@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -u
 
-BASE_DIR="/home/lsfservice/church-display"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 CONFIG_FILE="$BASE_DIR/config/config.json"
 MEDIA_DIR="$BASE_DIR/media"
 STATUS_DIR="$BASE_DIR/status"

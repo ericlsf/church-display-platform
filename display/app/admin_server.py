@@ -2,6 +2,7 @@ import base64
 import html
 import json
 import os
+from pathlib import Path
 import shutil
 import socket
 import subprocess
@@ -15,7 +16,9 @@ from app.media import scan_media
 IMAGE_EXT = (".jpg", ".jpeg", ".png", ".webp")
 VIDEO_EXT = (".mp4", ".mov", ".mkv")
 
-SYNC_SCRIPT_PATH = "/home/lsfservice/church-display/scripts/sync_media.sh"
+APP_ROOT = Path(__file__).resolve().parent.parent
+
+SYNC_SCRIPT_PATH = str(APP_ROOT / "scripts" / "sync_media.sh")
 # Legacy fallback only; sync folders are no longer restricted to this list.
 SYNC_FOLDER_OPTIONS = ["Weekly", "Missions"]
 

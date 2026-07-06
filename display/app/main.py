@@ -3,6 +3,8 @@ import os
 import json
 import threading
 from pathlib import Path
+
+APP_ROOT = Path(__file__).resolve().parent.parent
 from datetime import datetime
 
 from PySide6.QtWidgets import QApplication, QWidget, QLabel
@@ -20,12 +22,12 @@ from app.admin_server import start_admin_server
 IMAGE_EXT = {".jpg", ".jpeg", ".png", ".webp"}
 VIDEO_EXT = {".mp4", ".mov", ".mkv"}
 
-CONFIG_PATH = "/home/lsfservice/church-display/config/config.json"
+CONFIG_PATH = str(APP_ROOT / "config" / "config.json")
 MEDIA_RESCAN_SECONDS = 10
 
-STATUS_DIR = "/home/lsfservice/church-display/status"
-PLAYER_STATUS_PATH = "/home/lsfservice/church-display/status/player.json"
-MEDIA_STATUS_PATH = "/home/lsfservice/church-display/status/media.json"
+STATUS_DIR = str(APP_ROOT / "status")
+PLAYER_STATUS_PATH = str(APP_ROOT / "status" / "player.json")
+MEDIA_STATUS_PATH = str(APP_ROOT / "status" / "media.json")
 
 
 class OutlineLabel(QLabel):

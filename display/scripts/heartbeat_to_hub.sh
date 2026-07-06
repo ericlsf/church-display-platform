@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -u
 
-BASE_DIR="/home/lsfservice/church-display-platform/display"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 HUB_URL="${HUB_URL:-http://127.0.0.1:8090}"
 DISPLAY_PORT="${DISPLAY_PORT:-8080}"
