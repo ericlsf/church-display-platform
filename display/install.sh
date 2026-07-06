@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-cd "$(dirname "$0")"
+APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+USER_NAME="${USER}"
+SERVICE_FILE="/etc/systemd/system/church-display.service"
+
+cd "$APP_DIR"
 
 python3 -m venv venv
 source venv/bin/activate
@@ -15,8 +19,39 @@ fi
 
 mkdir -p media status logs config/backups scripts
 
+echo "Creating systemd service at $SERVICE_FILE"
+
+sudo tee "$SERVICE_FILE" >/dev/null <<EOF
+[Unit]
+Description=Church Display
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+User=$USER_NAME
+WorkingDirectory=$APP_DIR
+ExecStart=$APP_DIR/venv/bin/python -m app.main
+Restart=always
+RestartSec=2
+
+Environment=QT_QPA_PLATFORM=wayland
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+
+[Install]
+WantedBy=default.target
+EOF
+
+sudo systemctl daemon-reload
+
+echo
 echo "Display install complete."
-echo "Run with:"
-echo "cd ~/church-display-platform/display && source venv/bin/activate && QT_QPA_PLATFORM=xcb python -m app.main"
+echo
+echo "Manual dev run:"
+echo "cd $APP_DIR && source venv/bin/activate && QT_QPA_PLATFORM=xcb python -m app.main"
+echo
+echo "Enable service:"
+echo "sudo systemctl enable church-display.service"
+echo "sudo systemctl start church-display.service"
 
 
