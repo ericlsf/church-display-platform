@@ -1,0 +1,18 @@
+[Unit]
+Description=Church Display
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+User=lsfservice
+WorkingDirectory=/home/lsfservice/church-display
+ExecStart=/home/lsfservice/church-display/venv/bin/python -m app.main
+Restart=always
+RestartSec=2
+
+Environment=QT_QPA_PLATFORM=wayland
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,10 @@
+[Unit]
+Description=Church Display Google Drive Sync
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+Unit=church-sync.service
+
+[Install]
+WantedBy=timers.target
