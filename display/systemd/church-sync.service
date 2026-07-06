@@ -1,7 +1,0 @@
-[Unit]
-Description=Sync Google Drive Media
-
-[Service]
-Type=oneshot
-User=lsfservice
-ExecStart=/usr/bin/rclone sync gdrive:Church\ Display/Media /home/lsfservice/church-display/media --delete-during

@@ -1,0 +1,9 @@
+[Unit]
+Description=Upload Church Display preview image to Hub
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/etc/church-display/heartbeat.env
+ExecStart=/home/lsfservice/church-display-platform/display/scripts/upload_preview_to_hub.sh

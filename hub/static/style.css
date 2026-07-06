@@ -1,1 +1,23 @@
 :root{--bg:#101010;--panel:#1d1d1d;--border:#333;--text:#f2f2f2;--muted:#aaa;--blue:#2d7dff;--red:#b3261e;--green:#1f8f4d;--yellow:#ffcf33}*{box-sizing:border-box}body{font-family:Arial,sans-serif;background:var(--bg);color:var(--text);margin:0}header{background:#050505;border-bottom:1px solid var(--border);padding:16px 20px;position:sticky;top:0;z-index:10}header h1{margin:0 0 12px 0;font-size:24px}nav{display:flex;gap:8px;overflow-x:auto}nav a{color:#ddd;text-decoration:none;padding:9px 12px;border-radius:8px;background:#181818;white-space:nowrap;border:1px solid #292929}nav a.active{background:var(--blue);color:white;border-color:var(--blue)}main{padding:20px;max-width:1500px;margin:0 auto}.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(360px,1fr))}.section,.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:18px}.card{margin-bottom:0}.muted{color:var(--muted)}.online{color:#54d17a;font-weight:bold}.offline{color:var(--yellow);font-weight:bold}a{color:#7db3ff}label{display:block;margin-top:12px;margin-bottom:5px;font-weight:bold}input,select{width:100%;padding:11px;font-size:16px;border-radius:7px;border:1px solid #555;background:#090909;color:white}input[type="checkbox"]{width:auto;margin-right:8px}button{padding:12px 18px;font-size:16px;border-radius:7px;border:0;cursor:pointer;margin-top:14px;margin-right:8px}.primary{background:var(--blue);color:white}.danger{background:var(--red);color:white}.safe{background:var(--green);color:white}.row{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end}.two-col{grid-template-columns:1fr 1fr}hr{border:0;border-top:1px solid var(--border);margin:18px 0}@media(max-width:760px){main{padding:14px}.row,.two-col{grid-template-columns:1fr}}
+.preview-empty {
+    width: 100%;
+    min-height: 180px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    background: #050505;
+    color: #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.preview-empty {
+    width: 100%;
+    min-height: 180px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    background: #050505;
+    color: #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

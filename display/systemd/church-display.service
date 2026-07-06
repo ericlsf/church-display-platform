@@ -6,8 +6,8 @@ PartOf=graphical-session.target
 [Service]
 Type=simple
 User=lsfservice
-WorkingDirectory=/home/lsfservice/church-display
-ExecStart=/home/lsfservice/church-display/venv/bin/python -m app.main
+WorkingDirectory=/home/lsfservice/church-display-platform/display
+ExecStart=/home/lsfservice/church-display-platform/display/venv/bin/python -m app.main
 Restart=always
 RestartSec=2
 
