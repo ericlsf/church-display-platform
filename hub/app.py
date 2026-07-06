@@ -5,6 +5,7 @@ from routes.displays import displays_bp
 from routes.fleet import fleet_bp
 from routes.discovery import discovery_bp
 from routes.health import health_bp
+from routes.heartbeat import heartbeat_bp
 
 
 def create_app():
@@ -14,6 +15,7 @@ def create_app():
     app.register_blueprint(fleet_bp)
     app.register_blueprint(discovery_bp)
     app.register_blueprint(health_bp)
+    app.register_blueprint(heartbeat_bp)
     return app
 
 
