@@ -287,6 +287,12 @@ class ConfigAdminHandler(BaseHTTPRequestHandler):
         if path == "/advanced": return self.render_advanced()
         if path == "/api/status": return self.handle_api_status()
         if path == "/api/sync-status": return self.handle_api_sync_status()
+
+        # Versioned API v1 aliases.
+        # These preserve the old endpoints while giving the Hub a stable API contract.
+        if path == "/api/v1/status": return self.handle_api_status()
+        if path == "/api/v1/sync": return self.handle_api_sync_status()
+
         if path == "/download-backup": return self.handle_download_backup()
         self.send_error(404)
 
@@ -300,6 +306,14 @@ class ConfigAdminHandler(BaseHTTPRequestHandler):
         if path == "/save-events": return self.handle_save_events(data)
         if path == "/save-schedule": return self.handle_save_schedule(data)
         if path == "/save-sync": return self.handle_save_sync(data)
+
+        # Versioned API v1 aliases.
+        # These preserve the old endpoints while giving the Hub a stable API contract.
+        if path == "/api/v1/sync/folder": return self.handle_save_sync(data)
+        if path == "/api/v1/sync/run": return self.handle_sync_now()
+        if path == "/api/v1/system/restart": return self.handle_restart()
+        if path == "/api/v1/system/reboot": return self.handle_reboot()
+
         if path == "/raw": return self.handle_raw(data)
         if path == "/restore-backup": return self.handle_restore_backup(data)
         if path == "/sync-now": return self.handle_sync_now()
@@ -636,6 +650,11 @@ def start_admin_server(config_path, host="0.0.0.0", port=8080):
     server = ThreadingHTTPServer((host, port), ConfigAdminHandler)
     print(f"Admin server running on http://{host}:{port}")
     server.serve_forever()
+
+
+
+
+
 
 
 
