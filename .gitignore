@@ -1,7 +1,6 @@
 **/venv/
 **/__pycache__/
 **/*.pyc
-**/.pytest_cache/
 
 display/media/
 display/status/
@@ -16,6 +15,5 @@ hub/config/heartbeats.json
 
 *.tmp
 *.bak
-.DS_Store
 
 
