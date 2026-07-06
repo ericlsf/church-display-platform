@@ -1,0 +1,9 @@
+[Unit]
+Description=Register Church Display with Hub
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/etc/church-display/register.env
+ExecStart=/home/lsfservice/church-display/scripts/register_with_hub.sh

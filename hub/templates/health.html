@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Health - Church Display Hub{% endblock %}
+{% block content %}
+<div class="section"><h2>Health Monitoring</h2><p class="muted">Checks display and sync APIs for each approved display.</p></div>
+<div class="grid">{% for row in rows %}<div class="card"><h2>{{ row.name }}</h2>{% if row.healthy %}<p class="online">● Healthy</p>{% else %}<p class="offline">○ Needs attention</p>{% endif %}<p><strong>Display API:</strong> {{ "OK" if row.status_ok else "Problem" }}</p><p><strong>Sync API:</strong> {{ "OK" if row.sync_ok else "Problem" }}</p><p><strong>Current Media:</strong> {{ row.current_media }}</p><p><strong>Last Update:</strong> {{ row.last_update }}</p><p><strong>Sync State:</strong> {{ row.sync_state }}</p><p><strong>Last Sync:</strong> {{ row.sync_last_success }}</p>{% if row.error %}<p class="muted">{{ row.error }}</p>{% endif %}</div>{% endfor %}</div>
+<div class="section"><h2>Event Log</h2>{% if events %}<ul>{% for event in events %}<li>{{ event }}</li>{% endfor %}</ul>{% else %}<p class="muted">No events logged yet.</p>{% endif %}</div>
+{% endblock %}

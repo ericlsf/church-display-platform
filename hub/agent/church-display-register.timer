@@ -1,0 +1,11 @@
+[Unit]
+Description=Register Church Display with Hub periodically
+
+[Timer]
+OnBootSec=45
+OnUnitActiveSec=60
+AccuracySec=10
+Persistent=true
+
+[Install]
+WantedBy=timers.target
