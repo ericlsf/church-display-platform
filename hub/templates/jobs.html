@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Jobs - Church Display Hub{% endblock %}
+
+{% block content %}
+
+<div class="section">
+    <h2>Job Engine</h2>
+    <p class="muted">
+        Queue work for display agents. Displays poll for jobs, execute them, and report success or failure.
+    </p>
+</div>
+
+<div class="section">
+    <h2>Queue Job</h2>
+
+    <form method="POST" action="/jobs/add">
+        <label>Display</label>
+        <select name="display_id">
+            <option value="all">All Displays</option>
+            {% for display in displays %}
+                <option value="{{ display.id }}">{{ display.name }} — {{ display.id }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Job Type</label>
+        <select name="job_type">
+            <option value="sync_now">Sync Now</option>
+            <option value="set_sync_folder">Set Sync Folder</option>
+            <option value="restart_display">Restart Display App</option>
+            <option value="reboot">Reboot Pi</option>
+            <option value="upload_preview">Upload Preview</option>
+            <option value="heartbeat">Send Heartbeat</option>
+        </select>
+
+        <label>Remote, only for Set Sync Folder</label>
+        <input name="remote" value="gdrive">
+
+        <label>Folder, only for Set Sync Folder</label>
+        <input name="folder" placeholder="Weekly">
+
+        <button class="primary" type="submit">Queue Job</button>
+    </form>
+</div>
+
+<div class="section">
+    <h2>Recent Jobs</h2>
+
+    {% if jobs %}
+        <div class="grid">
+            {% for job in jobs %}
+                <div class="card">
+                    <h3>{{ job.type }}</h3>
+                    <p><strong>Display:</strong> {{ job.display_id }}</p>
+                    <p><strong>Status:</strong> {{ job.status }}</p>
+                    <p><strong>Progress:</strong> {{ job.progress }}%</p>
+                    <p><strong>Message:</strong> {{ job.message }}</p>
+                    <p><strong>Created:</strong> {{ job.created_at }}</p>
+                    <p><strong>Updated:</strong> {{ job.updated_at }}</p>
+                    <p class="muted">{{ job.id }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="muted">No jobs yet.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
