@@ -43,6 +43,14 @@ def add_job():
     return redirect(url_for("jobs.jobs_page"))
 
 
+@jobs_api_bp.route("")
+def api_list_jobs():
+    return jsonify({
+        "ok": True,
+        "jobs": list_jobs(150),
+    })
+
+
 @jobs_api_bp.route("/next")
 def api_next_job():
     display_id = (
@@ -83,5 +91,3 @@ def api_update_job(job_id):
         )
 
     return jsonify({"ok": True, "job": job})
-
-
