@@ -7,6 +7,7 @@ SERVICE_DIR="/etc/systemd/system"
 ENV_DIR="/etc/church-display"
 
 DISPLAY_SERVICE="$SERVICE_DIR/church-display.service"
+AGENT_SERVICE="$SERVICE_DIR/church-display-agent.service"
 SYNC_SERVICE="$SERVICE_DIR/church-display-sync.service"
 SYNC_TIMER="$SERVICE_DIR/church-display-sync.timer"
 REGISTER_SERVICE="$SERVICE_DIR/church-display-register.service"
@@ -15,6 +16,8 @@ HEARTBEAT_SERVICE="$SERVICE_DIR/church-display-heartbeat.service"
 HEARTBEAT_TIMER="$SERVICE_DIR/church-display-heartbeat.timer"
 PREVIEW_SERVICE="$SERVICE_DIR/church-display-preview.service"
 PREVIEW_TIMER="$SERVICE_DIR/church-display-preview.timer"
+JOBS_SERVICE="$SERVICE_DIR/church-display-jobs.service"
+JOBS_TIMER="$SERVICE_DIR/church-display-jobs.timer"
 
 cd "$APP_DIR"
 
@@ -78,13 +81,13 @@ fi
 sudo mkdir -p "$ENV_DIR"
 
 if [ ! -f "$ENV_DIR/register.env" ]; then
-  read -rp "Hub URL, example http://192.168.1.50:8090: " HUB_URL
-  HUB_URL="${HUB_URL:-http://127.0.0.1:8090}"
+  read -rp "Hub URL, example http://192.168.1.50:8090: " HUB_URL_VALUE
+  HUB_URL_VALUE="${HUB_URL_VALUE:-http://127.0.0.1:8090}"
 
   sudo tee "$ENV_DIR/register.env" >/dev/null <<EOF
-HUB_URL=$HUB_URL
+HUB_URL=$HUB_URL_VALUE
 DISPLAY_PORT=8080
-DISPLAY_VERSION=1.2.1
+DISPLAY_VERSION=1.3.0
 EOF
 fi
 
@@ -112,6 +115,25 @@ Environment=XDG_RUNTIME_DIR=/run/user/1000
 
 [Install]
 WantedBy=default.target
+EOF
+
+sudo tee "$AGENT_SERVICE" >/dev/null <<EOF
+[Unit]
+Description=Church Display Agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=$USER_NAME
+WorkingDirectory=$APP_DIR
+EnvironmentFile=-$ENV_DIR/heartbeat.env
+ExecStart=$APP_DIR/venv/bin/python -m agent.agent
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
 EOF
 
 sudo tee "$SYNC_SERVICE" >/dev/null <<EOF
@@ -219,6 +241,32 @@ Persistent=true
 WantedBy=timers.target
 EOF
 
+sudo tee "$JOBS_SERVICE" >/dev/null <<EOF
+[Unit]
+Description=Process Church Display Hub jobs
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=-$ENV_DIR/heartbeat.env
+ExecStart=$APP_DIR/scripts/process_jobs.sh
+EOF
+
+sudo tee "$JOBS_TIMER" >/dev/null <<'EOF'
+[Unit]
+Description=Poll Church Display Hub for jobs
+
+[Timer]
+OnBootSec=30
+OnUnitActiveSec=10
+AccuracySec=2
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
 chmod +x scripts/*.sh 2>/dev/null || true
 
 sudo systemctl daemon-reload
@@ -229,13 +277,21 @@ echo
 echo "Enable display service:"
 echo "sudo systemctl enable --now church-display.service"
 echo
-echo "Enable background timers:"
+echo "Enable new Python agent service:"
+echo "sudo systemctl enable --now church-display-agent.service"
+echo
+echo "Disable legacy timers once agent is running:"
+echo "sudo systemctl disable --now church-display-jobs.timer"
+echo "sudo systemctl disable --now church-display-heartbeat.timer"
+echo "sudo systemctl disable --now church-display-preview.timer"
+echo "sudo systemctl disable --now church-display-sync.timer"
+echo
+echo "Optional legacy background timers:"
 echo "sudo systemctl enable --now church-display-sync.timer"
 echo "sudo systemctl enable --now church-display-register.timer"
 echo "sudo systemctl enable --now church-display-heartbeat.timer"
 echo "sudo systemctl enable --now church-display-preview.timer"
+echo "sudo systemctl enable --now church-display-jobs.timer"
 echo
 echo "Manual dev run:"
 echo "cd $APP_DIR && source venv/bin/activate && QT_QPA_PLATFORM=xcb python -m app.main"
-
-
