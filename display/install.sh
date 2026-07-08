@@ -128,6 +128,9 @@ Type=simple
 User=$USER_NAME
 WorkingDirectory=$APP_DIR
 EnvironmentFile=-$ENV_DIR/heartbeat.env
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+Environment=WAYLAND_DISPLAY=wayland-0
+Environment=DISPLAY=:0
 ExecStart=$APP_DIR/venv/bin/python -m agent.agent
 Restart=always
 RestartSec=5
@@ -295,3 +298,4 @@ echo "sudo systemctl enable --now church-display-jobs.timer"
 echo
 echo "Manual dev run:"
 echo "cd $APP_DIR && source venv/bin/activate && QT_QPA_PLATFORM=xcb python -m app.main"
+
