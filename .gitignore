@@ -12,6 +12,9 @@ hub/logs/
 hub/config/displays.json
 hub/config/pending_displays.json
 hub/config/heartbeats.json
+hub/config/jobs.json
+hub/static/previews/
+
 
 *.tmp
 *.bak
