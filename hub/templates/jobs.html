@@ -5,14 +5,11 @@
 
 <div class="section">
     <h2>Job Engine</h2>
-    <p class="muted">
-        Queue work for display agents. This page updates automatically.
-    </p>
+    <p class="muted">Queue work for display agents. This page updates automatically.</p>
 </div>
 
 <div class="section">
     <h2>Queue Job</h2>
-
     <form method="POST" action="/jobs/add">
         <label>Display</label>
         <select name="display_id">
@@ -30,6 +27,7 @@
             <option value="reboot">Reboot Pi</option>
             <option value="upload_preview">Upload Preview</option>
             <option value="heartbeat">Send Heartbeat</option>
+            <option value="update_check">Update Check</option>
         </select>
 
         <label>Remote, only for Set Sync Folder</label>
@@ -83,7 +81,6 @@ function statusClass(status) {
 
 function renderJob(job) {
     const cls = statusClass(job.status);
-
     return `
         <div class="card">
             <h3>${escapeHtml(job.type)}</h3>
@@ -105,17 +102,13 @@ async function refreshJobs() {
     try {
         const response = await fetch("/api/v1/jobs", { cache: "no-store" });
         if (!response.ok) return;
-
         const data = await response.json();
         const grid = document.getElementById("jobs-grid");
-
         if (!grid) return;
-
         if (!data.jobs || data.jobs.length === 0) {
             grid.innerHTML = '<p class="muted">No jobs yet.</p>';
             return;
         }
-
         grid.innerHTML = data.jobs.map(renderJob).join("");
     } catch (err) {
         console.log("Job refresh failed", err);
