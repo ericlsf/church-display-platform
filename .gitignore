@@ -20,3 +20,5 @@ hub/static/previews/
 *.bak
 
 
+hub/config/jobs.json
+hub/static/previews/
