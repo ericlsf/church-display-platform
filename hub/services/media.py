@@ -10,6 +10,33 @@ SUPPORTED_EXTS = IMAGE_EXTS | VIDEO_EXTS
 PLAYLISTS_FILE = CONFIG_DIR / "playlists.json"
 
 
+def human_duration(seconds):
+    try:
+        seconds = int(seconds or 0)
+    except Exception:
+        seconds = 0
+
+    if seconds <= 0:
+        return "0s"
+
+    minutes, sec = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+
+    if hours:
+        return f"{hours}h {minutes}m"
+    if minutes:
+        return f"{minutes}m {sec}s"
+    return f"{sec}s"
+
+
+def estimated_item_seconds(kind):
+    # Image timing matches the default display image duration.
+    # Video runtime is not available from Google Drive metadata yet.
+    if kind == "image":
+        return 8
+    return 0
+
+
 def human_size(num):
     try:
         num = float(num or 0)
@@ -250,11 +277,16 @@ def analyze_drive_folder(remote="gdrive", folder="", timeout=30, max_items=500, 
                 "modified": item.get("ModTime", ""),
                 "mime_type": item.get("MimeType", ""),
                 "supported": is_supported,
+                "duration_seconds": estimated_item_seconds(kind),
+                "duration_human": human_duration(estimated_item_seconds(kind)) if is_supported else "",
+                "resolution": "Available after sync",
             })
 
     items.sort(key=lambda x: (not x["is_dir"], x["type"] not in ["image", "video"], x["name"].lower()))
     media_items = ordered_media_items(items, saved_order)
     playlist_order = [item.get("path") or item.get("name") for item in media_items]
+    playlist_runtime_seconds = sum(int(item.get("duration_seconds") or 0) for item in media_items)
+    playlist_runtime_note = "Images estimate 8s each. Video runtime is shown after future metadata support."
 
     return {
         "folder": folder,
@@ -272,6 +304,9 @@ def analyze_drive_folder(remote="gdrive", folder="", timeout=30, max_items=500, 
         "items": items,
         "media_items": media_items,
         "playlist_order": playlist_order,
+        "playlist_runtime_seconds": playlist_runtime_seconds,
+        "playlist_runtime_human": human_duration(playlist_runtime_seconds),
+        "playlist_runtime_note": playlist_runtime_note,
         "shown": len(items),
         "recursive": recursive,
         "supported_only": supported_only,

@@ -10,6 +10,7 @@ from routes.jobs import jobs_bp, jobs_api_bp
 from routes.deployments import deployments_bp
 
 from routes.media import media_bp
+from routes.content import content_bp
 from routes.schedules import schedules_bp
 
 
@@ -26,6 +27,7 @@ def create_app():
     app.register_blueprint(jobs_api_bp)
     app.register_blueprint(deployments_bp)
     app.register_blueprint(media_bp)
+    app.register_blueprint(content_bp)
     app.register_blueprint(schedules_bp)
     return app
 
