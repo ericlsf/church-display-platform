@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Schedules - Church Display Hub{% endblock %}
+{% block content %}
+
+<div class="section">
+  <h2>Schedules</h2>
+  <p class="muted">Schedule syncs, folder changes, restarts, and deployments. Due schedules are processed by the Hub when this page is opened or when you click Process Due Now.</p>
+  {% if drive_error %}<p class="offline">Drive folders unavailable: {{ drive_error }}</p>{% endif %}
+  <form method="POST" action="/schedules/process"><button class="safe" type="submit">Process Due Now</button></form>
+</div>
+
+<div class="section">
+  <h2>Add Schedule</h2>
+  <form method="POST" action="/schedules/add">
+    <label>Name</label>
+    <input name="name" placeholder="Sunday morning sync">
+
+    <label>Display</label>
+    <select name="display_id" required>
+      <option value="all">All Displays</option>
+      {% for display in displays %}
+        <option value="{{ display.id }}">{{ display.name }} — {{ display.id }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Action</label>
+    <select name="job_type" id="job-type">
+      <option value="sync_now">Sync Now</option>
+      <option value="set_sync_folder">Set Sync Folder</option>
+      <option value="restart_display">Restart Display App</option>
+      <option value="reboot">Reboot Pi</option>
+      <option value="deploy_update">Deploy Update</option>
+    </select>
+
+    <label>Run At</label>
+    <input type="datetime-local" name="run_at" required>
+
+    <label>Recurrence</label>
+    <select name="recurrence">
+      <option value="once">Once</option>
+      <option value="daily">Daily</option>
+    </select>
+
+    <div id="folder-fields">
+      <label>Remote</label>
+      <input name="remote" value="{{ drive_remote or 'gdrive' }}">
+      <label>Google Drive Folder</label>
+      <select name="folder">
+        <option value="">Select folder</option>
+        {% for folder in drive_folders %}
+          <option value="{{ folder }}">{{ folder }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div id="deploy-fields">
+      <label>Target Version</label>
+      <select name="target">
+        <option value="">Select version</option>
+        {% for tag in release_tags %}
+          <option value="{{ tag }}">{{ tag }}</option>
+        {% endfor %}
+      </select>
+      <label>Deploy Mode</label>
+      <select name="dry_run">
+        <option value="true">Dry Run Only</option>
+        <option value="false">Real Deploy</option>
+      </select>
+    </div>
+
+    <button class="primary" type="submit">Save Schedule</button>
+  </form>
+</div>
+
+<div class="section">
+  <h2>Existing Schedules</h2>
+  {% if schedules %}
+  <table>
+    <thead><tr><th>Name</th><th>Display</th><th>Action</th><th>Run At</th><th>Repeat</th><th>Status</th><th>Last Run</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for schedule in schedules %}
+      <tr>
+        <td>{{ schedule.name }}</td>
+        <td>{{ schedule.display_id }}</td>
+        <td>{{ schedule.job_type }}</td>
+        <td>{{ schedule.run_at }}</td>
+        <td>{{ schedule.recurrence }}</td>
+        <td>{{ 'Enabled' if schedule.enabled else 'Disabled' }}</td>
+        <td>{{ schedule.last_run or 'Never' }}</td>
+        <td>
+          <form method="POST" action="/schedules/{{ schedule.id }}/toggle" style="display:inline"><button class="safe" type="submit">Toggle</button></form>
+          <form method="POST" action="/schedules/{{ schedule.id }}/delete" style="display:inline"><button class="danger" type="submit">Delete</button></form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="muted">No schedules yet.</p>
+  {% endif %}
+</div>
+
+<script>
+function updateVisibility() {
+  const type = document.getElementById('job-type').value;
+  document.getElementById('folder-fields').style.display = type === 'set_sync_folder' ? 'block' : 'none';
+  document.getElementById('deploy-fields').style.display = type === 'deploy_update' ? 'block' : 'none';
+}
+document.getElementById('job-type').addEventListener('change', updateVisibility);
+updateVisibility();
+</script>
+
+{% endblock %}

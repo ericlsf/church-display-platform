@@ -1,7 +1,48 @@
 {% extends "base.html" %}
 {% block title %}Health - Church Display Hub{% endblock %}
 {% block content %}
-<div class="section"><h2>Health Monitoring</h2><p class="muted">Checks display and sync APIs for each approved display.</p></div>
-<div class="grid">{% for row in rows %}<div class="card"><h2>{{ row.name }}</h2>{% if row.healthy %}<p class="online">● Healthy</p>{% else %}<p class="offline">○ Needs attention</p>{% endif %}<p><strong>Display API:</strong> {{ "OK" if row.status_ok else "Problem" }}</p><p><strong>Sync API:</strong> {{ "OK" if row.sync_ok else "Problem" }}</p><p><strong>Current Media:</strong> {{ row.current_media }}</p><p><strong>Last Update:</strong> {{ row.last_update }}</p><p><strong>Sync State:</strong> {{ row.sync_state }}</p><p><strong>Last Sync:</strong> {{ row.sync_last_success }}</p>{% if row.error %}<p class="muted">{{ row.error }}</p>{% endif %}</div>{% endfor %}</div>
+<div class="section">
+  <h2>Health Monitoring</h2>
+  <p class="muted">System metrics are collected from display heartbeats. API checks are also shown for local admin/sync status.</p>
+</div>
+
+<div class="grid">
+{% for row in rows %}
+  <div class="card">
+    <h2>{{ row.name }}</h2>
+    <p class="{{ 'online' if row.online else 'offline' }}">{{ '● Online' if row.online else '○ Offline' }}</p>
+    <p><strong>Heartbeat:</strong> {{ row.heartbeat }}</p>
+    <p><strong>Display API:</strong> {{ "OK" if row.status_online else "Problem" }}</p>
+    <p><strong>Sync API:</strong> {{ "OK" if row.sync_online else "Problem" }}</p>
+    <hr>
+    <h3>System</h3>
+    <div class="stats-grid compact">
+      <div class="stat"><span>CPU Temp</span><strong>{{ row.system.cpu_temp if row.system else 'Unknown' }}</strong></div>
+      <div class="stat"><span>Memory</span><strong>{{ row.system.memory if row.system else 'Unknown' }}</strong></div>
+      <div class="stat"><span>Disk</span><strong>{{ row.system.disk if row.system else 'Unknown' }}</strong></div>
+      <div class="stat"><span>Uptime</span><strong>{{ row.system.uptime if row.system else 'Unknown' }}</strong></div>
+    </div>
+    <hr>
+    <h3>App</h3>
+    <p><strong>Installed:</strong> {{ row.current_tag }}</p>
+    <p><strong>Latest:</strong> {{ row.latest_tag }}</p>
+    <p><strong>Sync Folder:</strong> {{ row.sync_folder }}</p>
+    <p><strong>Sync State:</strong> {{ row.sync_state }}</p>
+    <p><strong>Last Sync:</strong> {{ row.sync_last_success }}</p>
+    <p><strong>Current Media:</strong> {{ row.current_media }}</p>
+    {% if row.error %}<p class="muted">{{ row.error }}</p>{% endif %}
+  </div>
+{% endfor %}
+</div>
+
+<div class="section">
+  <h2>Alerts</h2>
+  {% if alerts %}
+    {% for alert in alerts %}<p class="{{ 'offline' if alert.level == 'danger' else 'status-warn' }}">● {{ alert.message }}</p>{% endfor %}
+  {% else %}
+    <p class="online">● No active alerts</p>
+  {% endif %}
+</div>
+
 <div class="section"><h2>Event Log</h2>{% if events %}<ul>{% for event in events %}<li>{{ event }}</li>{% endfor %}</ul>{% else %}<p class="muted">No events logged yet.</p>{% endif %}</div>
 {% endblock %}

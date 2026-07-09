@@ -6,6 +6,19 @@
   <p class="muted">Updated <span id="dashboard-updated">{{ now.strftime("%Y-%m-%d %I:%M:%S %p") }}</span></p>
   <p>Drive remote: <strong id="drive-remote">{{ drive_remote }}</strong></p>
   <p>Latest app version: <strong id="latest-tag">{{ latest_tag or "Unknown" }}</strong></p>
+  {% if outdated_count and latest_tag %}
+    <p class="status-warn">▲ {{ outdated_count }} display(s) have an update available.</p>
+    <form method="POST" action="/deployments/queue-outdated" style="display:inline-block;margin-right:8px;">
+      <input type="hidden" name="target" value="{{ latest_tag }}">
+      <input type="hidden" name="dry_run" value="true">
+      <button class="safe" type="submit">Dry Run All Outdated</button>
+    </form>
+    <form method="POST" action="/deployments/queue-outdated" style="display:inline-block;">
+      <input type="hidden" name="target" value="{{ latest_tag }}">
+      <input type="hidden" name="dry_run" value="false">
+      <button class="primary" type="submit">Update All Outdated</button>
+    </form>
+  {% endif %}
   {% if pending_count > 0 %}<p class="offline">● {{ pending_count }} display(s) waiting for approval. <a href="/discovery">Review discovery</a></p>{% endif %}
   {% if drive_error %}<p class="offline" id="drive-status">Drive folder lookup failed: {{ drive_error }}</p>{% else %}<p class="online" id="drive-status">● Drive folders loaded: {{ drive_folders|length }}</p>{% endif %}
 </div>

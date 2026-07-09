@@ -17,6 +17,8 @@ def dashboard():
         drive_remote=state["drive_remote"],
         drive_folders=state["drive_folders"],
         drive_error=state["drive_error"],
+        latest_tag=state.get("latest_tag", ""),
+        outdated_count=state.get("outdated_count", 0),
         pending_count=state["pending_count"],
         events=state["events"],
         alerts=state["alerts"],

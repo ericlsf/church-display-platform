@@ -123,8 +123,12 @@ def build_fleet_state():
             "preview_url": preview_url_for(display_id),
         })
 
+    outdated_rows = [row for row in rows if row.get("update_available")]
+
     return {
         "rows": rows,
+        "outdated_rows": outdated_rows,
+        "outdated_count": len(outdated_rows),
         "drive_remote": drive_remote,
         "drive_folders": drive_folders,
         "drive_error": drive_error,

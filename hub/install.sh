@@ -15,3 +15,9 @@ echo "Run with:"
 echo "cd ~/church-display-platform/hub && source venv/bin/activate && python app.py"
 
 
+
+
+echo "Optional scheduler timer:"
+echo "sudo cp systemd/church-display-hub-scheduler.* /etc/systemd/system/"
+echo "sudo systemctl daemon-reload"
+echo "sudo systemctl enable --now church-display-hub-scheduler.timer"
