@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Deployments - Church Display Hub{% endblock %}
+
+{% block content %}
+
+<div class="section">
+    <h2>Deployments</h2>
+    <p class="muted">Deploy tagged application versions to displays through the job engine. Use Dry Run first.</p>
+</div>
+
+<div class="section">
+    <h2>Queue Deployment</h2>
+
+    <form method="POST" action="/deployments/queue">
+        <label>Target Version</label>
+        <select name="target" required>
+            <option value="">Select version</option>
+            {% for tag in release_tags %}
+                <option value="{{ tag }}">{{ tag }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Deploy Mode</label>
+        <select name="dry_run">
+            <option value="true">Dry Run Only</option>
+            <option value="false">Real Deploy</option>
+        </select>
+
+        <h3>Displays</h3>
+        {% for display in displays %}
+            <label>
+                <input type="checkbox" name="display_ids" value="{{ display.id }}">
+                {{ display.name }} — {{ display.id }}
+            </label>
+        {% endfor %}
+
+        <button class="primary" type="submit">Queue Deployment</button>
+    </form>
+</div>
+
+<div class="section">
+    <h2>Recent Deployment Jobs</h2>
+
+    {% if deploy_jobs %}
+        <div id="deployments-grid" class="grid">
+            {% for job in deploy_jobs %}
+                <div class="card">
+                    <h3>{{ job.payload.target or job.type }}</h3>
+                    <p><strong>Display:</strong> {{ job.display_id }}</p>
+                    <p><strong>Mode:</strong> {% if job.payload.dry_run == "false" %}Real Deploy{% else %}Dry Run{% endif %}</p>
+                    <p><strong>Status:</strong> {{ job.status }}</p>
+                    <p><strong>Progress:</strong> {{ job.progress }}%</p>
+                    <p><strong>Message:</strong> {{ job.message }}</p>
+                    <p><strong>Updated:</strong> {{ job.updated_at }}</p>
+                    <p class="muted">{{ job.id }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="muted">No deployment jobs yet.</p>
+        <div id="deployments-grid" class="grid"></div>
+    {% endif %}
+</div>
+
+<script>
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function renderDeployJob(job) {
+    const payload = job.payload || {};
+    const mode = payload.dry_run === "false" ? "Real Deploy" : "Dry Run";
+    const target = payload.target || job.type;
+
+    return `
+        <div class="card">
+            <h3>${escapeHtml(target)}</h3>
+            <p><strong>Display:</strong> ${escapeHtml(job.display_id)}</p>
+            <p><strong>Mode:</strong> ${escapeHtml(mode)}</p>
+            <p><strong>Status:</strong> ${escapeHtml(job.status)}</p>
+            <p><strong>Progress:</strong> ${escapeHtml(job.progress)}%</p>
+            <div style="height:10px;background:#090909;border:1px solid #333;border-radius:999px;overflow:hidden;">
+                <div style="height:100%;width:${Number(job.progress || 0)}%;background:#2d7dff;"></div>
+            </div>
+            <p><strong>Message:</strong> ${escapeHtml(job.message)}</p>
+            <p><strong>Updated:</strong> ${escapeHtml(job.updated_at)}</p>
+            <p class="muted">${escapeHtml(job.id)}</p>
+        </div>
+    `;
+}
+
+async function refreshDeploymentJobs() {
+    try {
+        const response = await fetch("/api/v1/jobs", { cache: "no-store" });
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const grid = document.getElementById("deployments-grid");
+        if (!grid) return;
+
+        const jobs = (data.jobs || []).filter(job => job.type === "deploy_update");
+
+        if (jobs.length === 0) {
+            grid.innerHTML = '<p class="muted">No deployment jobs yet.</p>';
+            return;
+        }
+
+        grid.innerHTML = jobs.map(renderDeployJob).join("");
+    } catch (err) {
+        console.log("Deployment refresh failed", err);
+    }
+}
+
+refreshDeploymentJobs();
+setInterval(refreshDeploymentJobs, 2000);
+</script>
+
+{% endblock %}

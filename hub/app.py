@@ -7,6 +7,7 @@ from routes.health import health_bp
 from routes.heartbeat import heartbeat_bp
 from routes.live import live_bp
 from routes.jobs import jobs_bp, jobs_api_bp
+from routes.deployments import deployments_bp
 
 
 def create_app():
@@ -20,6 +21,7 @@ def create_app():
     app.register_blueprint(live_bp)
     app.register_blueprint(jobs_bp)
     app.register_blueprint(jobs_api_bp)
+    app.register_blueprint(deployments_bp)
     return app
 
 
