@@ -27,11 +27,17 @@ def git(args, timeout=20):
 
 
 def service_is_active(service_name):
-    code, stdout, stderr = run_command(
-        ["systemctl", "is-active", service_name],
-        timeout=15,
-    )
+    code, stdout, stderr = run_command(["systemctl", "is-active", service_name], timeout=15)
     return code == 0 and stdout.strip() == "active"
+
+
+def service_is_enabled(service_name):
+    code, stdout, stderr = run_command(["systemctl", "is-enabled", service_name], timeout=15)
+    return code == 0 and stdout.strip() in ["enabled", "static"]
+
+
+def display_service_should_be_verified():
+    return service_is_enabled("church-display.service") or service_is_active("church-display.service")
 
 
 def ensure_clean(report):
@@ -42,12 +48,29 @@ def ensure_clean(report):
     return True
 
 
+def ensure_main_branch(report):
+    code, stdout, stderr = git(["rev-parse", "--abbrev-ref", "HEAD"])
+    branch = stdout.strip() if code == 0 else ""
+
+    if branch == "main":
+        return True
+
+    report("running", 18, "Switching repository back to main")
+
+    code, stdout, stderr = git(["switch", "main"], timeout=60)
+    if code != 0:
+        report("failed", 100, f"Could not switch to main: {(stderr or stdout).strip()[-500:]}")
+        return False
+
+    return True
+
+
 def validate_target(target, report):
     if not target:
         report("failed", 100, "Missing target tag/version")
         return None
 
-    report("running", 20, "Fetching tags from origin")
+    report("running", 22, "Fetching tags from origin")
     code, stdout, stderr = git(["fetch", "--tags", "origin"], timeout=90)
     if code != 0:
         report("failed", 100, f"git fetch failed: {(stderr or stdout).strip()[-500:]}")
@@ -76,12 +99,16 @@ def backup_current_state(current_commit, report):
     report("running", 50, f"Rollback point saved: {current_commit[:8]}")
 
 
-def checkout_ref(ref, report, progress=60):
-    report("running", progress, f"Checking out {ref}")
-    code, stdout, stderr = git(["checkout", "--force", ref], timeout=90)
-    if code != 0:
-        report("failed", 100, f"checkout failed: {(stderr or stdout).strip()[-500:]}")
+def reset_main_to_ref(ref, report, progress=60):
+    if not ensure_main_branch(report):
         return False
+
+    report("running", progress, f"Resetting main to {ref}")
+    code, stdout, stderr = git(["reset", "--hard", ref], timeout=90)
+    if code != 0:
+        report("failed", 100, f"reset failed: {(stderr or stdout).strip()[-500:]}")
+        return False
+
     return True
 
 
@@ -112,12 +139,13 @@ def install_dependencies(report, progress=70):
     return True
 
 
-def restart_display_and_verify(report):
+def restart_display_if_needed(report):
+    if not display_service_should_be_verified():
+        report("running", 88, "Display service disabled/inactive; skipping display restart verification")
+        return True
+
     report("running", 82, "Restarting display service")
-    code, stdout, stderr = run_command(
-        ["sudo", "systemctl", "restart", "church-display.service"],
-        timeout=45,
-    )
+    code, stdout, stderr = run_command(["sudo", "systemctl", "restart", "church-display.service"], timeout=45)
 
     if code != 0:
         report("running", 86, f"display restart command failed: {(stderr or stdout).strip()[-300:]}")
@@ -139,19 +167,11 @@ def restart_agent_after_success(report):
 
 
 def rollback_to(commit, report, reason):
-    report("running", 90, f"Rolling back to {commit[:8]}")
-
-    git(["checkout", "--force", commit], timeout=90)
-    install_dependencies(report, progress=92)
-
-    run_command(["sudo", "systemctl", "restart", "church-display.service"], timeout=45)
-
-    time.sleep(6)
-
-    if service_is_active("church-display.service"):
-        report("failed", 100, f"{reason}; rolled back to {commit[:8]} and display is active")
-    else:
-        report("failed", 100, f"{reason}; rollback attempted to {commit[:8]} but display service is still not active")
+    report("running", 90, f"Rolling back main to {commit[:8]}")
+    reset_main_to_ref(commit, report, progress=91)
+    install_dependencies(report, progress=93)
+    restart_display_if_needed(report)
+    report("failed", 100, f"{reason}; rolled back main to {commit[:8]}")
 
 
 def handle_deploy_update(job, report):
@@ -165,6 +185,9 @@ def handle_deploy_update(job, report):
 
     mode = "dry-run" if dry_run else "real"
     report("running", 10, f"{mode} deploy validation for {target}")
+
+    if not ensure_main_branch(report):
+        return
 
     if not ensure_clean(report):
         return
@@ -183,7 +206,7 @@ def handle_deploy_update(job, report):
         report("running", 75, "Validating rollback point")
         message = (
             f"DRY RUN OK. "
-            f"Would deploy {target} ({target_commit[:8]}) "
+            f"Would reset main to {target} ({target_commit[:8]}) "
             f"from {current_info.get('describe')} ({current_commit[:8]}). "
             f"Rollback point would be {current_commit[:8]}. "
             f"No files changed."
@@ -197,15 +220,15 @@ def handle_deploy_update(job, report):
 
     backup_current_state(current_commit, report)
 
-    if not checkout_ref(target, report, progress=60):
-        rollback_to(current_commit, report, "Deploy failed during checkout")
+    if not reset_main_to_ref(target, report, progress=60):
+        rollback_to(current_commit, report, "Deploy failed during reset")
         return
 
     if not install_dependencies(report, progress=72):
         rollback_to(current_commit, report, "Deploy failed during dependency install")
         return
 
-    if not restart_display_and_verify(report):
+    if not restart_display_if_needed(report):
         rollback_to(current_commit, report, "Deploy failed display-service verification")
         return
 
@@ -214,10 +237,9 @@ def handle_deploy_update(job, report):
 
     message = (
         f"Deploy verified. "
-        f"Updated from {current_commit[:8]} to {target} ({target_commit[:8]}). "
+        f"Updated main from {current_commit[:8]} to {target} ({target_commit[:8]}). "
         f"Current commit is {final_commit}. Agent will restart."
     )
 
     report("success", 100, message)
-
     restart_agent_after_success(report)
