@@ -6,10 +6,15 @@
 <div class="section">
     <h2>Job Engine</h2>
     <p class="muted">Queue work for display agents. This page updates automatically.</p>
+
+    {% if drive_error %}
+        <p class="offline">Drive folders unavailable: {{ drive_error }}</p>
+    {% endif %}
 </div>
 
 <div class="section">
     <h2>Queue Job</h2>
+
     <form method="POST" action="/jobs/add">
         <label>Display</label>
         <select name="display_id">
@@ -20,7 +25,7 @@
         </select>
 
         <label>Job Type</label>
-        <select name="job_type">
+        <select name="job_type" id="job-type">
             <option value="sync_now">Sync Now</option>
             <option value="set_sync_folder">Set Sync Folder</option>
             <option value="restart_display">Restart Display App</option>
@@ -28,17 +33,41 @@
             <option value="upload_preview">Upload Preview</option>
             <option value="heartbeat">Send Heartbeat</option>
             <option value="update_check">Update Check</option>
-            <option value="deploy_update">Deploy Update - Dry Run</option>
+            <option value="deploy_update">Deploy Update</option>
         </select>
 
-        <label>Remote, only for Set Sync Folder</label>
-        <input name="remote" value="gdrive">
+        <div id="sync-fields">
+            <label>Remote</label>
+            <input name="remote" value="{{ drive_remote or 'gdrive' }}">
 
-        <label>Folder, only for Set Sync Folder</label>
-        <input name="folder" placeholder="Weekly">
+            <label>Google Drive Folder</label>
+            <select name="folder">
+                <option value="">Select folder</option>
+                {% for folder in drive_folders %}
+                    <option value="{{ folder }}">{{ folder }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <label>Target tag/version, only for Deploy Update</label>
-        <input name="target" placeholder="v1.4.0">
+        <div id="deploy-fields">
+            <label>Target App Version</label>
+            <select name="target">
+                <option value="">Select version</option>
+                {% for tag in release_tags %}
+                    <option value="{{ tag }}">{{ tag }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Deploy Mode</label>
+            <select name="dry_run">
+                <option value="true">Dry Run Only</option>
+                <option value="false">Real Deploy</option>
+            </select>
+
+            <p class="muted">
+                Real deploy checks out the selected Git tag, installs dependencies, and restarts the display and agent services.
+            </p>
+        </div>
 
         <button class="primary" type="submit">Queue Job</button>
     </form>
@@ -123,6 +152,18 @@ async function refreshJobs() {
         console.log("Job refresh failed", err);
     }
 }
+
+function updateFieldVisibility() {
+    const jobType = document.getElementById("job-type").value;
+    const syncFields = document.getElementById("sync-fields");
+    const deployFields = document.getElementById("deploy-fields");
+
+    syncFields.style.display = jobType === "set_sync_folder" ? "block" : "none";
+    deployFields.style.display = jobType === "deploy_update" ? "block" : "none";
+}
+
+document.getElementById("job-type").addEventListener("change", updateFieldVisibility);
+updateFieldVisibility();
 
 refreshJobs();
 setInterval(refreshJobs, 2000);

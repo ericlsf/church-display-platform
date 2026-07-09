@@ -1,8 +1,10 @@
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 
-from services.config import load_config
+from services.config import load_config, load_hub_settings
+from services.drive import list_drive_folders
 from services.events import log_event
 from services.jobs import create_job, get_next_job, list_jobs, update_job
+from services.releases import list_git_tags
 
 
 jobs_bp = Blueprint("jobs", __name__, url_prefix="/jobs")
@@ -12,11 +14,21 @@ jobs_api_bp = Blueprint("jobs_api", __name__, url_prefix="/api/v1/jobs")
 @jobs_bp.route("")
 def jobs_page():
     cfg = load_config()
+    hub_settings = load_hub_settings()
+
+    drive_remote = hub_settings.get("drive_remote", "gdrive")
+    drive_folders, drive_error = list_drive_folders(drive_remote)
+    release_tags = list_git_tags()
+
     return render_template(
         "jobs.html",
         active="jobs",
         displays=cfg.get("displays", []),
         jobs=list_jobs(150),
+        drive_remote=drive_remote,
+        drive_folders=drive_folders,
+        drive_error=drive_error,
+        release_tags=release_tags,
     )
 
 
@@ -37,6 +49,10 @@ def add_job():
     target = request.form.get("target", "").strip()
     if target:
         payload["target"] = target
+
+    dry_run = request.form.get("dry_run", "true").strip()
+    if job_type == "deploy_update":
+        payload["dry_run"] = dry_run
 
     if not display_id or not job_type:
         return redirect(url_for("jobs.jobs_page"))
