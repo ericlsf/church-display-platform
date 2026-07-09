@@ -26,6 +26,8 @@ def dispatch(job):
             preview.handle(job, report)
         elif job_type == "update_check":
             update.handle_update_check(job, report)
+        elif job_type == "deploy_update":
+            update.handle_deploy_update(job, report)
         else:
             report("failed", 100, f"Unknown job type: {job_type}")
     except Exception as exc:

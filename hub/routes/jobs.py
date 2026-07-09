@@ -34,6 +34,10 @@ def add_job():
         payload["folder"] = folder
         payload["remote"] = remote
 
+    target = request.form.get("target", "").strip()
+    if target:
+        payload["target"] = target
+
     if not display_id or not job_type:
         return redirect(url_for("jobs.jobs_page"))
 
@@ -45,10 +49,7 @@ def add_job():
 
 @jobs_api_bp.route("")
 def api_list_jobs():
-    return jsonify({
-        "ok": True,
-        "jobs": list_jobs(150),
-    })
+    return jsonify({"ok": True, "jobs": list_jobs(150)})
 
 
 @jobs_api_bp.route("/next")

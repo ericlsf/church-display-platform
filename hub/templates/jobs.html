@@ -28,6 +28,7 @@
             <option value="upload_preview">Upload Preview</option>
             <option value="heartbeat">Send Heartbeat</option>
             <option value="update_check">Update Check</option>
+            <option value="deploy_update">Deploy Update - Dry Run</option>
         </select>
 
         <label>Remote, only for Set Sync Folder</label>
@@ -35,6 +36,9 @@
 
         <label>Folder, only for Set Sync Folder</label>
         <input name="folder" placeholder="Weekly">
+
+        <label>Target tag/version, only for Deploy Update</label>
+        <input name="target" placeholder="v1.4.0">
 
         <button class="primary" type="submit">Queue Job</button>
     </form>
@@ -81,6 +85,7 @@ function statusClass(status) {
 
 function renderJob(job) {
     const cls = statusClass(job.status);
+
     return `
         <div class="card">
             <h3>${escapeHtml(job.type)}</h3>
@@ -102,13 +107,17 @@ async function refreshJobs() {
     try {
         const response = await fetch("/api/v1/jobs", { cache: "no-store" });
         if (!response.ok) return;
+
         const data = await response.json();
         const grid = document.getElementById("jobs-grid");
+
         if (!grid) return;
+
         if (!data.jobs || data.jobs.length === 0) {
             grid.innerHTML = '<p class="muted">No jobs yet.</p>';
             return;
         }
+
         grid.innerHTML = data.jobs.map(renderJob).join("");
     } catch (err) {
         console.log("Job refresh failed", err);
