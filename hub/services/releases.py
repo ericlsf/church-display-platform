@@ -30,3 +30,8 @@ def list_git_tags(limit=30):
         return tags[:limit]
     except Exception:
         return []
+
+
+def latest_git_tag():
+    tags = list_git_tags(limit=1)
+    return tags[0] if tags else ""

@@ -3,7 +3,7 @@ from flask import Blueprint, redirect, render_template, request, url_for
 from services.config import load_config
 from services.events import log_event
 from services.jobs import create_job, list_jobs
-from services.releases import list_git_tags
+from services.releases import latest_git_tag, list_git_tags
 
 
 deployments_bp = Blueprint("deployments", __name__, url_prefix="/deployments")
@@ -45,3 +45,21 @@ def queue_deployment():
         log_event(f"Queued deployment of {target} for {display_id}")
 
     return redirect(url_for("deployments.deployments_page"))
+
+
+@deployments_bp.route("/queue-latest", methods=["POST"])
+def queue_latest_deployment():
+    display_id = request.form.get("display_id", "").strip()
+    dry_run = request.form.get("dry_run", "true").strip()
+    target = request.form.get("target", "").strip() or latest_git_tag()
+
+    if not display_id or not target:
+        return redirect(request.referrer or url_for("dashboard.dashboard"))
+
+    create_job(display_id, "deploy_update", {
+        "target": target,
+        "dry_run": dry_run,
+    })
+    log_event(f"Queued latest deployment of {target} for {display_id}")
+
+    return redirect(request.referrer or url_for("dashboard.dashboard"))

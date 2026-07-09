@@ -5,6 +5,7 @@
   <h2>Fleet Dashboard</h2>
   <p class="muted">Updated <span id="dashboard-updated">{{ now.strftime("%Y-%m-%d %I:%M:%S %p") }}</span></p>
   <p>Drive remote: <strong id="drive-remote">{{ drive_remote }}</strong></p>
+  <p>Latest app version: <strong id="latest-tag">{{ latest_tag or "Unknown" }}</strong></p>
   {% if pending_count > 0 %}<p class="offline">● {{ pending_count }} display(s) waiting for approval. <a href="/discovery">Review discovery</a></p>{% endif %}
   {% if drive_error %}<p class="offline" id="drive-status">Drive folder lookup failed: {{ drive_error }}</p>{% else %}<p class="online" id="drive-status">● Drive folders loaded: {{ drive_folders|length }}</p>{% endif %}
 </div>
@@ -56,6 +57,27 @@
     <h3>Heartbeat</h3>
     <p><strong>Last Heartbeat:</strong> <span data-field="heartbeat">{{ row.heartbeat }}</span></p>
     <p><strong>Software Version:</strong> <span data-field="version">{{ row.version }}</span></p>
+    <p><strong>Installed Tag:</strong> <span data-field="current_tag">{{ row.current_tag }}</span></p>
+    <p><strong>Latest Tag:</strong> <span data-field="latest_tag">{{ row.latest_tag }}</span></p>
+    <div data-field="update_panel">
+      {% if row.update_available %}
+        <p class="status-warn">▲ Update available</p>
+        <form method="POST" action="/deployments/queue-latest">
+          <input type="hidden" name="display_id" value="{{ row.id }}">
+          <input type="hidden" name="target" value="{{ row.latest_tag }}">
+          <input type="hidden" name="dry_run" value="true">
+          <button class="safe" type="submit">Dry Run Update</button>
+        </form>
+        <form method="POST" action="/deployments/queue-latest">
+          <input type="hidden" name="display_id" value="{{ row.id }}">
+          <input type="hidden" name="target" value="{{ row.latest_tag }}">
+          <input type="hidden" name="dry_run" value="false">
+          <button class="primary" type="submit">Update to {{ row.latest_tag }}</button>
+        </form>
+      {% else %}
+        <p class="online">✓ Up to date</p>
+      {% endif %}
+    </div>
     <p><strong>Config Version:</strong> <span data-field="config_version">{{ row.config_version }}</span></p>
     <p><strong>CPU Temp:</strong> <span data-field="cpu_temp">{{ row.system.cpu_temp if row.system else 'Unknown' }}</span></p>
     <p><strong>Memory:</strong> <span data-field="memory">{{ row.system.memory if row.system else 'Unknown' }}</span></p>
@@ -113,12 +135,35 @@ function updateDisplay(row) {
   if (!card) return;
   const online = card.querySelector('[data-field="online"]');
   if (online) { online.textContent = row.online ? "● Online" : "○ Offline"; online.className = row.online ? "online" : "offline"; }
-  ["current_media","media_type","overlay","countdown","last_update","heartbeat","version","config_version","sync_folder","sync_state","sync_last_success"].forEach(f => setText(card, f, row[f]));
+  ["current_media","media_type","overlay","countdown","last_update","heartbeat","version","current_tag","latest_tag","config_version","sync_folder","sync_state","sync_last_success"].forEach(f => setText(card, f, row[f]));
   const system = row.system || {};
   setText(card, "cpu_temp", system.cpu_temp || "Unknown");
   setText(card, "memory", system.memory || "Unknown");
   setText(card, "disk", system.disk || "Unknown");
   setText(card, "uptime", system.uptime || "Unknown");
+
+  const panel = card.querySelector('[data-field="update_panel"]');
+  if (panel) {
+    if (row.update_available) {
+      panel.innerHTML = `
+        <p class="status-warn">▲ Update available</p>
+        <form method="POST" action="/deployments/queue-latest">
+          <input type="hidden" name="display_id" value="${row.id}">
+          <input type="hidden" name="target" value="${row.latest_tag}">
+          <input type="hidden" name="dry_run" value="true">
+          <button class="safe" type="submit">Dry Run Update</button>
+        </form>
+        <form method="POST" action="/deployments/queue-latest">
+          <input type="hidden" name="display_id" value="${row.id}">
+          <input type="hidden" name="target" value="${row.latest_tag}">
+          <input type="hidden" name="dry_run" value="false">
+          <button class="primary" type="submit">Update to ${row.latest_tag}</button>
+        </form>
+      `;
+    } else {
+      panel.innerHTML = '<p class="online">✓ Up to date</p>';
+    }
+  }
   if (row.preview_url) {
     let img = card.querySelector('[data-field="preview"]');
     const empty = card.querySelector('[data-field="preview-empty"]');
@@ -137,6 +182,8 @@ function connectFleetEvents() {
   source.addEventListener("fleet", event => {
     const data = JSON.parse(event.data);
     document.getElementById("drive-remote").textContent = data.drive_remote || "gdrive";
+    const latestTag = document.getElementById("latest-tag");
+    if (latestTag) latestTag.textContent = data.latest_tag || "Unknown";
     const driveStatus = document.getElementById("drive-status");
     if (driveStatus) {
       if (data.drive_error) { driveStatus.className = "offline"; driveStatus.textContent = `Drive folder lookup failed: ${data.drive_error}`; }

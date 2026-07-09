@@ -21,3 +21,5 @@
     align-items: center;
     justify-content: center;
 }
+
+.status-warn { color: #ffcc66; font-weight: 600; }

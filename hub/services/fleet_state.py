@@ -5,6 +5,7 @@ from services.display_client import get_status, get_sync_status
 from services.drive import list_drive_folders
 from services.events import read_events
 from services.heartbeat_store import load_heartbeats, get_heartbeat_for_display
+from services.releases import latest_git_tag
 from services.timeutil import human_age, is_fresh, seconds_old
 
 
@@ -61,6 +62,7 @@ def build_fleet_state():
 
     drive_remote = hub_settings.get("drive_remote", "gdrive")
     drive_folders, drive_error = list_drive_folders(drive_remote)
+    latest_tag = latest_git_tag()
 
     rows = []
 
@@ -85,6 +87,8 @@ def build_fleet_state():
             folder_options = [current_folder] + folder_options
 
         display_id = display.get("id", "")
+        current_tag = hb_git.get("tag") or "Unknown"
+        update_available = bool(latest_tag and current_tag not in [latest_tag, "Unknown", "untagged", ""])
 
         rows.append({
             "id": display_id,
@@ -101,6 +105,9 @@ def build_fleet_state():
             "heartbeat_age_seconds": heartbeat_age_seconds,
             "version": hb.get("version", "Unknown"),
             "git": hb_git,
+            "current_tag": current_tag,
+            "latest_tag": latest_tag or "Unknown",
+            "update_available": update_available,
             "config_version": hb.get("config_version", "Unknown"),
             "current_media": status.get("current_media") or hb_player.get("current_media") or "Unknown",
             "media_type": status.get("media_type") or hb_player.get("media_type") or "Unknown",
@@ -121,6 +128,7 @@ def build_fleet_state():
         "drive_remote": drive_remote,
         "drive_folders": drive_folders,
         "drive_error": drive_error,
+        "latest_tag": latest_tag or "",
         "pending_count": len(pending.get("pending", [])),
         "events": read_events(12),
         "alerts": build_alerts(rows, drive_error),
