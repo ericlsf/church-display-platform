@@ -162,7 +162,6 @@ def restart_display_if_needed(report):
 
 
 def restart_agent_after_success(report):
-    report("running", 96, "Restarting agent service")
     run_command(["sudo", "systemctl", "restart", "church-display-agent.service"], timeout=20)
 
 
