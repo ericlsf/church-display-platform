@@ -4,7 +4,7 @@
 
 <div class="section">
   <h2>Media Manager</h2>
-  <p class="muted">Browse Google Drive folders, inspect playlist contents, and queue sync jobs for displays.</p>
+  <p class="muted">Browse Google Drive folders, reorder playlists, inspect content, and queue sync jobs for displays.</p>
   <p>Drive remote: <strong>{{ drive_remote }}</strong></p>
   {% if drive_error %}<p class="offline">Drive folder lookup failed: {{ drive_error }}</p>{% endif %}
 </div>
@@ -33,37 +33,68 @@
 <div class="section">
   <div class="toolbar">
     <h2 style="margin-right:auto;">{{ selected_folder }}</h2>
-    {% if analysis.parent %}<a class="button-link" href="/media?folder={{ analysis.parent }}">Up one level</a>{% endif %}
+    {% if analysis["parent"] %}<a class="button-link" href="/media?folder={{ analysis['parent'] }}">Up one level</a>{% endif %}
   </div>
 
-  {% if analysis.breadcrumbs %}
+  {% if analysis["breadcrumbs"] %}
     <p class="muted">
       <a href="/media">Drive</a>
-      {% for crumb in analysis.breadcrumbs %}
+      {% for crumb in analysis["breadcrumbs"] %}
         / <a href="/media?folder={{ crumb.path }}">{{ crumb.name }}</a>
       {% endfor %}
     </p>
   {% endif %}
 
-  {% if analysis.error %}
-    <p class="offline">{{ analysis.error }}</p>
+  {% if analysis["error"] %}
+    <p class="offline">{{ analysis["error"] }}</p>
   {% else %}
     <div class="stats-grid">
-      <div class="stat"><span>Items</span><strong>{{ analysis.total }}</strong></div>
-      <div class="stat"><span>Folders</span><strong>{{ analysis.folders }}</strong></div>
-      <div class="stat"><span>Images</span><strong>{{ analysis.images }}</strong></div>
-      <div class="stat"><span>Videos</span><strong>{{ analysis.videos }}</strong></div>
-      <div class="stat"><span>Supported</span><strong>{{ analysis.supported }}</strong></div>
-      <div class="stat"><span>Total Size</span><strong>{{ analysis.total_size_human }}</strong></div>
+      <div class="stat"><span>Items</span><strong>{{ analysis["total"] }}</strong></div>
+      <div class="stat"><span>Folders</span><strong>{{ analysis["folders"] }}</strong></div>
+      <div class="stat"><span>Images</span><strong>{{ analysis["images"] }}</strong></div>
+      <div class="stat"><span>Videos</span><strong>{{ analysis["videos"] }}</strong></div>
+      <div class="stat"><span>Supported</span><strong>{{ analysis["supported"] }}</strong></div>
+      <div class="stat"><span>Total Size</span><strong>{{ analysis["total_size_human"] }}</strong></div>
     </div>
+
+    {% if analysis["media_items"] %}
+    <div class="section nested">
+      <h3>Playlist Order</h3>
+      <p class="muted">Drag items or use the arrow buttons. This order is saved in the Hub and sent to displays when you sync this folder.</p>
+
+      <form method="POST" action="/media/order" id="order-form">
+        <input type="hidden" name="remote" value="{{ drive_remote }}">
+        <input type="hidden" name="folder" value="{{ selected_folder }}">
+        <textarea name="playlist_order" id="playlist-order-field" hidden>{% for item in analysis["media_items"] %}{{ item.path }}{% if not loop.last %}
+{% endif %}{% endfor %}</textarea>
+
+        <div class="playlist-list" id="playlist-list">
+          {% for item in analysis["media_items"] %}
+            <div class="playlist-row" draggable="true" data-path="{{ item.path }}">
+              <span class="drag-handle">☰</span>
+              <span class="media-icon">{{ item.icon }}</span>
+              <span class="playlist-name">{{ item.name }}</span>
+              <span class="muted playlist-meta">{{ item.type }} · {{ item.size_human }}</span>
+              <button type="button" class="small" onclick="movePlaylistRow(this, -1)">↑</button>
+              <button type="button" class="small" onclick="movePlaylistRow(this, 1)">↓</button>
+            </div>
+          {% endfor %}
+        </div>
+
+        <button class="primary" type="submit">Save Playlist Order</button>
+      </form>
+    </div>
+    {% endif %}
 
     <div class="section nested">
       <h3>Deploy / Sync Playlist</h3>
-      <p class="muted">This queues a folder-change sync job. The display will sync supported image/video files from this Drive folder.</p>
-      <form method="POST" action="/media/sync">
+      <p class="muted">This queues a folder-change sync job. Displays will sync the selected Drive folder and use the saved playlist order.</p>
+      <form method="POST" action="/media/sync" id="sync-form">
         <input type="hidden" name="remote" value="{{ drive_remote }}">
         <input type="hidden" name="folder" value="{{ selected_folder }}">
         <input type="hidden" name="run_now" value="1">
+        <textarea name="playlist_order" id="sync-playlist-order-field" hidden>{% for item in analysis["media_items"] %}{{ item.path }}{% if not loop.last %}
+{% endif %}{% endfor %}</textarea>
 
         {% for display in displays %}
           <label><input type="checkbox" name="display_ids" value="{{ display.id }}"> {{ display.name }} — {{ display.id }}</label>
@@ -92,12 +123,76 @@
           </div>
         {% endfor %}
       </div>
-      {% if analysis.total > analysis.shown %}<p class="muted">Showing first {{ analysis.shown }} of {{ analysis.total }} items.</p>{% endif %}
+      {% if analysis["total"] > analysis["shown"] %}<p class="muted">Showing first {{ analysis["shown"] }} of {{ analysis["total"] }} items.</p>{% endif %}
     {% else %}
       <p class="muted">No items found in this folder.</p>
     {% endif %}
   {% endif %}
 </div>
 {% endif %}
+
+<script>
+function syncPlaylistOrderFields() {
+  const rows = Array.from(document.querySelectorAll('#playlist-list .playlist-row'));
+  const order = rows.map(row => row.dataset.path).join('\n');
+  const orderField = document.getElementById('playlist-order-field');
+  const syncField = document.getElementById('sync-playlist-order-field');
+  if (orderField) orderField.value = order;
+  if (syncField) syncField.value = order;
+}
+
+function movePlaylistRow(button, direction) {
+  const row = button.closest('.playlist-row');
+  const list = document.getElementById('playlist-list');
+  if (!row || !list) return;
+  if (direction < 0 && row.previousElementSibling) {
+    list.insertBefore(row, row.previousElementSibling);
+  }
+  if (direction > 0 && row.nextElementSibling) {
+    list.insertBefore(row.nextElementSibling, row);
+  }
+  syncPlaylistOrderFields();
+}
+
+let draggedRow = null;
+document.addEventListener('dragstart', event => {
+  const row = event.target.closest('.playlist-row');
+  if (!row) return;
+  draggedRow = row;
+  row.classList.add('dragging');
+});
+
+document.addEventListener('dragend', event => {
+  if (draggedRow) draggedRow.classList.remove('dragging');
+  draggedRow = null;
+  syncPlaylistOrderFields();
+});
+
+document.addEventListener('dragover', event => {
+  const list = document.getElementById('playlist-list');
+  if (!list || !draggedRow) return;
+  event.preventDefault();
+  const after = getDragAfterElement(list, event.clientY);
+  if (after == null) {
+    list.appendChild(draggedRow);
+  } else {
+    list.insertBefore(draggedRow, after);
+  }
+});
+
+function getDragAfterElement(container, y) {
+  const rows = [...container.querySelectorAll('.playlist-row:not(.dragging)')];
+  return rows.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    }
+    return closest;
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+syncPlaylistOrderFields();
+</script>
 
 {% endblock %}

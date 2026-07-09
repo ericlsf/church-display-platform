@@ -23,3 +23,5 @@ hub/static/previews/
 backups/
 hub/config/schedules.json
 hub/config/schedules.json.tmp
+
+hub/config/playlists.json

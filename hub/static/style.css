@@ -26,3 +26,58 @@
 
 /* v1.6 polish */
 table{width:100%;border-collapse:collapse;margin-top:12px;overflow:hidden;border-radius:10px}th,td{border-bottom:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}th{color:#ddd;background:#141414}tr:hover td{background:#171717}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin:12px 0}.stats-grid.compact{grid-template-columns:repeat(auto-fit,minmax(100px,1fr))}.stat{background:#121212;border:1px solid #303030;border-radius:10px;padding:12px}.stat span{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}.stat strong{font-size:20px}.badge{display:inline-block;border:1px solid #3a3a3a;border-radius:999px;padding:3px 8px;background:#111;color:#ddd;font-size:12px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.card h2,.section h2{margin-top:0}button.danger:hover,button.primary:hover,button.safe:hover{filter:brightness(1.1)}
+
+/* v1.6.1 Media Manager */
+.nested{background:#171717;margin-top:18px}.button-link{display:inline-block;padding:9px 12px;border-radius:8px;background:#181818;border:1px solid #333;text-decoration:none}.media-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px}.media-item{display:flex;gap:12px;align-items:flex-start;background:#121212;border:1px solid #303030;border-radius:12px;padding:12px}.media-item.folder{border-color:#465f8a}.media-item.image{border-color:#375a42}.media-item.video{border-color:#6d5730}.media-icon{font-size:32px;line-height:1}.media-info p{margin:5px 0}.media-info strong,.media-info a{word-break:break-word}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+
+.playlist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.playlist-row {
+  display: grid;
+  grid-template-columns: 32px 40px 1fr auto auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid #333;
+  border-radius: 10px;
+  background: #141414;
+  cursor: grab;
+}
+
+.playlist-row.dragging {
+  opacity: 0.45;
+}
+
+.drag-handle {
+  color: #999;
+  font-size: 18px;
+}
+
+.playlist-name {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.playlist-meta {
+  white-space: nowrap;
+}
+
+button.small,
+.small {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #202020;
+  color: #fff;
+}
+
+.section.nested {
+  background: #111;
+  border-color: #2c2c2c;
+}
