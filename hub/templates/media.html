@@ -3,17 +3,17 @@
 {% block content %}
 
 <div class="section">
-  <h2>Media Management</h2>
-  <p class="muted">Browse Google Drive folders, inspect media counts, and queue folder sync jobs for displays.</p>
+  <h2>Media Manager</h2>
+  <p class="muted">Browse Google Drive folders, inspect playlist contents, and queue sync jobs for displays.</p>
   <p>Drive remote: <strong>{{ drive_remote }}</strong></p>
   {% if drive_error %}<p class="offline">Drive folder lookup failed: {{ drive_error }}</p>{% endif %}
 </div>
 
 <div class="section">
-  <h2>Browse Folder</h2>
+  <h2>Browse Google Drive</h2>
   <form method="GET" action="/media" class="row two-col">
     <div>
-      <label>Google Drive Folder</label>
+      <label>Top-level Folder</label>
       <select name="folder">
         <option value="">Select folder</option>
         {% for folder in drive_folders %}
@@ -22,54 +22,79 @@
       </select>
     </div>
     <div>
-      <button class="primary" type="submit">Analyze Folder</button>
+      <label><input type="checkbox" name="recursive" value="1" {% if recursive %}checked{% endif %}> Include subfolders</label>
+      <label><input type="checkbox" name="supported_only" value="1" {% if supported_only %}checked{% endif %}> Hide unsupported files</label>
+      <button class="primary" type="submit">Browse</button>
     </div>
   </form>
 </div>
 
 {% if analysis %}
 <div class="section">
-  <h2>{{ selected_folder }}</h2>
+  <div class="toolbar">
+    <h2 style="margin-right:auto;">{{ selected_folder }}</h2>
+    {% if analysis.parent %}<a class="button-link" href="/media?folder={{ analysis.parent }}">Up one level</a>{% endif %}
+  </div>
+
+  {% if analysis.breadcrumbs %}
+    <p class="muted">
+      <a href="/media">Drive</a>
+      {% for crumb in analysis.breadcrumbs %}
+        / <a href="/media?folder={{ crumb.path }}">{{ crumb.name }}</a>
+      {% endfor %}
+    </p>
+  {% endif %}
+
   {% if analysis.error %}
     <p class="offline">{{ analysis.error }}</p>
   {% else %}
     <div class="stats-grid">
-      <div class="stat"><span>Total</span><strong>{{ analysis.total }}</strong></div>
+      <div class="stat"><span>Items</span><strong>{{ analysis.total }}</strong></div>
+      <div class="stat"><span>Folders</span><strong>{{ analysis.folders }}</strong></div>
       <div class="stat"><span>Images</span><strong>{{ analysis.images }}</strong></div>
       <div class="stat"><span>Videos</span><strong>{{ analysis.videos }}</strong></div>
-      <div class="stat"><span>Other</span><strong>{{ analysis.other }}</strong></div>
+      <div class="stat"><span>Supported</span><strong>{{ analysis.supported }}</strong></div>
+      <div class="stat"><span>Total Size</span><strong>{{ analysis.total_size_human }}</strong></div>
     </div>
 
-    <form method="POST" action="/media/sync">
-      <input type="hidden" name="remote" value="{{ drive_remote }}">
-      <input type="hidden" name="folder" value="{{ selected_folder }}">
-      <input type="hidden" name="run_now" value="1">
+    <div class="section nested">
+      <h3>Deploy / Sync Playlist</h3>
+      <p class="muted">This queues a folder-change sync job. The display will sync supported image/video files from this Drive folder.</p>
+      <form method="POST" action="/media/sync">
+        <input type="hidden" name="remote" value="{{ drive_remote }}">
+        <input type="hidden" name="folder" value="{{ selected_folder }}">
+        <input type="hidden" name="run_now" value="1">
 
-      <h3>Sync this folder to displays</h3>
-      {% for display in displays %}
-        <label><input type="checkbox" name="display_ids" value="{{ display.id }}"> {{ display.name }} — {{ display.id }}</label>
-      {% endfor %}
-      <button class="primary" type="submit">Set Folder and Sync</button>
-    </form>
+        {% for display in displays %}
+          <label><input type="checkbox" name="display_ids" value="{{ display.id }}"> {{ display.name }} — {{ display.id }}</label>
+        {% endfor %}
+        <button class="primary" type="submit">Set Folder and Sync Selected</button>
+      </form>
+    </div>
 
-    <h3>Files Preview</h3>
-    {% if analysis.items %}
-      <table>
-        <thead><tr><th>Name</th><th>Type</th><th>Size</th><th>Modified</th></tr></thead>
-        <tbody>
-          {% for item in analysis.items %}
-          <tr>
-            <td>{{ item.name }}</td>
-            <td><span class="badge">{{ item.type }}</span></td>
-            <td>{{ item.size }}</td>
-            <td>{{ item.modified }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% if analysis.total > analysis.items|length %}<p class="muted">Showing first {{ analysis.items|length }} of {{ analysis.total }} files.</p>{% endif %}
+    <h3>Folder Contents</h3>
+    {% if analysis["items"] %}
+      <div class="media-grid">
+        {% for item in analysis["items"] %}
+          <div class="media-item {{ item.type }}">
+            <div class="media-icon">{{ item.icon }}</div>
+            <div class="media-info">
+              {% if item.is_dir %}
+                <a href="/media?folder={{ item.child_folder }}">{{ item.name }}</a>
+              {% else %}
+                <strong>{{ item.name }}</strong>
+              {% endif %}
+              <p class="muted">{{ item.type }}{% if item.mime_type %} · {{ item.mime_type }}{% endif %}</p>
+              {% if not item.is_dir %}<p>{{ item.size_human }}</p>{% endif %}
+              {% if item.modified %}<p class="muted">{{ item.modified }}</p>{% endif %}
+              {% if not item.is_dir and not item.supported %}<p class="offline">Unsupported by display player</p>{% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      {% if analysis.total > analysis.shown %}<p class="muted">Showing first {{ analysis.shown }} of {{ analysis.total }} items.</p>{% endif %}
     {% else %}
-      <p class="muted">No files found in this folder.</p>
+      <p class="muted">No items found in this folder.</p>
     {% endif %}
   {% endif %}
 </div>
