@@ -31,3 +31,7 @@ release/dist/
 
 hub/content/
 hub/config/hub.sqlite3
+hub/data/
+hub/config/.setup-complete
+*.tar.gz
+hub/config/hub.json
