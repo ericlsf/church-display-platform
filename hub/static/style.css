@@ -92,3 +92,14 @@ button.small,
 .inline-form { display: grid; gap: 10px; }
 .playlist-row.dragging { opacity: .45; }
 @media (max-width: 900px) { .content-layout { grid-template-columns: 1fr; } }
+
+/* v2.1 content manager */
+.unsaved-banner { display:none; padding:10px 14px; border:1px solid #9a6b13; background:#2a210d; border-radius:10px; margin:12px 0; }
+.unsaved-banner.visible { display:block; }
+.preview-stage { min-height:360px; display:flex; align-items:center; justify-content:center; background:#000; border-radius:14px; overflow:hidden; }
+.preview-stage img, .preview-stage video { max-width:100%; max-height:65vh; object-fit:contain; }
+.preview-controls { display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap; }
+.revision-list { display:grid; gap:8px; }
+.revision-row { display:flex; justify-content:space-between; gap:12px; align-items:center; border:1px solid #333; padding:10px; border-radius:10px; }
+.playlist-row { cursor:grab; }
+.playlist-row:active { cursor:grabbing; }
