@@ -13,11 +13,7 @@ EXCLUDE_DIRS = {
 }
 
 EXCLUDE_SUFFIXES = {
-    ".pyc", ".pyo", ".log", ".tmp", ".bak",
-}
-
-EXCLUDE_FILE_NAMES = {
-    "church-display-current.tar.gz",
+    ".pyc", ".pyo", ".log", ".tmp",
 }
 
 EXCLUDE_PATH_PARTS = {
@@ -39,12 +35,6 @@ def should_exclude(path):
         return True
 
     if path.suffix in EXCLUDE_SUFFIXES:
-        return True
-
-    if path.name in EXCLUDE_FILE_NAMES:
-        return True
-
-    if path.name.startswith("church-display-current") and path.name.endswith(".tar.gz"):
         return True
 
     for part in EXCLUDE_PATH_PARTS:

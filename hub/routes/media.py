@@ -5,6 +5,7 @@ from services.drive import list_drive_folders
 from services.events import log_event
 from services.jobs import create_job
 from services.media import analyze_drive_folder, save_playlist_order
+from services.content_cache import sync_playlist_from_drive
 
 media_bp = Blueprint("media", __name__, url_prefix="/media")
 
@@ -74,6 +75,13 @@ def queue_media_sync():
 
     if not folder or not display_ids:
         return redirect(url_for("media.media_page", folder=folder))
+
+    manifest, cache_error = sync_playlist_from_drive(remote, folder)
+    if cache_error:
+        log_event(f"Hub cache sync failed for {remote}:{folder}: {cache_error}")
+        return redirect(url_for("media.media_page", folder=folder, supported_only="1"))
+
+    playlist_order = manifest.get("order", playlist_order)
 
     for display_id in display_ids:
         create_job(display_id, "set_sync_folder", {

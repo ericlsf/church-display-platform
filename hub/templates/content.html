@@ -58,7 +58,6 @@
       <div class="section nested">
         <h3>Playlist Editor</h3>
         <p class="muted">Drag rows or use arrows to set playback order. This saved order is sent to displays when deployed.</p>
-        <div id="unsaved-banner" class="unsaved-banner">Playlist order has unsaved changes.</div>
 
         <form method="POST" action="/content/order" id="order-form">
           <input type="hidden" name="remote" value="{{ drive_remote }}">
@@ -79,26 +78,26 @@
             {% endfor %}
           </div>
 
-          <label>Revision note</label>
-          <input name="note" placeholder="What changed in this revision?">
           <button class="primary" type="submit">Save Order</button>
         </form>
       </div>
 
       <div class="section nested">
         <h3>Preview</h3>
-        <div class="preview-stage" id="preview-stage">
-          <p class="muted">Choose an item below to preview it.</p>
-        </div>
-        <div class="preview-controls">
-          <button type="button" class="small" onclick="previewPrevious()">Previous</button>
-          <button type="button" class="small" onclick="previewNext()">Next</button>
-          <button type="button" class="small" onclick="togglePreviewPlayback()">Play / Pause</button>
-          <span id="preview-caption" class="muted"></span>
+        <div class="preview-frame">
+          {% if analysis["media_items"] %}
+            <div class="preview-slide">
+              <div class="preview-icon">{{ analysis["media_items"][0].icon }}</div>
+              <strong>{{ analysis["media_items"][0].name }}</strong>
+              <p class="muted">First item in playlist</p>
+            </div>
+          {% else %}
+            <p class="muted">No supported media to preview.</p>
+          {% endif %}
         </div>
         <ol class="compact-list" id="preview-order">
           {% for item in analysis["media_items"] %}
-            <li data-path="{{ item.path }}" data-type="{{ item.type }}" onclick="previewPath(this.dataset.path, this.dataset.type)">{{ item.icon }} {{ item.name }}</li>
+            <li data-path="{{ item.path }}">{{ item.icon }} {{ item.name }}</li>
           {% endfor %}
         </ol>
       </div>
@@ -149,30 +148,6 @@
     </div>
 
     <div class="section nested">
-      <h3>Playlist Revisions</h3>
-      {% if revisions %}
-        <div class="revision-list">
-          {% for revision in revisions %}
-            <div class="revision-row">
-              <div>
-                <strong>{{ revision.saved_at or 'Unknown time' }}</strong>
-                <div class="muted">{{ revision.note or 'Saved revision' }} · {{ revision.order|length }} item(s)</div>
-              </div>
-              <form method="POST" action="/content/restore">
-                <input type="hidden" name="remote" value="{{ drive_remote }}">
-                <input type="hidden" name="folder" value="{{ selected_folder }}">
-                <input type="hidden" name="revision_index" value="{{ loop.index0 }}">
-                <button class="small" type="submit">Restore</button>
-              </form>
-            </div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <p class="muted">No prior revisions yet. A revision is created whenever a saved order changes.</p>
-      {% endif %}
-    </div>
-
-    <div class="section nested">
       <h3>Content Library</h3>
       {% if analysis["items"] %}
         <div class="media-grid">
@@ -215,16 +190,7 @@
 {% endif %}
 
 <script>
-let playlistDirty = false;
-let previewIndex = -1;
-
-function markPlaylistDirty() {
-  playlistDirty = true;
-  const banner = document.getElementById("unsaved-banner");
-  if (banner) banner.classList.add("visible");
-}
-
-function syncPlaylistOrderFields(markDirty = false) {
+function syncPlaylistOrderFields() {
   const rows = Array.from(document.querySelectorAll('#playlist-list .playlist-row'));
   const order = rows.map(row => row.dataset.path).join('\n');
   ['playlist-order-field', 'deploy-playlist-order-field', 'schedule-playlist-order-field'].forEach(id => {
@@ -232,7 +198,6 @@ function syncPlaylistOrderFields(markDirty = false) {
     if (field) field.value = order;
   });
   const preview = document.getElementById('preview-order');
-  if (markDirty) markPlaylistDirty();
   if (preview) {
     const existing = Array.from(preview.querySelectorAll('li'));
     preview.innerHTML = '';
@@ -251,7 +216,7 @@ function movePlaylistRow(button, direction) {
   if (!row || !list) return;
   if (direction < 0 && row.previousElementSibling) list.insertBefore(row, row.previousElementSibling);
   if (direction > 0 && row.nextElementSibling) list.insertBefore(row.nextElementSibling, row);
-  syncPlaylistOrderFields(true);
+  syncPlaylistOrderFields();
 }
 
 let draggedRow = null;
@@ -265,7 +230,7 @@ document.addEventListener('dragstart', event => {
 document.addEventListener('dragend', event => {
   if (draggedRow) draggedRow.classList.remove('dragging');
   draggedRow = null;
-  syncPlaylistOrderFields(true);
+  syncPlaylistOrderFields();
 });
 
 document.addEventListener('dragover', event => {
@@ -287,57 +252,7 @@ function getDragAfterElement(container, y) {
   }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
-function previewItems() {
-  return Array.from(document.querySelectorAll('#preview-order li'));
-}
-
-function previewPath(path, type) {
-  const items = previewItems();
-  previewIndex = items.findIndex(item => item.dataset.path === path);
-  const params = new URLSearchParams({remote: {{ drive_remote|tojson }}, folder: {{ selected_folder|tojson }}, path: path});
-  const url = '/content/asset?' + params.toString();
-  const stage = document.getElementById('preview-stage');
-  const caption = document.getElementById('preview-caption');
-  if (!stage) return;
-  stage.innerHTML = type === 'video'
-    ? `<video controls autoplay src="${url}"></video>`
-    : `<img src="${url}" alt="${path}">`;
-  if (caption) caption.textContent = path;
-}
-
-function previewNext() {
-  const items = previewItems();
-  if (!items.length) return;
-  previewIndex = (previewIndex + 1 + items.length) % items.length;
-  previewPath(items[previewIndex].dataset.path, items[previewIndex].dataset.type);
-}
-
-function previewPrevious() {
-  const items = previewItems();
-  if (!items.length) return;
-  previewIndex = (previewIndex - 1 + items.length) % items.length;
-  previewPath(items[previewIndex].dataset.path, items[previewIndex].dataset.type);
-}
-
-function togglePreviewPlayback() {
-  const video = document.querySelector('#preview-stage video');
-  if (!video) return;
-  if (video.paused) video.play(); else video.pause();
-}
-
-['order-form', 'deploy-form', 'schedule-form'].forEach(id => {
-  const form = document.getElementById(id);
-  if (form) form.addEventListener('submit', () => { playlistDirty = false; });
-});
-
-window.addEventListener('beforeunload', event => {
-  if (!playlistDirty) return;
-  event.preventDefault();
-  event.returnValue = '';
-});
-
-syncPlaylistOrderFields(false);
-if (previewItems().length) previewNext();
+syncPlaylistOrderFields();
 </script>
 
 {% endblock %}

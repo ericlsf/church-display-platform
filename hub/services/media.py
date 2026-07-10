@@ -1,6 +1,5 @@
 import json
 import subprocess
-from datetime import datetime
 from pathlib import Path
 
 from services.config import CONFIG_DIR
@@ -101,7 +100,7 @@ def get_playlist_order(remote, folder):
     return [str(x) for x in order if str(x).strip()]
 
 
-def save_playlist_order(remote, folder, order, note="Saved from Content Manager"):
+def save_playlist_order(remote, folder, order):
     clean = []
     seen = set()
     for item in order or []:
@@ -113,79 +112,13 @@ def save_playlist_order(remote, folder, order, note="Saved from Content Manager"
     data = load_playlists()
     key = playlist_key(remote, folder)
     data.setdefault("playlists", {})
-    previous = data["playlists"].get(key, {})
-    previous_order = [str(x) for x in previous.get("order", []) if str(x).strip()]
-    revisions = list(previous.get("revisions", []))
-
-    if previous_order and previous_order != clean:
-        revisions.insert(0, {
-            "saved_at": previous.get("updated_at") or datetime.now().isoformat(timespec="seconds"),
-            "note": previous.get("note") or "Previous saved order",
-            "order": previous_order,
-        })
-
-    revisions = revisions[:20]
     data["playlists"][key] = {
         "remote": remote or "gdrive",
         "folder": (folder or "").strip().strip("/"),
         "order": clean,
-        "updated_at": datetime.now().isoformat(timespec="seconds"),
-        "note": str(note or "Saved from Content Manager")[:200],
-        "revisions": revisions,
     }
     save_playlists(data)
     return clean
-
-
-def get_playlist_entry(remote, folder):
-    data = load_playlists()
-    return data.get("playlists", {}).get(playlist_key(remote, folder), {})
-
-
-def get_playlist_revisions(remote, folder):
-    entry = get_playlist_entry(remote, folder)
-    return list(entry.get("revisions", []))
-
-
-def restore_playlist_revision(remote, folder, revision_index):
-    entry = get_playlist_entry(remote, folder)
-    revisions = list(entry.get("revisions", []))
-    try:
-        revision = revisions[int(revision_index)]
-    except (ValueError, TypeError, IndexError):
-        raise ValueError("Revision not found")
-    return save_playlist_order(
-        remote, folder, revision.get("order", []),
-        note=f"Restored revision from {revision.get('saved_at', 'unknown time')}",
-    )
-
-
-def open_drive_asset_stream(remote, folder, path):
-    remote = remote or "gdrive"
-    folder = (folder or "").strip().strip("/")
-    path = (path or "").strip().strip("/")
-    if not folder or not path or ".." in Path(path).parts:
-        return None, "Invalid media path"
-
-    source = f"{remote}:{folder}/{path}"
-    try:
-        probe = subprocess.run(
-            ["rclone", "lsjson", source, "--stat"],
-            capture_output=True, text=True, timeout=20,
-        )
-        if probe.returncode != 0:
-            return None, probe.stderr.strip() or "Media not found"
-        process = subprocess.Popen(
-            ["rclone", "cat", source],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        )
-        return process, ""
-    except FileNotFoundError:
-        return None, "rclone is not installed or not in PATH."
-    except subprocess.TimeoutExpired:
-        return None, "Timed out checking media."
-    except Exception as exc:
-        return None, str(exc)
 
 
 def rclone_lsjson(source, recursive=False, timeout=30):

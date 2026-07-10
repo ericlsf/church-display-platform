@@ -1,42 +1,32 @@
-# Python environments and caches
 **/venv/
-**/.venv/
 **/__pycache__/
-**/*.py[cod]
-.pytest_cache/
+**/*.pyc
 
-# Display runtime data
 display/media/
 display/status/
 display/logs/
 display/config/backups/
 display/config/config.json
-display/config/config.json.bak
-display/*.log
 
-# Hub runtime data
 hub/logs/
 hub/config/displays.json
-hub/config/displays.json.bak
 hub/config/pending_displays.json
 hub/config/heartbeats.json
 hub/config/jobs.json
-hub/config/schedules.json
-hub/config/playlists.json
 hub/static/previews/
 
-# Temporary and backup files
+
 *.tmp
 *.bak
-*~
-backups/
 
-# Local archives and generated releases
-church-display-current*.tar.gz
-church-display-platform-*.zip
+
+backups/
+hub/config/schedules.json
+hub/config/schedules.json.tmp
+
+hub/config/playlists.json
+
+# Release build artifacts
 release/dist/
 
-# Editor and OS files
-.vscode/
-.idea/
-.DS_Store
+hub/content/
