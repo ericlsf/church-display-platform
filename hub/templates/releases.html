@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Releases - Church Display Hub{% endblock %}
+
+{% block content %}
+<div class="section">
+    <h2>Releases</h2>
+    <p class="muted">
+        Build, tag, and verify release packages from the repository instead of manually assembling ZIP files.
+    </p>
+</div>
+
+<div class="section">
+    <h2>Current Release Tags</h2>
+    {% if latest_tag %}
+        <p><strong>Latest:</strong> {{ latest_tag }}</p>
+    {% else %}
+        <p class="muted">No Git tags found.</p>
+    {% endif %}
+
+    {% if release_tags %}
+        <div class="grid">
+            {% for tag in release_tags %}
+                <div class="card">
+                    <h3>{{ tag }}</h3>
+                    {% if tag == latest_tag %}
+                        <p class="online">Latest release</p>
+                    {% else %}
+                        <p class="muted">Previous release</p>
+                    {% endif %}
+                    <form method="POST" action="/deployments/queue-outdated">
+                        <input type="hidden" name="target" value="{{ tag }}">
+                        <input type="hidden" name="dry_run" value="true">
+                        <button class="safe" type="submit">Dry Run to Outdated Displays</button>
+                    </form>
+                    <form method="POST" action="/deployments/queue-outdated">
+                        <input type="hidden" name="target" value="{{ tag }}">
+                        <input type="hidden" name="dry_run" value="false">
+                        <button class="danger" type="submit">Deploy to Outdated Displays</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<div class="section">
+    <h2>Build a Release Package</h2>
+    <p>Run this from the repository root after committing and tagging:</p>
+
+    <pre><code>./release/build_release.py v1.8.0</code></pre>
+
+    <p>The release builder creates:</p>
+    <ul>
+        <li><code>release/dist/church-display-platform-vX.Y.Z.zip</code></li>
+        <li><code>release/dist/manifest.json</code></li>
+        <li><code>release/dist/SHA256SUMS</code></li>
+        <li><code>release/dist/release_notes.md</code></li>
+    </ul>
+
+    <p>Verify a package with:</p>
+
+    <pre><code>./release/verify.py release/dist/church-display-platform-v1.8.0.zip --manifest release/dist/manifest.json</code></pre>
+</div>
+{% endblock %}
