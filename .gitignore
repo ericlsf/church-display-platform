@@ -30,3 +30,4 @@ hub/config/playlists.json
 release/dist/
 
 hub/content/
+hub/config/hub.sqlite3

@@ -5,7 +5,7 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
-from services.media import load_playlists, media_kind, playlist_key, save_playlists
+from services.media import get_playlist_policy, load_playlists, media_kind, playlist_key, save_playlists
 
 HUB_DIR = Path(__file__).resolve().parent.parent
 CONTENT_DIR = HUB_DIR / "content"
@@ -94,6 +94,7 @@ def _reconcile_order(remote, folder, current_meta):
     entry = data.setdefault("playlists", {}).get(key, {})
     previous_order = [str(x) for x in entry.get("order", []) if str(x).strip()]
     previous_meta = entry.get("files", {}) if isinstance(entry.get("files", {}), dict) else {}
+    policy = get_playlist_policy(remote, folder)
 
     current_names = set(current_meta)
     changed = []
@@ -110,8 +111,18 @@ def _reconcile_order(remote, folder, current_meta):
     unchanged_manual = [name for name in previous_order if name in current_names and name not in changed_set]
     manual_set = set(unchanged_manual)
     remaining = [name for name in current_names if name not in changed_set and name not in manual_set]
-    remaining.sort(key=newest_key, reverse=True)
-    order = changed + unchanged_manual + remaining
+
+    if policy == "newest_last":
+        remaining.sort(key=newest_key, reverse=True)
+        order = unchanged_manual + remaining + changed
+    elif policy == "alphabetical":
+        order = sorted(current_names, key=str.lower)
+    elif policy == "manual":
+        remaining.sort(key=str.lower)
+        order = unchanged_manual + remaining + changed
+    else:
+        remaining.sort(key=newest_key, reverse=True)
+        order = changed + unchanged_manual + remaining
 
     data["playlists"][key] = {
         **entry,
@@ -120,11 +131,10 @@ def _reconcile_order(remote, folder, current_meta):
         "order": order,
         "files": current_meta,
         "last_drive_sync": utc_now(),
-        "ordering_policy": "new_or_modified_first_then_manual",
+        "insertion_policy": policy,
     }
     save_playlists(data)
-    return order, changed
-
+    return order, changed, policy
 
 def build_manifest(remote, folder, order, drive_meta):
     base = cache_path(remote, folder)
@@ -154,7 +164,7 @@ def build_manifest(remote, folder, order, drive_meta):
         "remote": remote,
         "folder": folder,
         "generated_at": utc_now(),
-        "ordering_policy": "new_or_modified_first_then_manual",
+        "ordering_policy": get_playlist_policy(remote, folder),
         "order": normalized_order,
         "files": [file_map[name] for name in normalized_order],
     }
@@ -181,9 +191,10 @@ def sync_playlist_from_drive(remote="gdrive", folder=""):
     if code != 0:
         return None, err.strip() or out.strip() or f"rclone sync exited {code}"
 
-    order, changed = _reconcile_order(remote, folder, current_meta)
+    order, changed, policy = _reconcile_order(remote, folder, current_meta)
     manifest = build_manifest(remote, folder, order, current_meta)
     manifest["new_or_modified_front"] = changed
+    manifest["insertion_policy"] = policy
     return manifest, ""
 
 

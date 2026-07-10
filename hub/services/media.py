@@ -112,14 +112,43 @@ def save_playlist_order(remote, folder, order):
     data = load_playlists()
     key = playlist_key(remote, folder)
     data.setdefault("playlists", {})
+    existing = data["playlists"].get(key, {})
     data["playlists"][key] = {
+        **existing,
         "remote": remote or "gdrive",
         "folder": (folder or "").strip().strip("/"),
         "order": clean,
+        "insertion_policy": existing.get("insertion_policy", "newest_first"),
     }
     save_playlists(data)
     return clean
 
+
+
+VALID_INSERTION_POLICIES = {"newest_first", "newest_last", "alphabetical", "manual"}
+
+
+def get_playlist_policy(remote, folder):
+    data = load_playlists()
+    entry = data.get("playlists", {}).get(playlist_key(remote, folder), {})
+    policy = str(entry.get("insertion_policy") or "newest_first")
+    return policy if policy in VALID_INSERTION_POLICIES else "newest_first"
+
+
+def save_playlist_policy(remote, folder, policy):
+    policy = str(policy or "newest_first")
+    if policy not in VALID_INSERTION_POLICIES:
+        policy = "newest_first"
+    data = load_playlists()
+    key = playlist_key(remote, folder)
+    entry = data.setdefault("playlists", {}).setdefault(key, {})
+    entry.update({
+        "remote": remote or "gdrive",
+        "folder": (folder or "").strip().strip("/"),
+        "insertion_policy": policy,
+    })
+    save_playlists(data)
+    return policy
 
 def rclone_lsjson(source, recursive=False, timeout=30):
     cmd = ["rclone", "lsjson", source]

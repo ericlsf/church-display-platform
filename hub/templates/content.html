@@ -148,6 +148,22 @@
     </div>
 
     <div class="section nested">
+      <h3>Automatic Insertion Policy</h3>
+      <form method="POST" action="/content/policy">
+        <input type="hidden" name="remote" value="{{ drive_remote }}">
+        <input type="hidden" name="folder" value="{{ selected_folder }}">
+        <label>When Drive files are new or modified</label>
+        <select name="insertion_policy">
+          <option value="newest_first" {% if insertion_policy == 'newest_first' %}selected{% endif %}>Put newest first</option>
+          <option value="newest_last" {% if insertion_policy == 'newest_last' %}selected{% endif %}>Put newest last</option>
+          <option value="alphabetical" {% if insertion_policy == 'alphabetical' %}selected{% endif %}>Alphabetical</option>
+          <option value="manual" {% if insertion_policy == 'manual' %}selected{% endif %}>Preserve manual order; append discoveries</option>
+        </select>
+        <button class="primary" type="submit">Save Policy</button>
+      </form>
+    </div>
+
+    <div class="section nested">
       <h3>Content Library</h3>
       {% if analysis["items"] %}
         <div class="media-grid">

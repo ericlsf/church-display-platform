@@ -14,10 +14,12 @@ from routes.content import content_bp
 from routes.content_api import content_api_bp
 from routes.schedules import schedules_bp
 from routes.releases import releases_bp
+from services.startup import run_startup_checks
 
 
 def create_app():
     app = Flask(__name__)
+    app.config["STARTUP_PROBLEMS"] = run_startup_checks()
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(displays_bp)
     app.register_blueprint(fleet_bp)

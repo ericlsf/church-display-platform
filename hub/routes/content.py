@@ -4,7 +4,7 @@ from services.config import load_config, load_hub_settings
 from services.drive import list_drive_folders
 from services.events import log_event
 from services.jobs import create_job, list_jobs
-from services.media import analyze_drive_folder, get_playlist_order, save_playlist_order
+from services.media import analyze_drive_folder, get_playlist_order, get_playlist_policy, save_playlist_order, save_playlist_policy
 from services.content_cache import sync_playlist_from_drive
 from services.schedules import create_schedule
 
@@ -55,9 +55,19 @@ def content_page():
         recursive=recursive,
         supported_only=supported_only,
         analysis=analysis,
+        insertion_policy=get_playlist_policy(remote, folder) if folder else "newest_first",
         deploy_jobs=deploy_jobs,
     )
 
+
+
+@content_bp.route("/policy", methods=["POST"])
+def save_policy():
+    folder = request.form.get("folder", "").strip().strip("/")
+    remote = request.form.get("remote", "gdrive").strip() or "gdrive"
+    policy = save_playlist_policy(remote, folder, request.form.get("insertion_policy"))
+    log_event(f"Playlist insertion policy set to {policy} for {remote}:{folder}", category="content")
+    return redirect(url_for("content.content_page", folder=folder, supported_only="1"))
 
 @content_bp.route("/order", methods=["POST"])
 def save_order():
