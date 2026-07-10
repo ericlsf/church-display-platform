@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}First-Run Setup - Church Display{% endblock %}
+
+{% block content %}
+
+<div class="section">
+    <h2>First-Run Setup</h2>
+
+    <p class="muted">
+        Configure the Hub and enroll displays from this page.
+    </p>
+
+    {% if message %}
+        <p class="online">● {{ message }}</p>
+    {% endif %}
+
+    {% if error %}
+        <p class="offline">● {{ error }}</p>
+    {% endif %}
+
+    {% if request.args.get("approved") %}
+        <p class="online">● Display approved successfully.</p>
+    {% endif %}
+
+    {% if request.args.get("approval_error") %}
+        <p class="offline">
+            ● The display could not be approved. It may no longer be pending.
+        </p>
+    {% endif %}
+</div>
+
+
+<div class="section">
+    <h2>1. Hub Configuration</h2>
+
+    <form method="POST" action="/setup">
+        <label>Organization / Church Name</label>
+        <input
+            name="organization_name"
+            required
+            value="{{ settings.get('organization_name', 'Church Display') }}"
+            placeholder="LifeSpring Fellowship"
+        >
+
+        <label>Google Drive rclone Remote</label>
+        <input
+            name="drive_remote"
+            required
+            value="{{ settings.get('drive_remote', 'gdrive') }}"
+            placeholder="gdrive"
+        >
+
+        <label>Time Zone</label>
+        <input
+            name="timezone"
+            required
+            value="{{ settings.get('timezone', 'America/Chicago') }}"
+            placeholder="America/Chicago"
+        >
+
+        <label>Hub URL</label>
+        <input
+            name="hub_url"
+            value="{{ settings.get('hub_url', '') }}"
+            placeholder="http://church-display-hub.local:8090"
+        >
+
+        <button class="primary" type="submit">
+            Save Hub Configuration
+        </button>
+    </form>
+
+    {% if setup_complete %}
+        <p class="online">● Hub configuration has been saved.</p>
+    {% else %}
+        <p class="muted">Hub setup has not been marked complete yet.</p>
+    {% endif %}
+</div>
+
+
+<div class="section">
+    <h2>2. Enroll Displays</h2>
+
+    <p class="muted">
+        Displays that contact this Hub appear below. They may take up to one
+        minute to appear after their agent starts.
+    </p>
+
+    <p>
+        <a href="/setup">Refresh discovered displays</a>
+    </p>
+
+    {% if pending %}
+        <div class="grid">
+            {% for item in pending %}
+                <div class="card">
+                    <h3>{{ item.get("name", "New Display") }}</h3>
+
+                    <p>
+                        <strong>Host:</strong>
+                        {{ item.get("host", "Unknown") }}
+                    </p>
+
+                    <p>
+                        <strong>IP:</strong>
+                        {{ item.get("ip", "Unknown") }}
+                    </p>
+
+                    <p>
+                        <strong>Hostname:</strong>
+                        {{ item.get("hostname", "Unknown") }}
+                    </p>
+
+                    <p>
+                        <strong>Version:</strong>
+                        {{ item.get("version", "Unknown") }}
+                    </p>
+
+                    <p>
+                        <strong>Last Seen:</strong>
+                        {{ item.get("last_seen", "Unknown") }}
+                    </p>
+
+                    <form method="POST" action="/setup/approve">
+                        <input
+                            type="hidden"
+                            name="host"
+                            value="{{ item.get('host', '') }}"
+                        >
+
+                        <label>Friendly Display Name</label>
+                        <input
+                            name="name"
+                            required
+                            value="{{ item.get('name', item.get('hostname', 'Display')) }}"
+                            placeholder="Sanctuary Display"
+                        >
+
+                        <button class="primary" type="submit">
+                            Approve Display
+                        </button>
+                    </form>
+
+                    <form method="POST" action="/setup/ignore">
+                        <input
+                            type="hidden"
+                            name="host"
+                            value="{{ item.get('host', '') }}"
+                        >
+
+                        <button class="danger" type="submit">
+                            Ignore
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="muted">
+            No displays are currently waiting for approval.
+        </p>
+    {% endif %}
+</div>
+
+
+<div class="section">
+    <h2>3. Approved Displays</h2>
+
+    {% if displays %}
+        <div class="grid">
+            {% for display in displays %}
+                <div class="card">
+                    <h3>{{ display.get("name", "Display") }}</h3>
+
+                    <p>
+                        <strong>ID:</strong>
+                        {{ display.get("id", "Unknown") }}
+                    </p>
+
+                    <p>
+                        <strong>Host:</strong>
+                        {{ display.get("host", "Unknown") }}
+                    </p>
+
+                    <p class="online">● Approved</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="muted">No displays have been approved yet.</p>
+    {% endif %}
+</div>
+
+
+<div class="section">
+    <h2>4. Finish Setup</h2>
+
+    <p class="muted">
+        You can return to this page later to update settings or enroll
+        additional displays.
+    </p>
+
+    <form method="POST" action="/setup/finish">
+        <button class="safe" type="submit">
+            Finish Setup and Open Dashboard
+        </button>
+    </form>
+</div>
+
+{% endblock %}
