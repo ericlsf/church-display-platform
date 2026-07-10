@@ -1,0 +1,47 @@
+name: Bug report
+description: Report a reproducible problem in the Hub, display, agent, or release pipeline.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Hub
+        - Display player
+        - Display agent
+        - Content sync
+        - Deployment/update
+        - Release pipeline
+        - Installer/systemd
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or Git tag
+      placeholder: v2.3.0
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: Include the exact action, command, playlist, or route involved.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and logs
+      description: Remove passwords, tokens, and private URLs.
+    validations:
+      required: true

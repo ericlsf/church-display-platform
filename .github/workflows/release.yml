@@ -1,0 +1,66 @@
+name: Build Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: hub/requirements.txt
+
+      - name: Create virtual environments
+        run: |
+          python -m venv hub/venv
+          python -m venv display/venv
+          hub/venv/bin/python -m pip install --upgrade pip
+          display/venv/bin/python -m pip install --upgrade pip
+          hub/venv/bin/python -m pip install -r hub/requirements.txt
+
+      - name: Run tests
+        run: ./scripts/run-tests.sh
+
+      - name: Build tagged release
+        run: ./release/build_release.py "${GITHUB_REF_NAME}"
+
+      - name: Verify release package
+        run: |
+          ./release/verify.py \
+            "release/dist/church-display-platform-${GITHUB_REF_NAME}.zip" \
+            --manifest release/dist/manifest.json
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: church-display-platform-${{ github.ref_name }}
+          path: |
+            release/dist/church-display-platform-${{ github.ref_name }}.zip
+            release/dist/manifest.json
+            release/dist/SHA256SUMS
+            release/dist/release_notes.md
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release/dist/release_notes.md
+          files: |
+            release/dist/church-display-platform-${{ github.ref_name }}.zip
+            release/dist/manifest.json
+            release/dist/SHA256SUMS

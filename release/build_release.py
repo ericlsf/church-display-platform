@@ -3,7 +3,7 @@ import argparse
 from pathlib import Path
 
 from changelog import render_release_notes
-from manifest import build_manifest, sha256_file, write_manifest
+from manifest import build_manifest, is_dirty, sha256_file, write_manifest
 from package import build_source_zip
 
 
@@ -28,9 +28,12 @@ def write_sha256s(path, entries):
 def main():
     parser = argparse.ArgumentParser(description="Build a Church Display Platform release package.")
     parser.add_argument("version", nargs="?", help="Release version, for example v1.8.0")
+    parser.add_argument("--allow-dirty", action="store_true", help="Allow building from a dirty working tree")
     args = parser.parse_args()
 
     version = normalize_version(args.version)
+    if is_dirty() and not args.allow_dirty:
+        raise SystemExit("Refusing to build from a dirty working tree. Commit changes or pass --allow-dirty.")
     DIST.mkdir(parents=True, exist_ok=True)
 
     package_name = f"church-display-platform-{version}.zip"

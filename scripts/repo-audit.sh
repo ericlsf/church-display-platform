@@ -6,32 +6,39 @@ cd "$ROOT"
 
 fail=0
 
-check_tracked() {
+check_forbidden() {
   local pattern="$1"
   local label="$2"
-  local matches
-  matches="$(git ls-files | grep -E "$pattern" || true)"
-  if [[ -n "$matches" ]]; then
-    echo "ERROR: tracked $label:"
-    echo "$matches"
+  if git ls-files 2>/dev/null | grep -E "$pattern" >/dev/null; then
+    echo "ERROR: tracked $label detected:" >&2
+    git ls-files | grep -E "$pattern" >&2 || true
     fail=1
   fi
 }
 
-check_tracked '(^|/)(venv|__pycache__|media|status|logs|backups)(/|$)' 'runtime/cache paths'
-check_tracked '\.(pyc|pyo|log|tmp|bak)$' 'generated files'
-check_tracked '(^|/)church-display-current.*\.tar\.gz$' 'audit archives'
-
-if [[ -n "$(git status --porcelain)" ]]; then
-  echo "WARNING: working tree is not clean:"
-  git status --short
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  check_forbidden '(^|/)(venv|\.venv|__pycache__)(/|$)' 'environment/cache files'
+  check_forbidden '(^|/)(media|logs|status|backups|previews)(/|$)' 'runtime files'
+  check_forbidden '\.(pyc|pyo|log|tmp|db|sqlite|sqlite3)$' 'generated files'
+  check_forbidden '(^|/)release/dist(/|$)' 'release build output'
 fi
 
-python3 -m py_compile hub/app.py hub/routes/*.py hub/services/*.py
-python3 -m py_compile display/app/*.py display/agent/*.py display/agent/jobs/*.py
+for required in \
+  hub/app.py \
+  display/agent/agent.py \
+  display/scripts/sync_media.sh \
+  release/build_release.py \
+  release/verify.py \
+  scripts/run-tests.sh; do
+  if [ ! -f "$required" ]; then
+    echo "ERROR: required file missing: $required" >&2
+    fail=1
+  fi
+done
+
 python3 -m py_compile release/*.py
 
-if [[ "$fail" -ne 0 ]]; then
+if [ "$fail" -ne 0 ]; then
   exit 1
 fi
 
