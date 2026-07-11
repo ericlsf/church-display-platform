@@ -41,6 +41,14 @@ def build_alerts(rows, drive_error=""):
         if row.get("git", {}).get("dirty") == "yes":
             alerts.append({"level": "warning", "message": f"{name} has uncommitted local changes."})
 
+        if row.get("heartbeat_fresh") and not row.get("display_app_running"):
+            alerts.append({
+                "level": "danger",
+                "message": f"{name} display app is not running.",
+                "display_id": row.get("id"),
+                "action": "restart_display",
+            })
+
         temp = str(row.get("system", {}).get("cpu_temp", ""))
         try:
             temp_value = float(temp.replace("°C", "").strip())
@@ -75,6 +83,7 @@ def build_fleet_state():
         hb_sync = hb.get("sync", {})
         hb_system = hb.get("system", {})
         hb_git = hb.get("git", {})
+        hb_display_app = hb.get("display_app", {})
 
         heartbeat_received_at = hb.get("received_at", "")
         heartbeat_fresh = is_fresh(heartbeat_received_at, 90)
@@ -120,6 +129,9 @@ def build_fleet_state():
             "sync_last_success": sync_status.get("last_success") or hb_sync.get("last_success") or "Unknown",
             "folder_options": folder_options,
             "system": hb_system,
+            "display_app": hb_display_app,
+            "display_app_running": bool(hb_display_app.get("running")),
+            "display_app_state": hb_display_app.get("active_state", "unknown"),
             "preview_url": preview_url_for(display_id),
         })
 

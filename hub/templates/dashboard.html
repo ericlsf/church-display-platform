@@ -85,7 +85,15 @@
         <strong>{{ row.name }}</strong>
         <span>{{ row.sync_folder }}</span>
         <span class="muted">{{ row.current_media }}</span>
+        {% if row.heartbeat_fresh and not row.display_app_running %}
+          <span class="offline">Display app stopped</span>
+        {% endif %}
       </a>
+      {% if row.heartbeat_fresh and not row.display_app_running %}
+        <form method="POST" action="/fleet/{{ row.id }}/restart" class="inline-recovery-form">
+          <button class="safe" type="submit">Start Display App</button>
+        </form>
+      {% endif %}
     {% endfor %}
   </div>
 </div>

@@ -1,7 +1,72 @@
 {% extends "base.html" %}
 {% block title %}Displays - Church Display Hub{% endblock %}
 {% block content %}
-<div class="section"><h2>Manage Displays</h2><p class="muted">Add, rename, test, or remove display boards.</p>{% if test_message %}<p><strong>{{ test_message }}</strong></p>{% endif %}</div>
-<div class="section"><h2>Add Display</h2><form method="POST" action="/displays/add"><label>Name</label><input name="name" placeholder="Lobby Display"><label>Admin URL or IP</label><input name="host" placeholder="http://192.168.1.101:8080"><label>Username, optional</label><input name="username" placeholder="admin"><label>Password, optional</label><input name="password" type="password"><button class="primary" type="submit">Add Display</button></form></div>
-<div class="section"><h2>Configured Displays</h2>{% for row in rows %}<div class="card"><h3>{{ row.name }}</h3>{% if row.online %}<p class="online">● Online</p>{% else %}<p class="offline">○ Offline</p><p class="muted">{{ row.message }}</p>{% endif %}<form method="POST" action="/displays/update"><input type="hidden" name="id" value="{{ row.id }}"><div class="row"><div><label>Name</label><input name="name" value="{{ row.name }}"></div><div><label>Host</label><input name="host" value="{{ row.host }}"></div><button class="primary" type="submit">Save</button></div><div class="row two-col"><div><label>Username</label><input name="username" value="{{ row.username }}"></div><div><label>Password</label><input name="password" type="password" value="{{ row.password }}"></div></div></form><form method="POST" action="/displays/test"><input type="hidden" name="host" value="{{ row.host }}"><input type="hidden" name="username" value="{{ row.username }}"><input type="hidden" name="password" value="{{ row.password }}"><button class="safe" type="submit">Test</button></form><form method="POST" action="/displays/remove"><input type="hidden" name="id" value="{{ row.id }}"><button class="danger" type="submit">Remove</button></form><p><a href="{{ row.host }}" target="_blank">Open Local Admin</a></p></div>{% endfor %}</div>
+<div class="section">
+  <h2>Manage Displays</h2>
+  <p class="muted">Add, rename, test, remove, or recover display boards.</p>
+  {% if test_message %}<p><strong>{{ test_message }}</strong></p>{% endif %}
+</div>
+
+<div class="section">
+  <h2>Add Display</h2>
+  <form method="POST" action="/displays/add">
+    <label>Name</label><input name="name" placeholder="Lobby Display">
+    <label>Admin URL or IP</label><input name="host" placeholder="http://192.168.1.101:8080">
+    <label>Username, optional</label><input name="username" placeholder="admin">
+    <label>Password, optional</label><input name="password" type="password">
+    <button class="primary" type="submit">Add Display</button>
+  </form>
+</div>
+
+<div class="section">
+  <h2>Configured Displays</h2>
+  <div class="grid">
+  {% for row in rows %}
+    <div class="card">
+      <h3>{{ row.name }}</h3>
+      <p class="{{ 'online' if row.online else 'offline' }}">{{ '● Online' if row.online else '○ Offline' }}</p>
+      {% if row.message %}<p class="muted">{{ row.message }}</p>{% endif %}
+
+      <p>
+        <strong>Display App:</strong>
+        <span class="{{ 'online' if row.display_app_running else 'offline' }}">
+          {{ 'Running' if row.display_app_running else row.display_app_state|title }}
+        </span>
+      </p>
+
+      {% if row.heartbeat_fresh and not row.display_app_running %}
+        <form method="POST" action="/fleet/{{ row.id }}/restart">
+          <button class="safe" type="submit">Start Display App</button>
+        </form>
+      {% else %}
+        <form method="POST" action="/fleet/{{ row.id }}/restart">
+          <button type="submit">Restart Display App</button>
+        </form>
+      {% endif %}
+
+      <form method="POST" action="/displays/update">
+        <input type="hidden" name="id" value="{{ row.id }}">
+        <label>Name</label><input name="name" value="{{ row.name }}">
+        <label>Host</label><input name="host" value="{{ row.host }}">
+        <label>Username</label><input name="username" value="{{ row.username }}">
+        <label>Password</label><input name="password" type="password" value="{{ row.password }}">
+        <button class="primary" type="submit">Save</button>
+      </form>
+
+      <form method="POST" action="/displays/test">
+        <input type="hidden" name="host" value="{{ row.host }}">
+        <input type="hidden" name="username" value="{{ row.username }}">
+        <input type="hidden" name="password" value="{{ row.password }}">
+        <button class="safe" type="submit">Test Local Admin</button>
+      </form>
+
+      <form method="POST" action="/displays/remove">
+        <input type="hidden" name="id" value="{{ row.id }}">
+        <button class="danger" type="submit">Remove</button>
+      </form>
+      <p><a href="{{ row.host }}" target="_blank">Open Local Admin</a></p>
+    </div>
+  {% endfor %}
+  </div>
+</div>
 {% endblock %}

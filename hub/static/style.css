@@ -160,3 +160,13 @@ button.small,
 @media (max-width: 900px) {
   .header-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
 }
+
+/* v3.1.2 display app recovery */
+.inline-recovery-form {
+  margin: 4px 0 12px;
+}
+.mini-display-grid .inline-recovery-form button {
+  width: 100%;
+}
+
+.remote-output{max-height:440px;overflow:auto;white-space:pre-wrap;background:#090909;border:1px solid #333;border-radius:8px;padding:12px;font-family:monospace;font-size:.85rem}.inline-form{display:inline;margin-left:8px}.action-grid{display:flex;gap:8px;flex-wrap:wrap}.action-grid form{margin:0}
