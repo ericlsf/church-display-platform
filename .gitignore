@@ -37,3 +37,5 @@ hub/config/.setup-complete
 hub/config/hub.json
 hub/data/auth.db
 hub/data/auth.db-*
+hub/config/groups.json
+hub/config/groups.json.tmp

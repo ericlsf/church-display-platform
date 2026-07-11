@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Display Groups - Church Display{% endblock %}
+{% block content %}
+<div class="section">
+  <h2>Display Groups</h2>
+  <p class="muted">Organize displays and run maintenance, content, and deployment actions across the whole group.</p>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <p class="{{ 'offline' if category == 'error' else 'online' }}">{{ message }}</p>
+    {% endfor %}
+  {% endwith %}
+</div>
+
+<div class="section">
+  <h2>Create Group</h2>
+  <form method="POST" action="/groups/create">
+    <label>Name</label><input name="name" required placeholder="Sanctuary">
+    <label>Description</label><input name="description" placeholder="Main sanctuary displays">
+    <h3>Displays</h3>
+    {% for display in displays %}
+      <label><input type="checkbox" name="display_ids" value="{{ display.id }}"> {{ display.name }} — {{ display.id }}</label>
+    {% endfor %}
+    <button class="primary" type="submit">Create Group</button>
+  </form>
+</div>
+
+<div class="grid">
+{% for group in groups %}
+  <div class="card">
+    <h2>{{ group.name }}</h2>
+    <p class="muted">{{ group.description or 'No description' }}</p>
+    <p><strong>Members:</strong> {{ group.display_ids|length }}</p>
+
+    <form method="POST" action="/groups/{{ group.id }}/update">
+      <label>Name</label><input name="name" value="{{ group.name }}" required>
+      <label>Description</label><input name="description" value="{{ group.description }}">
+      <h3>Membership</h3>
+      {% for display in displays %}
+        <label><input type="checkbox" name="display_ids" value="{{ display.id }}" {% if display.id in group.display_ids %}checked{% endif %}> {{ display.name }}</label>
+      {% endfor %}
+      <button class="safe" type="submit">Save Group</button>
+    </form>
+
+    <hr><h3>Quick Actions</h3>
+    {% for action, label, css in [('sync_now','Sync Now','safe'),('heartbeat','Heartbeat','safe'),('restart_display','Restart Apps','danger'),('reboot','Reboot Displays','danger')] %}
+      <form method="POST" action="/groups/{{ group.id }}/action" style="display:inline-block">
+        <input type="hidden" name="action" value="{{ action }}">
+        <button class="{{ css }}" type="submit">{{ label }}</button>
+      </form>
+    {% endfor %}
+
+    <form method="POST" action="/groups/{{ group.id }}/action">
+      <input type="hidden" name="action" value="set_sync_folder">
+      <input type="hidden" name="remote" value="{{ drive_remote }}">
+      <label>Set Folder and Sync</label>
+      <select name="folder" required><option value="">Select folder</option>{% for folder in drive_folders %}<option value="{{ folder }}">{{ folder }}</option>{% endfor %}</select>
+      <button class="primary" type="submit">Apply to Group</button>
+    </form>
+
+    <form method="POST" action="/groups/{{ group.id }}/action">
+      <input type="hidden" name="action" value="deploy_update">
+      <label>Deploy Version</label>
+      <select name="target" required><option value="">Select version</option>{% for tag in release_tags %}<option value="{{ tag }}">{{ tag }}</option>{% endfor %}</select>
+      <select name="dry_run"><option value="true">Dry Run</option><option value="false">Real Deploy</option></select>
+      <button class="primary" type="submit">Queue Group Deployment</button>
+    </form>
+
+    <form method="POST" action="/groups/{{ group.id }}/delete">
+      <button class="danger" type="submit">Delete Group</button>
+    </form>
+  </div>
+{% else %}
+  <div class="section"><p class="muted">No groups created yet.</p></div>
+{% endfor %}
+</div>
+{% endblock %}
