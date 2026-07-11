@@ -22,6 +22,7 @@ from routes.schedules import schedules_bp
 from routes.releases import releases_bp
 from routes.groups import groups_bp
 from routes.operations import operations_bp
+from routes.sites import sites_bp
 from services.startup import run_startup_checks
 
 
@@ -48,6 +49,7 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(groups_bp)
     app.register_blueprint(operations_bp)
+    app.register_blueprint(sites_bp)
 
     # v2.6.0 auth hooks
     app.secret_key = os.environ.get(
