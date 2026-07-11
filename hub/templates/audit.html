@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Audit Log - Church Display{% endblock %}
+{% block content %}
+<div class="section"><h2>Audit Log</h2><p class="muted">Recent state-changing requests and administrative actions.</p></div>
+<div class="section" style="overflow-x:auto;"><table><thead><tr><th>Time</th><th>User</th><th>Role</th><th>Method</th><th>Path</th><th>Status</th><th>IP</th></tr></thead><tbody>
+{% for item in entries %}<tr><td>{{ item.created_at }}</td><td>{{ item.username or 'system' }}</td><td>{{ item.role or '' }}</td><td>{{ item.method }}</td><td>{{ item.path }}</td><td>{{ item.status_code or '' }}</td><td>{{ item.remote_addr or '' }}</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

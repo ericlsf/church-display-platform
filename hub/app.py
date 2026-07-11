@@ -1,3 +1,7 @@
+from services.auth import init_auth_db, load_current_user, log_audit, user_count
+from routes.auth import auth_bp
+from flask import g, redirect, request, session, url_for
+import os
 from flask import Flask
 from routes.dashboard import dashboard_bp
 from routes.displays import displays_bp
@@ -39,6 +43,76 @@ def create_app():
     app.register_blueprint(releases_bp)
     app.register_blueprint(setup_bp)
     app.register_blueprint(system_bp)
+    app.register_blueprint(auth_bp)
+
+    # v2.6.0 auth hooks
+    app.secret_key = os.environ.get(
+        "CHURCH_DISPLAY_SECRET_KEY",
+        app.config.get("SECRET_KEY") or "REPLACE_ME",
+    )
+
+    init_auth_db()
+
+    public_paths = {
+        "/login",
+        "/setup",
+        "/discovery/register",
+        "/api/v1/heartbeat",
+        "/api/v1/preview",
+    }
+
+    api_prefixes = (
+        "/api/v1/jobs/next",
+        "/api/v1/jobs/",
+        "/api/v1/content/",
+    )
+
+    @app.before_request
+    def church_display_auth_guard():
+        load_current_user()
+
+        if request.path.startswith("/static/"):
+            return None
+        if request.path in public_paths:
+            return None
+        if any(request.path.startswith(prefix) for prefix in api_prefixes):
+            return None
+
+        if user_count() == 0:
+            if request.path.startswith("/setup"):
+                return None
+            return redirect(url_for("setup.setup_page"))
+
+        if not g.current_user:
+            return redirect(url_for("auth.login", next=request.full_path))
+
+        role = g.current_user.get("role")
+        mutating = request.method in {"POST", "PUT", "PATCH", "DELETE"}
+
+        if mutating and role == "viewer":
+            return ("Viewer accounts are read-only.", 403)
+
+        if request.path.startswith(("/users", "/audit", "/system")) and role != "admin":
+            return ("Administrator access required.", 403)
+
+        if request.path.startswith(("/deployments", "/jobs", "/schedules")) and mutating:
+            if role not in {"admin", "editor"}:
+                return ("Editor or administrator access required.", 403)
+        return None
+
+    @app.after_request
+    def church_display_audit_response(response):
+        if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+            try:
+                log_audit(status_code=response.status_code)
+            except Exception:
+                pass
+        return response
+
+    @app.context_processor
+    def church_display_auth_context():
+        return {"current_user": getattr(g, "current_user", None)}
+
     return app
 
 

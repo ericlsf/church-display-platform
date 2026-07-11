@@ -22,8 +22,10 @@
             <a class="{{ 'active' if active == 'releases' else '' }}" href="/releases">Releases</a>
             <a class="{{ 'active' if active == 'setup' else '' }}" href="/setup">Setup</a>
             <a class="{{ 'active' if active == 'system' else '' }}" href="/system">System</a>
-        </nav>
+        {% if current_user and current_user.role == 'admin' %}<a class="{{ 'active' if active == 'users' else '' }}" href="/users">Users</a><a class="{{ 'active' if active == 'audit' else '' }}" href="/audit">Audit</a>{% endif %}
+</nav>
     </header>
     <main>{% block content %}{% endblock %}</main>
+{% if current_user %}<form method="POST" action="/logout" style="position:fixed;right:16px;top:12px;z-index:1000;"><button type="submit">Sign Out</button></form>{% endif %}
 </body>
 </html>

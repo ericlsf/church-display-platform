@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Sign In - Church Display{% endblock %}
+{% block content %}
+<div class="section" style="max-width:520px;margin:40px auto;">
+  <h2>Sign In</h2>
+  <p class="muted">Use your Church Display account.</p>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}<p class="{{ 'offline' if category == 'error' else 'online' }}">{{ message }}</p>{% endfor %}
+  {% endwith %}
+  <form method="POST">
+    <input type="hidden" name="next" value="{{ next or '' }}">
+    <label>Username</label><input name="username" autocomplete="username" required autofocus>
+    <label>Password</label><input type="password" name="password" autocomplete="current-password" required>
+    <button class="primary" type="submit">Sign In</button>
+  </form>
+</div>
+{% endblock %}
