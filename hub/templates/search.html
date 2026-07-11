@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Search - Church Display{% endblock %}
+{% block content %}
+<div class="section">
+  <h2>Global Search</h2>
+  <form method="GET" action="/search" class="global-search-page">
+    <input name="q" value="{{ query }}" placeholder="Search displays, playlists, sites, groups, jobs..." autofocus>
+    <button class="primary" type="submit">Search</button>
+  </form>
+</div>
+
+{% if query %}
+<div class="section">
+  <h2>Results for “{{ query }}”</h2>
+  {% if results %}
+    <div class="search-results">
+      {% for item in results %}
+        <a class="search-result" href="{{ item.href }}">
+          <span class="search-type">{{ item.type }}</span>
+          <strong>{{ item.title }}</strong>
+          <span class="muted">{{ item.description }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">No matches found.</p>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

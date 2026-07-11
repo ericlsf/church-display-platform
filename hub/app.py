@@ -1,3 +1,4 @@
+from services.notifications import notification_summary
 from services.auth import init_auth_db, load_current_user, log_audit, user_count
 from routes.auth import auth_bp
 from flask import g, redirect, request, session, url_for
@@ -23,6 +24,8 @@ from routes.releases import releases_bp
 from routes.groups import groups_bp
 from routes.operations import operations_bp
 from routes.sites import sites_bp
+from routes.notifications import notifications_bp
+from routes.search import search_bp
 from services.startup import run_startup_checks
 
 
@@ -50,6 +53,8 @@ def create_app():
     app.register_blueprint(groups_bp)
     app.register_blueprint(operations_bp)
     app.register_blueprint(sites_bp)
+    app.register_blueprint(notifications_bp)
+    app.register_blueprint(search_bp)
 
     # v2.6.0 auth hooks
     app.secret_key = os.environ.get(
@@ -117,7 +122,7 @@ def create_app():
 
     @app.context_processor
     def church_display_auth_context():
-        return {"current_user": getattr(g, "current_user", None)}
+        return {"current_user": getattr(g, "current_user", None), "notification_summary": notification_summary()}
 
     return app
 

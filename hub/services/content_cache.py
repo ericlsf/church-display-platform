@@ -124,15 +124,41 @@ def _reconcile_order(remote, folder, current_meta):
         remaining.sort(key=newest_key, reverse=True)
         order = changed + unchanged_manual + remaining
 
+    previous_published = [str(x) for x in (entry.get("published_order") or entry.get("order") or []) if str(x).strip()]
+    previous_draft = [str(x) for x in (entry.get("draft_order") or previous_published) if str(x).strip()]
+
+    def reconcile_saved(saved):
+        saved_unchanged = [name for name in saved if name in current_names and name not in changed_set]
+        saved_set = set(saved_unchanged)
+        extras = [name for name in current_names if name not in changed_set and name not in saved_set]
+        if policy == "alphabetical":
+            return sorted(current_names, key=str.lower)
+        if policy == "newest_last":
+            extras.sort(key=newest_key, reverse=True)
+            return saved_unchanged + extras + changed
+        if policy == "manual":
+            extras.sort(key=str.lower)
+            return saved_unchanged + extras + changed
+        extras.sort(key=newest_key, reverse=True)
+        return changed + saved_unchanged + extras
+
+    published_order = reconcile_saved(previous_published) if previous_published else order
+    draft_order = reconcile_saved(previous_draft) if previous_draft else published_order
+    has_draft = entry.get("status") == "draft" and draft_order != published_order
+
     data["playlists"][key] = {
         **entry,
         "remote": remote,
         "folder": folder,
-        "order": order,
+        "order": published_order,
+        "published_order": published_order,
+        "draft_order": draft_order if has_draft else published_order,
+        "status": "draft" if has_draft else "published",
         "files": current_meta,
         "last_drive_sync": utc_now(),
         "insertion_policy": policy,
     }
+    order = published_order
     save_playlists(data)
     return order, changed, policy
 

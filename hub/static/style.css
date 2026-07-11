@@ -95,3 +95,33 @@ button.small,
 
 /* v3.0 simplified navigation and sites */
 .main-nav{display:flex;align-items:center;gap:8px;overflow:visible;flex-wrap:wrap}.nav-menu{position:relative}.nav-menu>summary{list-style:none;cursor:pointer;color:#ddd;padding:9px 12px;border-radius:8px;background:#181818;border:1px solid #292929;white-space:nowrap}.nav-menu>summary::-webkit-details-marker{display:none}.nav-menu>summary::after{content:" ▾";color:#888}.nav-menu[open]>summary{background:#252525;border-color:#555}.nav-dropdown{position:absolute;top:calc(100% + 8px);left:0;min-width:190px;background:#101010;border:1px solid #3a3a3a;border-radius:10px;padding:8px;display:grid;gap:5px;box-shadow:0 14px 30px rgba(0,0,0,.45);z-index:100}.nav-dropdown a{display:block;width:100%}.site-heading{display:grid;grid-template-columns:minmax(220px,1fr) minmax(360px,1fr);gap:18px;align-items:start}.check-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;margin:10px 0 16px}.check-card{margin:0;padding:10px 12px;background:#121212;border:1px solid #333;border-radius:8px}.action-grid{display:flex;gap:8px;flex-wrap:wrap}.action-grid form{margin:0}details>summary{cursor:pointer;color:#9ec3ff;margin:10px 0}@media(max-width:760px){.site-heading{grid-template-columns:1fr}.nav-dropdown{position:fixed;left:14px;right:14px;top:110px;min-width:0}}
+
+/* v3.1 operator workflow */
+.header-title { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+.header-title h1 { margin-right:auto; }
+.header-search { margin:0; min-width:min(360px, 42vw); }
+.header-search input { margin:0; }
+.notification-link { position:relative; white-space:nowrap; }
+.notification-badge { display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; padding:0 6px; margin-left:5px; border-radius:999px; background:#b42318; color:white; font-size:12px; font-weight:700; }
+.dashboard-heading,.section-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.dashboard-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.button-link { display:inline-block; padding:9px 12px; border:1px solid #3b3b3b; border-radius:8px; background:#181818; }
+.dashboard-columns { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.dashboard-stats { grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); }
+.attention-item,.notification-row { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding:12px; margin:8px 0; border-radius:9px; border:1px solid #333; background:#121212; }
+.attention-item p,.notification-row p { margin:4px 0; }
+.attention-danger,.notification-danger { border-color:#7a271a; background:#24110e; }
+.attention-warning,.notification-warning { border-color:#7a5b12; background:#211a08; }
+.job-summary,.schedule-summary { display:grid; grid-template-columns:1fr auto auto; gap:12px; padding:9px 0; border-bottom:1px solid #292929; }
+.mini-display-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:10px; }
+.mini-display-card { display:grid; grid-template-columns:auto 1fr; gap:5px 10px; padding:12px; border:1px solid #333; border-radius:9px; background:#121212; }
+.mini-display-card .muted { grid-column:2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.search-results { display:grid; gap:8px; }
+.search-result { display:grid; grid-template-columns:100px minmax(180px,1fr) 2fr; gap:12px; align-items:center; padding:12px; border:1px solid #333; border-radius:9px; background:#121212; }
+.search-type { font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#9ec3ff; }
+.workflow-banner { display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:10px 12px; border-radius:9px; margin-bottom:12px; }
+.workflow-draft { background:#2a2109; border:1px solid #7a5b12; }
+.workflow-published { background:#0d2414; border:1px solid #286b3b; }
+.workflow-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.workflow-actions form { margin:0; }
+@media (max-width:800px) { .dashboard-columns { grid-template-columns:1fr; } .search-result { grid-template-columns:1fr; } .header-search { width:100%; min-width:0; } }

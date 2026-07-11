@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Content - Church Display Hub{% endblock %}
 {% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}<p class="{{ 'offline' if category == 'error' else 'online' }}">{{ message }}</p>{% endfor %}
+{% endwith %}
 
 <div class="section hero-card">
   <h2>Content Workflow</h2>
@@ -56,6 +59,11 @@
 
     <div class="content-layout">
       <div class="section nested">
+        <div class="workflow-banner {{ 'workflow-draft' if workflow.status == 'draft' else 'workflow-published' }}">
+          <strong>{{ workflow.status|default('published')|title }}</strong>
+          {% if workflow.status == 'draft' %}<span>Changes are saved as a draft and are not live.</span>{% else %}<span>Displays use this published order.</span>{% endif %}
+          {% if workflow.published_at %}<span class="muted">Published {{ workflow.published_at }}</span>{% endif %}
+        </div>
         <h3>Playlist Editor</h3>
         <p class="muted">Drag rows or use arrows to set playback order. This saved order is sent to displays when deployed.</p>
 
@@ -78,8 +86,26 @@
             {% endfor %}
           </div>
 
-          <button class="primary" type="submit">Save Order</button>
+          <label>Draft Note (optional)</label>
+          <input name="draft_note" value="{{ workflow.draft_note or '' }}" placeholder="What changed?">
+          <button class="primary" type="submit">Save Draft</button>
         </form>
+
+        <div class="workflow-actions">
+          <form method="POST" action="/content/publish">
+            <input type="hidden" name="remote" value="{{ drive_remote }}">
+            <input type="hidden" name="folder" value="{{ selected_folder }}">
+            <textarea name="playlist_order" class="workflow-order-field" hidden></textarea>
+            <button class="safe" type="submit">Publish Draft</button>
+          </form>
+          {% if workflow.status == 'draft' %}
+          <form method="POST" action="/content/discard">
+            <input type="hidden" name="remote" value="{{ drive_remote }}">
+            <input type="hidden" name="folder" value="{{ selected_folder }}">
+            <button class="danger" type="submit">Discard Draft</button>
+          </form>
+          {% endif %}
+        </div>
       </div>
 
       <div class="section nested">
@@ -114,7 +140,8 @@
         {% for display in displays %}
           <label><input type="checkbox" name="display_ids" value="{{ display.id }}"> {{ display.name }} — {{ display.id }}</label>
         {% endfor %}
-        <button class="primary" type="submit">Deploy Playlist to Selected</button>
+        <label><input type="checkbox" name="publish_first" value="1"> Publish current draft before deploying</label>
+        <button class="primary" type="submit">Deploy Published Playlist</button>
       </form>
     </div>
 
@@ -143,7 +170,8 @@
           <option value="daily">Daily</option>
         </select>
 
-        <button class="safe" type="submit">Schedule Playlist Deployment</button>
+        <p class="muted">Scheduling always uses the currently published order.</p>
+        <button class="safe" type="submit">Schedule Published Playlist</button>
       </form>
     </div>
 
@@ -213,6 +241,7 @@ function syncPlaylistOrderFields() {
     const field = document.getElementById(id);
     if (field) field.value = order;
   });
+  document.querySelectorAll('.workflow-order-field').forEach(field => field.value = order);
   const preview = document.getElementById('preview-order');
   if (preview) {
     const existing = Array.from(preview.querySelectorAll('li'));

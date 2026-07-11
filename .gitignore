@@ -40,3 +40,4 @@ hub/data/auth.db-*
 hub/config/groups.json
 hub/config/groups.json.tmp
 hub/config/sites.json
+hub/config/notification_dismissals.json

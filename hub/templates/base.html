@@ -8,14 +8,14 @@
 </head>
 <body>
     <header>
-        <h1>Church Display Hub</h1>
+        <div class="header-title"><h1>Church Display Hub</h1><form class="header-search" method="GET" action="/search"><input name="q" placeholder="Search everything…" aria-label="Global search"></form><a class="notification-link" href="/notifications">Notifications{% if notification_summary.total %}<span class="notification-badge">{{ notification_summary.total }}</span>{% endif %}</a></div>
         <nav class="main-nav">
   <a class="{{ 'active' if active == 'dashboard' else '' }}" href="/">Dashboard</a>
   <a class="{{ 'active' if active == 'operations' else '' }}" href="/operations">Operations</a>
   <a class="{{ 'active' if active in ['content', 'media'] else '' }}" href="/content">Content</a>
   <a class="{{ 'active' if active == 'schedules' else '' }}" href="/schedules">Schedules</a>
   <details class="nav-menu" {% if active in ['displays','groups','sites','discovery','health'] %}open{% endif %}><summary>Fleet</summary><div class="nav-dropdown"><a class="{{ 'active' if active == 'displays' else '' }}" href="/displays">Displays</a><a class="{{ 'active' if active == 'groups' else '' }}" href="/groups">Groups</a><a class="{{ 'active' if active == 'sites' else '' }}" href="/sites">Sites</a><a class="{{ 'active' if active == 'discovery' else '' }}" href="/discovery">Enrollment</a><a class="{{ 'active' if active == 'health' else '' }}" href="/health">Health</a></div></details>
-  <details class="nav-menu" {% if active in ['deployments','jobs','releases','system','users','audit','setup'] %}open{% endif %}><summary>Manage</summary><div class="nav-dropdown"><a class="{{ 'active' if active == 'deployments' else '' }}" href="/deployments">Deployments</a><a class="{{ 'active' if active == 'jobs' else '' }}" href="/jobs">Jobs</a><a class="{{ 'active' if active == 'releases' else '' }}" href="/releases">Releases</a>{% if not current_user or current_user.role == 'admin' %}<a class="{{ 'active' if active == 'system' else '' }}" href="/system">System</a><a class="{{ 'active' if active == 'users' else '' }}" href="/users">Users</a><a class="{{ 'active' if active == 'audit' else '' }}" href="/audit">Audit</a><a class="{{ 'active' if active == 'setup' else '' }}" href="/setup">Setup</a>{% endif %}</div></details>
+  <details class="nav-menu" {% if active in ['deployments','jobs','releases','system','users','audit','setup','notifications','search'] %}open{% endif %}><summary>Manage</summary><div class="nav-dropdown"><a class="{{ 'active' if active == 'deployments' else '' }}" href="/deployments">Deployments</a><a class="{{ 'active' if active == 'jobs' else '' }}" href="/jobs">Jobs</a><a class="{{ 'active' if active == 'releases' else '' }}" href="/releases">Releases</a>{% if not current_user or current_user.role == 'admin' %}<a class="{{ 'active' if active == 'system' else '' }}" href="/system">System</a><a class="{{ 'active' if active == 'users' else '' }}" href="/users">Users</a><a class="{{ 'active' if active == 'audit' else '' }}" href="/audit">Audit</a><a class="{{ 'active' if active == 'setup' else '' }}" href="/setup">Setup</a>{% endif %}</div></details>
 </nav>
     </header>
     <main>{% block content %}{% endblock %}</main>

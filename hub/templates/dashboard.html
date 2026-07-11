@@ -1,213 +1,97 @@
 {% extends "base.html" %}
-{% block title %}Dashboard - Church Display Hub{% endblock %}
+{% block title %}Dashboard - Church Display{% endblock %}
 {% block content %}
-<div class="section">
-  <h2>Fleet Dashboard</h2>
-  <p class="muted">Updated <span id="dashboard-updated">{{ now.strftime("%Y-%m-%d %I:%M:%S %p") }}</span></p>
-  <p>Drive remote: <strong id="drive-remote">{{ drive_remote }}</strong></p>
-  <p>Latest app version: <strong id="latest-tag">{{ latest_tag or "Unknown" }}</strong></p>
-  {% if outdated_count and latest_tag %}
-    <p class="status-warn">▲ {{ outdated_count }} display(s) have an update available.</p>
-    <form method="POST" action="/deployments/queue-outdated" style="display:inline-block;margin-right:8px;">
-      <input type="hidden" name="target" value="{{ latest_tag }}">
-      <input type="hidden" name="dry_run" value="true">
-      <button class="safe" type="submit">Dry Run All Outdated</button>
-    </form>
-    <form method="POST" action="/deployments/queue-outdated" style="display:inline-block;">
-      <input type="hidden" name="target" value="{{ latest_tag }}">
-      <input type="hidden" name="dry_run" value="false">
-      <button class="primary" type="submit">Update All Outdated</button>
-    </form>
-  {% endif %}
-  {% if pending_count > 0 %}<p class="offline">● {{ pending_count }} display(s) waiting for approval. <a href="/discovery">Review discovery</a></p>{% endif %}
-  {% if drive_error %}<p class="offline" id="drive-status">Drive folder lookup failed: {{ drive_error }}</p>{% else %}<p class="online" id="drive-status">● Drive folders loaded: {{ drive_folders|length }}</p>{% endif %}
-</div>
-
-<div class="section" id="alerts-section">
-  <h2>Alerts</h2>
-  <div id="alerts-list">
-    {% if alerts %}{% for alert in alerts %}<p class="{{ 'offline' if alert.level == 'danger' else 'muted' }}">● {{ alert.message }}</p>{% endfor %}{% else %}<p class="online">● No active alerts</p>{% endif %}
-  </div>
-</div>
-
-<div class="section">
-  <h2>Bulk Actions</h2>
-  <form method="POST" action="/fleet/bulk/set-sync">
-    <label>Folder</label>
-    <select name="sync_folder">{% for folder in drive_folders %}<option value="{{ folder }}">{{ folder }}</option>{% endfor %}</select>
-    <input type="hidden" name="sync_remote" value="{{ drive_remote }}">
-    <label><input type="checkbox" name="run_now" value="1"> Sync immediately after setting folder</label>
-    {% for row in rows %}<label><input type="checkbox" name="display_ids" value="{{ row.id }}"> {{ row.name }}</label>{% endfor %}
-    <button class="primary" type="submit">Apply Folder</button>
-  </form>
-  <form method="POST" action="/fleet/bulk/sync-now">
-    {% for row in rows %}<label><input type="checkbox" name="display_ids" value="{{ row.id }}"> {{ row.name }}</label>{% endfor %}
-    <button class="safe" type="submit">Sync Selected Now</button>
-  </form>
-</div>
-
-<div class="grid" id="display-grid">
-{% for row in rows %}
-  <div class="card display-card" id="display-{{ row.id }}">
-    <h2>{{ row.name }}</h2>
-    <p class="{{ 'online' if row.online else 'offline' }}" data-field="online">{{ '● Online' if row.online else '○ Offline' }}</p>
-
-    {% if row.preview_url %}
-      <img data-field="preview" src="{{ row.preview_url }}" style="width:100%;border-radius:10px;border:1px solid #333;background:#050505;">
-    {% else %}
-      <div data-field="preview-empty" class="preview-empty">No preview yet</div>
-    {% endif %}
-
-    <hr>
-    <h3>Display</h3>
-    <p><strong>Current Media:</strong> <span data-field="current_media">{{ row.current_media }}</span></p>
-    <p><strong>Media Type:</strong> <span data-field="media_type">{{ row.media_type }}</span></p>
-    <p><strong>Overlay:</strong> <span data-field="overlay">{{ row.overlay }}</span></p>
-    <p><strong>Countdown:</strong> <span data-field="countdown">{{ row.countdown }}</span></p>
-    <p><strong>Last Update:</strong> <span data-field="last_update">{{ row.last_update }}</span></p>
-
-    <hr>
-    <h3>Heartbeat</h3>
-    <p><strong>Last Heartbeat:</strong> <span data-field="heartbeat">{{ row.heartbeat }}</span></p>
-    <p><strong>Software Version:</strong> <span data-field="version">{{ row.version }}</span></p>
-    <p><strong>Installed Tag:</strong> <span data-field="current_tag">{{ row.current_tag }}</span></p>
-    <p><strong>Latest Tag:</strong> <span data-field="latest_tag">{{ row.latest_tag }}</span></p>
-    <div data-field="update_panel">
-      {% if row.update_available %}
-        <p class="status-warn">▲ Update available</p>
-        <form method="POST" action="/deployments/queue-latest">
-          <input type="hidden" name="display_id" value="{{ row.id }}">
-          <input type="hidden" name="target" value="{{ row.latest_tag }}">
-          <input type="hidden" name="dry_run" value="true">
-          <button class="safe" type="submit">Dry Run Update</button>
-        </form>
-        <form method="POST" action="/deployments/queue-latest">
-          <input type="hidden" name="display_id" value="{{ row.id }}">
-          <input type="hidden" name="target" value="{{ row.latest_tag }}">
-          <input type="hidden" name="dry_run" value="false">
-          <button class="primary" type="submit">Update to {{ row.latest_tag }}</button>
-        </form>
-      {% else %}
-        <p class="online">✓ Up to date</p>
-      {% endif %}
+<div class="section hero-card">
+  <div class="dashboard-heading">
+    <div>
+      <h2>Operator Dashboard</h2>
+      <p class="muted">Updated {{ now.strftime("%Y-%m-%d %I:%M:%S %p") }}</p>
     </div>
-    <p><strong>Config Version:</strong> <span data-field="config_version">{{ row.config_version }}</span></p>
-    <p><strong>CPU Temp:</strong> <span data-field="cpu_temp">{{ row.system.cpu_temp if row.system else 'Unknown' }}</span></p>
-    <p><strong>Memory:</strong> <span data-field="memory">{{ row.system.memory if row.system else 'Unknown' }}</span></p>
-    <p><strong>Disk:</strong> <span data-field="disk">{{ row.system.disk if row.system else 'Unknown' }}</span></p>
-    <p><strong>Uptime:</strong> <span data-field="uptime">{{ row.system.uptime if row.system else 'Unknown' }}</span></p>
-
-    <hr>
-    <h3>Media Sync</h3>
-    <p><strong>Folder:</strong> <span data-field="sync_folder">{{ row.sync_folder }}</span></p>
-    <p><strong>Status:</strong> <span data-field="sync_state">{{ row.sync_state }}</span></p>
-    <p><strong>Last Success:</strong> <span data-field="sync_last_success">{{ row.sync_last_success }}</span></p>
-    <form method="POST" action="/fleet/{{ row.id }}/set-sync">
-      <input type="hidden" name="sync_remote" value="{{ drive_remote }}">
-      <label>Folder</label>
-      <select name="sync_folder">{% for folder in row.folder_options %}<option value="{{ folder }}" {% if folder == row.sync_folder %}selected{% endif %}>{{ folder }}</option>{% endfor %}</select>
-      <label><input type="checkbox" name="run_now" value="1"> Sync immediately</label>
-      <button class="primary" type="submit">Set Sync Folder</button>
-    </form>
-    <form method="POST" action="/fleet/{{ row.id }}/sync-now"><button class="safe" type="submit">Sync Now</button></form>
-
-    <hr>
-    <p><a href="{{ row.host }}" target="_blank">Open Local Admin</a></p>
-    <p><a href="{{ row.host }}/diagnostics" target="_blank">Open Diagnostics</a></p>
-    <form method="POST" action="/fleet/{{ row.id }}/restart"><button class="danger" type="submit">Restart Display App</button></form>
-    <form method="POST" action="/fleet/{{ row.id }}/reboot"><button class="danger" type="submit">Reboot Pi</button></form>
+    <div class="dashboard-actions">
+      <a class="button-link" href="/operations">Live Operations</a>
+      <a class="button-link" href="/content">Manage Content</a>
+      <a class="button-link" href="/notifications">Notifications</a>
+    </div>
   </div>
-{% endfor %}
+
+  <div class="stats-grid dashboard-stats">
+    <div class="stat"><span>Online</span><strong>{{ online_count }}</strong></div>
+    <div class="stat"><span>Offline</span><strong>{{ offline_count }}</strong></div>
+    <div class="stat"><span>Outdated</span><strong>{{ outdated_count }}</strong></div>
+    <div class="stat"><span>Pending</span><strong>{{ pending_count }}</strong></div>
+    <div class="stat"><span>Drafts</span><strong>{{ draft_count }}</strong></div>
+    <div class="stat"><span>Active Jobs</span><strong>{{ active_jobs|length }}</strong></div>
+  </div>
+</div>
+
+<div class="dashboard-columns">
+  <div class="section">
+    <div class="section-heading"><h2>Needs Attention</h2><a href="/notifications">View all</a></div>
+    {% if notifications %}
+      {% for item in notifications %}
+        <div class="attention-item attention-{{ item.level }}">
+          <div><strong>{{ item.title }}</strong><p>{{ item.message }}</p></div>
+          {% if item.href %}<a href="{{ item.href }}">Open</a>{% endif %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="online">● Nothing currently needs attention.</p>
+    {% endif %}
+  </div>
+
+  <div class="section">
+    <div class="section-heading"><h2>Current Work</h2><a href="/jobs">All jobs</a></div>
+    {% if active_jobs %}
+      {% for job in active_jobs %}
+        <div class="job-summary"><strong>{{ job.type }}</strong><span>{{ job.display_id }}</span><span>{{ job.progress }}%</span></div>
+      {% endfor %}
+    {% else %}<p class="muted">No queued or running jobs.</p>{% endif %}
+
+    {% if failed_jobs %}
+      <h3>Recent Failures</h3>
+      {% for job in failed_jobs %}
+        <div class="attention-item attention-danger"><div><strong>{{ job.type }}</strong><p>{{ job.display_id }} · {{ job.message }}</p></div></div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
+<div class="dashboard-columns">
+  <div class="section">
+    <div class="section-heading"><h2>Content Status</h2><a href="/content">Open Content</a></div>
+    <div class="stats-grid compact">
+      <div class="stat"><span>Published</span><strong>{{ published_count }}</strong></div>
+      <div class="stat"><span>Drafts</span><strong>{{ draft_count }}</strong></div>
+    </div>
+    {% if draft_count %}<p class="status-warn">▲ Draft playlist changes are waiting to be published.</p>{% endif %}
+  </div>
+
+  <div class="section">
+    <div class="section-heading"><h2>Upcoming Schedules</h2><a href="/schedules">Open schedules</a></div>
+    {% if schedules %}
+      {% for item in schedules %}
+        <div class="schedule-summary"><strong>{{ item.name }}</strong><span>{{ item.run_at }}</span><span>{{ item.display_id }}</span></div>
+      {% endfor %}
+    {% else %}<p class="muted">No schedules configured.</p>{% endif %}
+  </div>
 </div>
 
 <div class="section">
-  <h2>Recent Events</h2>
-  <ul id="events-list">{% if events %}{% for event in events %}<li>{{ event }}</li>{% endfor %}{% else %}<li class="muted">No events logged yet.</li>{% endif %}</ul>
+  <div class="section-heading"><h2>Display Overview</h2><a href="/operations">Live view</a></div>
+  <div class="mini-display-grid">
+    {% for row in rows %}
+      <a class="mini-display-card" href="/operations#display-{{ row.id }}">
+        <span class="{{ 'online' if row.online else 'offline' }}">{{ '●' if row.online else '○' }}</span>
+        <strong>{{ row.name }}</strong>
+        <span>{{ row.sync_folder }}</span>
+        <span class="muted">{{ row.current_media }}</span>
+      </a>
+    {% endfor %}
+  </div>
 </div>
 
-<script>
-function setText(card, field, value) {
-  const el = card.querySelector(`[data-field="${field}"]`);
-  if (!el) return;
-  el.textContent = value === null || value === undefined || value === "" ? "—" : String(value);
-}
-function updateAlerts(alerts) {
-  const list = document.getElementById("alerts-list");
-  if (!list) return;
-  if (!alerts || alerts.length === 0) { list.innerHTML = '<p class="online">● No active alerts</p>'; return; }
-  list.innerHTML = alerts.map(a => `<p class="${a.level === 'danger' ? 'offline' : 'muted'}">● ${a.message}</p>`).join("");
-}
-function updateEvents(events) {
-  const list = document.getElementById("events-list");
-  if (!list) return;
-  if (!events || events.length === 0) { list.innerHTML = '<li class="muted">No events logged yet.</li>'; return; }
-  list.innerHTML = events.map(e => `<li>${e}</li>`).join("");
-}
-function updateDisplay(row) {
-  const card = document.getElementById(`display-${row.id}`);
-  if (!card) return;
-  const online = card.querySelector('[data-field="online"]');
-  if (online) { online.textContent = row.online ? "● Online" : "○ Offline"; online.className = row.online ? "online" : "offline"; }
-  ["current_media","media_type","overlay","countdown","last_update","heartbeat","version","current_tag","latest_tag","config_version","sync_folder","sync_state","sync_last_success"].forEach(f => setText(card, f, row[f]));
-  const system = row.system || {};
-  setText(card, "cpu_temp", system.cpu_temp || "Unknown");
-  setText(card, "memory", system.memory || "Unknown");
-  setText(card, "disk", system.disk || "Unknown");
-  setText(card, "uptime", system.uptime || "Unknown");
-
-  const panel = card.querySelector('[data-field="update_panel"]');
-  if (panel) {
-    if (row.update_available) {
-      panel.innerHTML = `
-        <p class="status-warn">▲ Update available</p>
-        <form method="POST" action="/deployments/queue-latest">
-          <input type="hidden" name="display_id" value="${row.id}">
-          <input type="hidden" name="target" value="${row.latest_tag}">
-          <input type="hidden" name="dry_run" value="true">
-          <button class="safe" type="submit">Dry Run Update</button>
-        </form>
-        <form method="POST" action="/deployments/queue-latest">
-          <input type="hidden" name="display_id" value="${row.id}">
-          <input type="hidden" name="target" value="${row.latest_tag}">
-          <input type="hidden" name="dry_run" value="false">
-          <button class="primary" type="submit">Update to ${row.latest_tag}</button>
-        </form>
-      `;
-    } else {
-      panel.innerHTML = '<p class="online">✓ Up to date</p>';
-    }
-  }
-  if (row.preview_url) {
-    let img = card.querySelector('[data-field="preview"]');
-    const empty = card.querySelector('[data-field="preview-empty"]');
-    if (!img) {
-      img = document.createElement("img");
-      img.setAttribute("data-field", "preview");
-      img.style.width = "100%"; img.style.borderRadius = "10px"; img.style.border = "1px solid #333"; img.style.background = "#050505";
-      card.insertBefore(img, card.querySelector("hr"));
-    }
-    if (empty) empty.remove();
-    img.src = row.preview_url;
-  }
-}
-function connectFleetEvents() {
-  const source = new EventSource("/api/v1/events/fleet");
-  source.addEventListener("fleet", event => {
-    const data = JSON.parse(event.data);
-    document.getElementById("drive-remote").textContent = data.drive_remote || "gdrive";
-    const latestTag = document.getElementById("latest-tag");
-    if (latestTag) latestTag.textContent = data.latest_tag || "Unknown";
-    const driveStatus = document.getElementById("drive-status");
-    if (driveStatus) {
-      if (data.drive_error) { driveStatus.className = "offline"; driveStatus.textContent = `Drive folder lookup failed: ${data.drive_error}`; }
-      else { driveStatus.className = "online"; driveStatus.textContent = `● Drive folders loaded: ${(data.drive_folders || []).length}`; }
-    }
-    updateAlerts(data.alerts);
-    updateEvents(data.events);
-    (data.rows || []).forEach(updateDisplay);
-  });
-  source.onerror = () => console.log("Fleet event stream disconnected; browser will retry automatically.");
-}
-connectFleetEvents();
-</script>
+<div class="section">
+  <div class="section-heading"><h2>Recent Activity</h2><a href="/audit">Audit</a></div>
+  {% if events %}<ul>{% for event in events %}<li>{{ event }}</li>{% endfor %}</ul>{% else %}<p class="muted">No events yet.</p>{% endif %}
+</div>
 {% endblock %}
