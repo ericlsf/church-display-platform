@@ -49,3 +49,18 @@ def command():
         f"bash <(curl -fsSL {hub_url}/install/display)\n",
         mimetype="text/plain",
     )
+
+
+@display_installer_bp.route("/health")
+def health():
+    package = build_display_package()
+    size = len(package.getbuffer())
+    return {
+        "ok": True,
+        "version": current_version(),
+        "package_bytes": size,
+        "command": (
+            f"bash <(curl -fsSL "
+            f"{request.host_url.rstrip('/')}/install/display)"
+        ),
+    }
