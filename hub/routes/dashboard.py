@@ -6,6 +6,7 @@ from services.jobs import list_jobs
 from services.media import load_playlists
 from services.notifications import build_notifications, notification_summary
 from services.schedules import load_schedules
+from services.resilience import load_resilience
 
 
 dashboard_bp = Blueprint("dashboard", __name__)
@@ -46,4 +47,5 @@ def dashboard():
         published_count=sum(1 for entry in playlists.values() if entry.get("status") != "draft"),
         schedules=schedules[:6],
         events=state.get("events", [])[:8],
+        maintenance=load_resilience().get("maintenance", {}),
     )

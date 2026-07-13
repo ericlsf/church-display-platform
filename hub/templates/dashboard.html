@@ -1,105 +1,120 @@
 {% extends "base.html" %}
-{% block title %}Dashboard - Church Display{% endblock %}
+{% block title %}Home - Church Display{% endblock %}
 {% block content %}
-<div class="section hero-card">
-  <div class="dashboard-heading">
-    <div>
-      <h2>Operator Dashboard</h2>
-      <p class="muted">Updated {{ now.strftime("%Y-%m-%d %I:%M:%S %p") }}</p>
-    </div>
-    <div class="dashboard-actions">
-      <a class="button-link" href="/operations">Live Operations</a>
-      <a class="button-link" href="/content">Manage Content</a>
-      <a class="button-link" href="/notifications">Notifications</a>
-    </div>
+<div class="section hero-card ops-home-hero">
+  <div>
+    <p class="eyebrow">System overview</p>
+    <h2>Everything important, at a glance</h2>
+    <p class="muted">Updated {{ now.strftime("%Y-%m-%d %I:%M:%S %p") }}</p>
   </div>
-
-  <div class="stats-grid dashboard-stats">
-    <div class="stat"><span>Online</span><strong>{{ online_count }}</strong></div>
-    <div class="stat"><span>Offline</span><strong>{{ offline_count }}</strong></div>
-    <div class="stat"><span>Outdated</span><strong>{{ outdated_count }}</strong></div>
-    <div class="stat"><span>Pending</span><strong>{{ pending_count }}</strong></div>
-    <div class="stat"><span>Drafts</span><strong>{{ draft_count }}</strong></div>
-    <div class="stat"><span>Active Jobs</span><strong>{{ active_jobs|length }}</strong></div>
+  <div class="health-pill {{ 'health-good' if offline_count == 0 and not failed_jobs else 'health-attention' }}">
+    {% if offline_count == 0 and not failed_jobs %}
+      <strong>System healthy</strong><span>No critical display or job errors</span>
+    {% else %}
+      <strong>Needs attention</strong><span>{{ offline_count }} offline · {{ failed_jobs|length }} unresolved failures</span>
+    {% endif %}
   </div>
 </div>
 
-<div class="dashboard-columns">
-  <div class="section">
-    <div class="section-heading"><h2>Needs Attention</h2><a href="/notifications">View all</a></div>
+<div class="home-summary-grid">
+  <a class="summary-tile" href="/operations"><span>Displays online</span><strong>{{ online_count }}/{{ rows|length }}</strong></a>
+  <a class="summary-tile {{ 'summary-alert' if offline_count else '' }}" href="/notifications"><span>Offline</span><strong>{{ offline_count }}</strong></a>
+  <a class="summary-tile {{ 'summary-warn' if outdated_count else '' }}" href="/deployments"><span>Updates available</span><strong>{{ outdated_count }}</strong></a>
+  <a class="summary-tile {{ 'summary-warn' if pending_count else '' }}" href="/discovery"><span>Pending enrollment</span><strong>{{ pending_count }}</strong></a>
+  <a class="summary-tile {{ 'summary-warn' if draft_count else '' }}" href="/content"><span>Draft playlists</span><strong>{{ draft_count }}</strong></a>
+  <a class="summary-tile" href="/jobs"><span>Active jobs</span><strong>{{ active_jobs|length }}</strong></a>
+</div>
+
+<div class="dashboard-columns production-home-grid">
+  <section class="section">
+    <div class="section-heading"><h2>Needs Attention</h2><a href="/notifications">All notifications</a></div>
     {% if notifications %}
-      {% for item in notifications %}
+      <div class="attention-list">
+      {% for item in notifications[:5] %}
         <div class="attention-item attention-{{ item.level }}">
           <div><strong>{{ item.title }}</strong><p>{{ item.message }}</p></div>
-          {% if item.href %}<a href="{{ item.href }}">Open</a>{% endif %}
+          {% if item.href %}<a class="compact-link" href="{{ item.href }}">Open</a>{% endif %}
         </div>
       {% endfor %}
+      </div>
     {% else %}
-      <p class="online">● Nothing currently needs attention.</p>
+      <div class="empty-good"><strong>Nothing needs attention</strong><span>All monitored systems look normal.</span></div>
     {% endif %}
-  </div>
+  </section>
 
-  <div class="section">
-    <div class="section-heading"><h2>Current Work</h2><a href="/jobs">All jobs</a></div>
+  <section class="section">
+    <div class="section-heading"><h2>Quick Actions</h2><button class="text-button" type="button" data-command-open>More commands</button></div>
+    <div class="quick-action-grid">
+      <a class="quick-action" href="/content"><strong>Publish content</strong><span>Review drafts and playlists</span></a>
+      <a class="quick-action" href="/deployments"><strong>Deploy update</strong><span>Update selected displays</span></a>
+      <a class="quick-action" href="/management"><strong>Remote tools</strong><span>Logs, screenshots, and recovery</span></a>
+      <a class="quick-action" href="/simulation"><strong>Simulate output</strong><span>Preview a display at any time</span></a>
+      {% if not current_user or current_user.role == 'admin' %}
+      <a class="quick-action {{ 'maintenance-active' if maintenance.enabled else '' }}" href="/resilience"><strong>{{ 'Maintenance active' if maintenance.enabled else 'Maintenance mode' }}</strong><span>{{ maintenance.message if maintenance.enabled else 'Pause disruptive operations safely' }}</span></a>
+      <a class="quick-action" href="/system"><strong>System check</strong><span>Diagnostics, backups, and support</span></a>
+      {% endif %}
+    </div>
+  </section>
+</div>
+
+<div class="dashboard-columns production-home-grid">
+  <section class="section">
+    <div class="section-heading"><h2>Live Work</h2><a href="/jobs">Open jobs</a></div>
     {% if active_jobs %}
-      {% for job in active_jobs %}
-        <div class="job-summary"><strong>{{ job.type }}</strong><span>{{ job.display_id }}</span><span>{{ job.progress }}%</span></div>
+      {% for job in active_jobs[:5] %}
+        <div class="job-summary"><strong>{{ job.type|replace('_',' ')|title }}</strong><span>{{ job.display_id }}</span><span>{{ job.progress }}%</span></div>
       {% endfor %}
     {% else %}<p class="muted">No queued or running jobs.</p>{% endif %}
 
     {% if failed_jobs %}
-      <h3>Recent Failures</h3>
-      {% for job in failed_jobs %}
-        <div class="attention-item attention-danger"><div><strong>{{ job.type }}</strong><p>{{ job.display_id }} · {{ job.message }}</p></div><form method="POST" action="/jobs/{{ job.id }}/acknowledge"><button type="submit">Mark resolved</button></form></div>
+      <h3>Unresolved failures</h3>
+      {% for job in failed_jobs[:3] %}
+        <div class="attention-item attention-danger">
+          <div><strong>{{ job.type|replace('_',' ')|title }}</strong><p>{{ job.display_id }} · {{ job.message }}</p></div>
+          <form method="POST" action="/jobs/{{ job.id }}/acknowledge"><button class="small" type="submit">Resolve</button></form>
+        </div>
       {% endfor %}
     {% endif %}
-  </div>
-</div>
+  </section>
 
-<div class="dashboard-columns">
-  <div class="section">
-    <div class="section-heading"><h2>Content Status</h2><a href="/content">Open Content</a></div>
+  <section class="section">
+    <div class="section-heading"><h2>Publishing</h2><a href="/schedules">Schedules</a></div>
     <div class="stats-grid compact">
       <div class="stat"><span>Published</span><strong>{{ published_count }}</strong></div>
       <div class="stat"><span>Drafts</span><strong>{{ draft_count }}</strong></div>
     </div>
-    {% if draft_count %}<p class="status-warn">▲ Draft playlist changes are waiting to be published.</p>{% endif %}
-  </div>
-
-  <div class="section">
-    <div class="section-heading"><h2>Upcoming Schedules</h2><a href="/schedules">Open schedules</a></div>
     {% if schedules %}
-      {% for item in schedules %}
+      <h3>Next schedules</h3>
+      {% for item in schedules[:4] %}
         <div class="schedule-summary"><strong>{{ item.name }}</strong><span>{{ item.run_at }}</span><span>{{ item.display_id }}</span></div>
       {% endfor %}
     {% else %}<p class="muted">No schedules configured.</p>{% endif %}
-  </div>
+  </section>
 </div>
 
-<div class="section">
-  <div class="section-heading"><h2>Display Overview</h2><a href="/operations">Live view</a></div>
+<section class="section">
+  <div class="section-heading"><h2>Display Snapshot</h2><a href="/operations">Open live operations</a></div>
   <div class="mini-display-grid">
-    {% for row in rows %}
-      <a class="mini-display-card" href="/operations#display-{{ row.id }}">
-        <span class="{{ 'online' if row.online else 'offline' }}">{{ '●' if row.online else '○' }}</span>
-        <strong>{{ row.name }}</strong>
-        <span>{{ row.sync_folder }}</span>
-        <span class="muted">{{ row.current_media }}</span>
+    {% for row in rows[:8] %}
+      <div class="display-snapshot-card">
+        <a href="/operations#display-{{ row.id }}">
+          <span class="{{ 'online' if row.online else 'offline' }}">{{ '● Online' if row.online else '○ Offline' }}</span>
+          <strong>{{ row.name }}</strong>
+          <span>{{ row.sync_folder or 'No playlist' }}</span>
+          <span class="muted" title="{{ row.current_media }}">{{ row.current_media or 'No current media' }}</span>
+        </a>
         {% if row.heartbeat_fresh and not row.display_app_running %}
-          <span class="offline">Display app stopped</span>
+          <form method="POST" action="/fleet/{{ row.id }}/restart"><button class="safe small" type="submit">Start app</button></form>
         {% endif %}
-      </a>
-      {% if row.heartbeat_fresh and not row.display_app_running %}
-        <form method="POST" action="/fleet/{{ row.id }}/restart" class="inline-recovery-form">
-          <button class="safe" type="submit">Start Display App</button>
-        </form>
-      {% endif %}
+      </div>
     {% endfor %}
   </div>
-</div>
+  {% if rows|length > 8 %}<p><a href="/displays">Show all {{ rows|length }} displays</a></p>{% endif %}
+</section>
 
-<div class="section">
-  <div class="section-heading"><h2>Recent Activity</h2><a href="/audit">Audit</a></div>
-  {% if events %}<ul>{% for event in events %}<li>{{ event }}</li>{% endfor %}</ul>{% else %}<p class="muted">No events yet.</p>{% endif %}
-</div>
+<details class="section dashboard-details">
+  <summary>Recent activity</summary>
+  {% if events %}<ul class="compact-activity">{% for event in events %}<li>{{ event }}</li>{% endfor %}</ul>{% else %}<p class="muted">No events yet.</p>{% endif %}
+  <p><a href="/history">Open operational history</a></p>
+</details>
 {% endblock %}
