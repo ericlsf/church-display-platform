@@ -118,7 +118,7 @@ def summarize_health(rows):
     return sorted(result, key=lambda x: x['display_id'])
 
 
-def query_events(category='', display_id='', days=30, limit=500):
+def query_events(category='', display_id='', days=30, limit=500, offset=0):
     initialize_database()
     cutoff=(datetime.now()-timedelta(days=max(1,int(days)))).isoformat(timespec='seconds')
     sql='SELECT created_at, category, level, message, metadata_json FROM events WHERE created_at >= ?'
@@ -128,7 +128,7 @@ def query_events(category='', display_id='', days=30, limit=500):
     if display_id:
         sql += " AND (message LIKE ? OR metadata_json LIKE ?)"
         needle=f'%{display_id}%'; params.extend([needle, needle])
-    sql += ' ORDER BY id DESC LIMIT ?'; params.append(max(1,min(int(limit),2000)))
+    sql += ' ORDER BY id DESC LIMIT ? OFFSET ?'; params.extend([max(1,min(int(limit),2000)), max(0,int(offset))])
     with connection() as db:
         rows=db.execute(sql,params).fetchall()
     result=[]
@@ -138,3 +138,30 @@ def query_events(category='', display_id='', days=30, limit=500):
         except Exception: item['metadata']={}
         result.append(item)
     return result
+
+
+def count_events(category='', display_id='', days=30):
+    initialize_database()
+    cutoff=(datetime.now()-timedelta(days=max(1,int(days)))).isoformat(timespec='seconds')
+    sql='SELECT COUNT(*) AS total FROM events WHERE created_at >= ?'
+    params=[cutoff]
+    if category:
+        sql += ' AND category = ?'; params.append(category)
+    if display_id:
+        sql += ' AND (message LIKE ? OR metadata_json LIKE ?)'
+        needle=f'%{display_id}%'; params.extend([needle, needle])
+    with connection() as db:
+        row=db.execute(sql,params).fetchone()
+    return int(row['total'] if row else 0)
+
+
+def summarize_events(events):
+    summary={}
+    for event in events:
+        key=event.get('category') or 'general'
+        item=summary.setdefault(key, {'category': key, 'count': 0, 'latest_at': '', 'latest_message': ''})
+        item['count'] += 1
+        if not item['latest_at'] or str(event.get('created_at','')) > item['latest_at']:
+            item['latest_at']=event.get('created_at','')
+            item['latest_message']=event.get('message','')
+    return sorted(summary.values(), key=lambda item: (-item['count'], item['category']))

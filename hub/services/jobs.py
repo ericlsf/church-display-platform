@@ -50,6 +50,9 @@ def normalize_job(job):
     job.setdefault("cancel_requested", False)
     job.setdefault("cancellable", True)
     job.setdefault("history", [])
+    job.setdefault("acknowledged", False)
+    job.setdefault("acknowledged_at", "")
+    job.setdefault("acknowledged_note", "")
     return job
 
 
@@ -73,6 +76,9 @@ def create_job(display_id, job_type, payload=None, max_attempts=2, timeout_secon
         "cancel_requested": False,
         "cancellable": job_type not in {"reboot", "service_action"},
         "history": [],
+        "acknowledged": False,
+        "acknowledged_at": "",
+        "acknowledged_note": "",
     }
     data["jobs"].append(job)
     save_jobs(data)
@@ -201,3 +207,44 @@ def retry_job(job_id):
         save_jobs(data)
         return job
     return None
+
+
+def acknowledge_job(job_id, note=""):
+    data = load_jobs()
+    for job in data["jobs"]:
+        normalize_job(job)
+        if job.get("id") != job_id:
+            continue
+        job["acknowledged"] = True
+        job["acknowledged_at"] = now_iso()
+        job["acknowledged_note"] = str(note or "Marked resolved by operator")[:500]
+        job["updated_at"] = now_iso()
+        job["history"].append({
+            "at": now_iso(),
+            "status": "acknowledged",
+            "message": job["acknowledged_note"],
+        })
+        save_jobs(data)
+        return job
+    return None
+
+
+def acknowledge_all_terminal_jobs():
+    data = load_jobs()
+    changed = 0
+    for job in data["jobs"]:
+        normalize_job(job)
+        if job.get("status") in {"failed", "cancelled", "timed_out"} and not job.get("acknowledged"):
+            job["acknowledged"] = True
+            job["acknowledged_at"] = now_iso()
+            job["acknowledged_note"] = "Bulk marked resolved by operator"
+            job["updated_at"] = now_iso()
+            job["history"].append({
+                "at": now_iso(),
+                "status": "acknowledged",
+                "message": job["acknowledged_note"],
+            })
+            changed += 1
+    if changed:
+        save_jobs(data)
+    return changed

@@ -20,7 +20,11 @@ def dashboard():
     schedules = load_schedules().get("schedules", [])
     notifications = build_notifications()[:8]
 
-    failed_jobs = [job for job in jobs if job.get("status") == "failed"]
+    failed_jobs = [
+        job for job in jobs
+        if job.get("status") in {"failed", "timed_out", "cancelled"}
+        and not job.get("acknowledged")
+    ]
     active_jobs = [job for job in jobs if job.get("status") in {"queued", "running"}]
     drafts = [entry for entry in playlists.values() if entry.get("status") == "draft"]
 

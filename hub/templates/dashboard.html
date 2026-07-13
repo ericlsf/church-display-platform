@@ -50,7 +50,7 @@
     {% if failed_jobs %}
       <h3>Recent Failures</h3>
       {% for job in failed_jobs %}
-        <div class="attention-item attention-danger"><div><strong>{{ job.type }}</strong><p>{{ job.display_id }} · {{ job.message }}</p></div></div>
+        <div class="attention-item attention-danger"><div><strong>{{ job.type }}</strong><p>{{ job.display_id }} · {{ job.message }}</p></div><form method="POST" action="/jobs/{{ job.id }}/acknowledge"><button type="submit">Mark resolved</button></form></div>
       {% endfor %}
     {% endif %}
   </div>

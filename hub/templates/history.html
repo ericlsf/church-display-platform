@@ -1,7 +1,42 @@
 {% extends "base.html" %}
 {% block title %}History - Church Display{% endblock %}
 {% block content %}
-<div class="section"><h2>Operational History</h2><p class="muted">Search health samples and operational events by display, category, and date range.</p><form method="GET"><label>Display</label><select name="display_id"><option value="">All displays</option>{% for d in displays %}<option value="{{ d.id }}" {% if d.id == selected_display %}selected{% endif %}>{{ d.name }}</option>{% endfor %}</select><label>Event category</label><select name="category"><option value="">All categories</option>{% for c in categories %}<option value="{{ c }}" {% if c == selected_category %}selected{% endif %}>{{ c }}</option>{% endfor %}</select><label>Range</label><select name="days">{% for n in [1,7,14,30,90] %}<option value="{{ n }}" {% if n == days %}selected{% endif %}>{{ n }} day{% if n != 1 %}s{% endif %}</option>{% endfor %}</select><button class="primary">Apply</button></form></div>
-<div class="section"><h2>Health Trends</h2>{% if health_summary %}<div class="grid">{% for row in health_summary %}<div class="card"><h3>{{ row.display_id }}</h3><p><strong>Heartbeat uptime:</strong> {{ row.uptime_percent }}%</p><p><strong>App uptime:</strong> {{ row.app_uptime_percent }}%</p><p><strong>Avg CPU temp:</strong> {{ row.avg_cpu_temp if row.avg_cpu_temp is not none else 'Unknown' }}</p><p><strong>Avg memory:</strong> {{ row.avg_memory if row.avg_memory is not none else 'Unknown' }}</p><p><strong>Avg disk:</strong> {{ row.avg_disk if row.avg_disk is not none else 'Unknown' }}</p><p><strong>Sync errors:</strong> {{ row.sync_errors }}</p></div>{% endfor %}</div>{% else %}<p class="muted">No health samples in this range yet.</p>{% endif %}</div>
-<div class="section"><h2>Event Timeline</h2>{% if events %}<div class="history-list">{% for e in events %}<article class="history-item"><div><strong>{{ e.category }}</strong> <span class="muted">{{ e.created_at }}</span></div><p>{{ e.message }}</p></article>{% endfor %}</div>{% else %}<p class="muted">No events found.</p>{% endif %}</div>
+<div class="section">
+  <div class="section-heading">
+    <div><h2>Operational History</h2><p class="muted">Compact summaries by default, with detailed drill-down when needed.</p></div>
+    <div class="history-view-toggle">
+      <a class="button-link {% if view == 'compact' %}active{% endif %}" href="?display_id={{ selected_display }}&category={{ selected_category }}&days={{ days }}&view=compact">Condensed</a>
+      <a class="button-link {% if view == 'detailed' %}active{% endif %}" href="?display_id={{ selected_display }}&category={{ selected_category }}&days={{ days }}&view=detailed">Detailed</a>
+    </div>
+  </div>
+  <form method="GET">
+    <input type="hidden" name="view" value="{{ view }}">
+    <label>Display</label><select name="display_id"><option value="">All displays</option>{% for d in displays %}<option value="{{ d.id }}" {% if d.id == selected_display %}selected{% endif %}>{{ d.name }}</option>{% endfor %}</select>
+    <label>Event category</label><select name="category"><option value="">All categories</option>{% for c in categories %}<option value="{{ c }}" {% if c == selected_category %}selected{% endif %}>{{ c }}</option>{% endfor %}</select>
+    <label>Range</label><select name="days">{% for n in [1,7,14,30,90] %}<option value="{{ n }}" {% if n == days %}selected{% endif %}>{{ n }} day{% if n != 1 %}s{% endif %}</option>{% endfor %}</select>
+    <button class="primary">Apply</button>
+  </form>
+</div>
+
+<div class="section">
+  <h2>Health Trends</h2>
+  {% if health_summary %}<div class="grid compact-history-grid">{% for row in health_summary %}<div class="card"><h3>{{ row.display_id }}</h3><div class="history-metrics"><span>Heartbeat <strong>{{ row.uptime_percent }}%</strong></span><span>App <strong>{{ row.app_uptime_percent }}%</strong></span><span>CPU <strong>{{ row.avg_cpu_temp if row.avg_cpu_temp is not none else '—' }}</strong></span><span>RAM <strong>{{ row.avg_memory if row.avg_memory is not none else '—' }}{% if row.avg_memory is not none %}%{% endif %}</strong></span><span>Disk <strong>{{ row.avg_disk if row.avg_disk is not none else '—' }}{% if row.avg_disk is not none %}%{% endif %}</strong></span><span>Sync errors <strong>{{ row.sync_errors }}</strong></span></div></div>{% endfor %}</div>{% else %}<p class="muted">No health samples in this range yet.</p>{% endif %}
+</div>
+
+{% if view == 'compact' %}
+<div class="section"><h2>Event Summary</h2>{% if event_summary %}<div class="history-summary-grid">{% for item in event_summary %}<a class="history-summary-card" href="?display_id={{ selected_display }}&category={{ item.category }}&days={{ days }}&view=detailed"><strong>{{ item.category }}</strong><span>{{ item.count }} event{% if item.count != 1 %}s{% endif %}</span><small>{{ item.latest_message }}</small><small class="muted">Latest {{ item.latest_at }}</small></a>{% endfor %}</div>{% else %}<p class="muted">No events found.</p>{% endif %}</div>
+{% endif %}
+
+<div class="section">
+  <div class="section-heading"><h2>{% if view == 'compact' %}Recent Events{% else %}Detailed Event Timeline{% endif %}</h2><span class="muted">{{ total_events }} total</span></div>
+  {% if events %}<div class="history-list">{% for e in events %}<article class="history-item"><div><strong>{{ e.category }}</strong> <span class="muted">{{ e.created_at }}</span></div><p>{{ e.message }}</p>{% if view == 'detailed' and e.metadata %}<details><summary>Metadata</summary><pre>{{ e.metadata | tojson(indent=2) }}</pre></details>{% endif %}</article>{% endfor %}</div>{% else %}<p class="muted">No events found.</p>{% endif %}
+  <div class="history-pagination">
+    {% if page > 1 %}<a class="button-link" href="?display_id={{ selected_display }}&category={{ selected_category }}&days={{ days }}&view={{ view }}&page={{ page - 1 }}">Previous</a>{% endif %}
+    {% if has_more %}<a class="button-link primary" href="?display_id={{ selected_display }}&category={{ selected_category }}&days={{ days }}&view={{ view }}&page={{ page + 1 }}">Show more</a>{% endif %}
+  </div>
+</div>
+
+{% if view == 'detailed' and health_rows %}
+<div class="section"><details><summary>Raw health samples ({{ health_rows|length }})</summary><div class="history-table-wrap"><table><thead><tr><th>Time</th><th>Display</th><th>App</th><th>CPU</th><th>RAM</th><th>Disk</th><th>Sync</th><th>Media</th></tr></thead><tbody>{% for row in health_rows %}<tr><td>{{ row.created_at }}</td><td>{{ row.display_id }}</td><td>{{ 'Running' if row.display_app_running else 'Stopped' }}</td><td>{{ row.cpu_temp or '—' }}</td><td>{{ row.memory_percent or '—' }}</td><td>{{ row.disk_percent or '—' }}</td><td>{{ row.sync_state }}</td><td>{{ row.current_media }}</td></tr>{% endfor %}</tbody></table></div></details></div>
+{% endif %}
 {% endblock %}

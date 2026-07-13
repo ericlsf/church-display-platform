@@ -212,3 +212,19 @@ textarea { width: 100%; min-height: 120px; padding: 11px; border-radius: 7px; bo
   .job-summary, .schedule-summary { grid-template-columns: 1fr; }
   table { display: block; overflow-x: auto; white-space: nowrap; }
 }
+
+/* v3.5.1 condensed history and resolved-job controls */
+.history-view-toggle, .history-pagination { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.history-view-toggle .active { border-color:#6ea8ff; background:#183153; }
+.compact-history-grid .card { padding:14px; }
+.history-metrics { display:grid; grid-template-columns:repeat(3,minmax(90px,1fr)); gap:8px; }
+.history-metrics span { background:#111; border:1px solid #2d2d2d; border-radius:8px; padding:8px; display:flex; justify-content:space-between; gap:8px; }
+.history-summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+.history-summary-card { display:grid; gap:5px; padding:14px; background:#121212; border:1px solid #333; border-radius:10px; text-decoration:none; }
+.history-summary-card:hover { border-color:#6ea8ff; }
+.history-item { padding:12px 0; border-bottom:1px solid #292929; }
+.history-item p { margin:5px 0; }
+.history-pagination { justify-content:flex-end; margin-top:16px; }
+.history-table-wrap { overflow:auto; max-height:520px; }
+.job-controls { display:flex; gap:8px; flex-wrap:wrap; }
+@media (max-width:700px){ .history-metrics { grid-template-columns:1fr 1fr; } }
