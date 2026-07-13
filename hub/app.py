@@ -1,4 +1,3 @@
-from routes.management import management_bp, management_api_bp
 from services.notifications import notification_summary
 from services.auth import init_auth_db, load_current_user, log_audit, user_count
 from routes.auth import auth_bp
@@ -27,6 +26,7 @@ from routes.operations import operations_bp
 from routes.sites import sites_bp
 from routes.notifications import notifications_bp
 from routes.search import search_bp
+from routes.resilience import resilience_bp
 from services.startup import run_startup_checks
 
 
@@ -56,8 +56,7 @@ def create_app():
     app.register_blueprint(sites_bp)
     app.register_blueprint(notifications_bp)
     app.register_blueprint(search_bp)
-    app.register_blueprint(management_bp)
-    app.register_blueprint(management_api_bp)
+    app.register_blueprint(resilience_bp)
 
     # v2.6.0 auth hooks
     app.secret_key = os.environ.get(
@@ -79,7 +78,6 @@ def create_app():
         "/api/v1/jobs/next",
         "/api/v1/jobs/",
         "/api/v1/content/",
-        "/api/v1/management/",
     )
 
     @app.before_request
@@ -107,7 +105,7 @@ def create_app():
         if mutating and role == "viewer":
             return ("Viewer accounts are read-only.", 403)
 
-        if request.path.startswith(("/users", "/audit", "/system", "/management")) and role != "admin":
+        if request.path.startswith(("/users", "/audit", "/system", "/resilience")) and role != "admin":
             return ("Administrator access required.", 403)
 
         if request.path.startswith(("/deployments", "/jobs", "/schedules")) and mutating:

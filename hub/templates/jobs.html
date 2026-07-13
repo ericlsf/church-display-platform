@@ -85,7 +85,16 @@
                     <p><strong>Progress:</strong> {{ job.progress }}%</p>
                     <p><strong>Message:</strong> {{ job.message }}</p>
                     <p><strong>Created:</strong> {{ job.created_at }}</p>
+                    <p><strong>Attempt:</strong> {{ job.attempt or 0 }}/{{ job.max_attempts or 1 }}</p>
                     <p><strong>Updated:</strong> {{ job.updated_at }}</p>
+                    <div class="job-controls">
+                      {% if job.status in ["queued", "running"] and job.cancellable %}
+                      <form method="POST" action="/jobs/{{ job.id }}/cancel"><button class="danger" type="submit">Cancel</button></form>
+                      {% endif %}
+                      {% if job.status in ["failed", "cancelled", "timed_out"] %}
+                      <form method="POST" action="/jobs/{{ job.id }}/retry"><button class="safe" type="submit">Retry</button></form>
+                      {% endif %}
+                    </div>
                     <p class="muted">{{ job.id }}</p>
                 </div>
             {% endfor %}
@@ -126,7 +135,12 @@ function renderJob(job) {
             </div>
             <p><strong>Message:</strong> ${escapeHtml(job.message)}</p>
             <p><strong>Created:</strong> ${escapeHtml(job.created_at)}</p>
+            <p><strong>Attempt:</strong> ${escapeHtml(job.attempt || 0)}/${escapeHtml(job.max_attempts || 1)}</p>
             <p><strong>Updated:</strong> ${escapeHtml(job.updated_at)}</p>
+            <div class="job-controls">
+              ${(job.status === "queued" || job.status === "running") && job.cancellable ? `<form method="POST" action="/jobs/${escapeHtml(job.id)}/cancel"><button class="danger" type="submit">Cancel</button></form>` : ""}
+              (["failed", "cancelled", "timed_out"].includes(job.status)) ? `<form method="POST" action="/jobs/${escapeHtml(job.id)}/retry"><button class="safe" type="submit">Retry</button></form>` : ""}
+            </div>
             <p class="muted">${escapeHtml(job.id)}</p>
         </div>
     `;

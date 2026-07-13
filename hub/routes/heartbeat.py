@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Blueprint, jsonify, request
 from services.events import log_event
 from services.heartbeat_store import load_heartbeats, save_heartbeats
+from services.resilience import agent_policy
 
 heartbeat_bp = Blueprint("heartbeat", __name__, url_prefix="/api/v1")
 
@@ -19,4 +20,4 @@ def heartbeat():
     save_heartbeats(data)
     if first_seen:
         log_event(f"Heartbeat received from {display_id}")
-    return jsonify({"ok": True})
+    return jsonify({"ok": True, "agent_policy": agent_policy()})

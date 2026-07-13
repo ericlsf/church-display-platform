@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from services.config import CONFIG_DIR, load_pending
 from services.fleet_state import build_fleet_state
 from services.jobs import list_jobs
+from services.resilience import load_resilience
 
 DISMISSALS_FILE = CONFIG_DIR / "notification_dismissals.json"
 
@@ -58,6 +59,10 @@ def build_notifications(include_dismissed=False):
         }
         if include_dismissed or not item["dismissed"]:
             items.append(item)
+
+    resilience = load_resilience()
+    if resilience.get("maintenance", {}).get("enabled"):
+        add("maintenance", "warning", "Maintenance mode enabled", resilience["maintenance"].get("message", "Maintenance in progress"), "global", "/resilience")
 
     for row in state.get("rows", []):
         display_id = row.get("id", "")

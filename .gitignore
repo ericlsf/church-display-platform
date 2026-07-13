@@ -41,4 +41,6 @@ hub/config/groups.json
 hub/config/groups.json.tmp
 hub/config/sites.json
 hub/config/notification_dismissals.json
-hub/data/management/
+hub/config/resilience.json
+display/status/resilience.json
+display/status/resilience-policy.json

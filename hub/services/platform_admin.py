@@ -71,6 +71,19 @@ def create_backup(include_media=False):
     return target
 
 
+
+def prune_backups(retain=6):
+    try:
+        retain = max(1, int(retain))
+    except Exception:
+        retain = 6
+    paths = sorted(BACKUP_DIR.glob("*.tar.gz"), key=lambda p: p.stat().st_mtime, reverse=True)
+    removed = []
+    for path in paths[retain:]:
+        path.unlink(missing_ok=True)
+        removed.append(path.name)
+    return removed
+
 def restore_backup(archive_path):
     archive_path = Path(archive_path).resolve()
     if not archive_path.exists() or archive_path.parent != BACKUP_DIR.resolve():

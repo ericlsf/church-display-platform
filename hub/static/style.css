@@ -169,4 +169,6 @@ button.small,
   width: 100%;
 }
 
-.remote-output{max-height:440px;overflow:auto;white-space:pre-wrap;background:#090909;border:1px solid #333;border-radius:8px;padding:12px;font-family:monospace;font-size:.85rem}.inline-form{display:inline;margin-left:8px}.action-grid{display:flex;gap:8px;flex-wrap:wrap}.action-grid form{margin:0}
+/* v3.3 resilience and unified jobs */
+.job-controls { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.job-controls form { margin:0; }

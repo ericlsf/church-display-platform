@@ -45,9 +45,11 @@ def post_heartbeat(payload):
     )
 
     with urllib.request.urlopen(request, timeout=10) as response:
-        response.read()
-
-
+        raw = response.read().decode("utf-8")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return {}
 
 
 def post_management_artifact(kind, payload):

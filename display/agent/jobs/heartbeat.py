@@ -73,6 +73,7 @@ def build_heartbeat():
         "media": read_json(APP_DIR / "status" / "media.json", {}),
         "sync": read_json(APP_DIR / "status" / "sync.json", {}),
         "display_app": service_state("church-display.service"),
+        "resilience": read_json(APP_DIR / "status" / "resilience.json", {}),
         "system": {
             "cpu_temp": cpu_temp(),
             "memory": memory_usage(),

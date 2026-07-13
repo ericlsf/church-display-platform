@@ -6,6 +6,7 @@ from agent.config import DISPLAY_ID, HUB_URL
 from agent.dispatcher import dispatch
 from agent.jobs.heartbeat import build_heartbeat
 from agent.jobs.preview import upload_preview
+from agent.resilience import evaluate_and_recover
 
 
 HEARTBEAT_INTERVAL_SECONDS = 30
@@ -29,7 +30,12 @@ def run_job_once():
 
 
 def send_heartbeat():
-    post_heartbeat(build_heartbeat())
+    heartbeat = build_heartbeat()
+    response = post_heartbeat(heartbeat)
+    state = evaluate_and_recover(heartbeat, response)
+    action = state.get("last_action")
+    if action and action not in {"recovery_disabled", "maintenance_suppressed"}:
+        log(f"Recovery action: {action}")
     log("Heartbeat sent")
 
 
