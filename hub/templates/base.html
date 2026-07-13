@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <header>
         <div class="header-title">
             <h1>Church Display Hub</h1>
@@ -30,7 +31,7 @@
                 {% endif %}
             </div>
         </div>
-        <nav class="main-nav">
+        <nav class="main-nav" aria-label="Primary navigation">
   <a class="{{ 'active' if active == 'dashboard' else '' }}" href="/">Dashboard</a>
   <a class="{{ 'active' if active == 'operations' else '' }}" href="/operations">Operations</a>
   <a class="{{ 'active' if active in ['content', 'media'] else '' }}" href="/content">Content</a>
@@ -39,7 +40,18 @@
   <details class="nav-menu"><summary>Manage</summary><div class="nav-dropdown"><a class="{{ 'active' if active == 'deployments' else '' }}" href="/deployments">Deployments</a><a class="{{ 'active' if active == 'jobs' else '' }}" href="/jobs">Jobs</a><a class="{{ 'active' if active == 'releases' else '' }}" href="/releases">Releases</a>{% if not current_user or current_user.role == 'admin' %}<a class="{{ 'active' if active == 'system' else '' }}" href="/system">System</a><a class="{{ 'active' if active == 'resilience' else '' }}" href="/resilience">Resilience</a><a class="{{ 'active' if active == 'users' else '' }}" href="/users">Users</a><a class="{{ 'active' if active == 'audit' else '' }}" href="/audit">Audit</a><a class="{{ 'active' if active == 'setup' else '' }}" href="/setup">Setup</a>{% endif %}</div></details>
 </nav>
     </header>
-    <main>{% block content %}{% endblock %}</main>
+    <main id="main-content" tabindex="-1">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack" role="status" aria-live="polite">
+          {% for category, message in messages %}
+            <div class="flash-message flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+</main>
 <script>
 (function () {
     const menus = Array.from(document.querySelectorAll("details.nav-menu"));

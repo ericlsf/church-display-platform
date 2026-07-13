@@ -3,7 +3,7 @@ from services.auth import init_auth_db, load_current_user, log_audit, user_count
 from routes.auth import auth_bp
 from flask import g, redirect, request, session, url_for
 import os
-from flask import Flask
+from flask import Flask, render_template
 from routes.dashboard import dashboard_bp
 from routes.displays import displays_bp
 from routes.fleet import fleet_bp
@@ -28,6 +28,7 @@ from routes.notifications import notifications_bp
 from routes.search import search_bp
 from routes.resilience import resilience_bp
 from services.startup import run_startup_checks
+from services.request_context import assign_request_id, log_exception, request_id
 
 
 def create_app():
@@ -81,6 +82,10 @@ def create_app():
     )
 
     @app.before_request
+    def church_display_request_context():
+        assign_request_id()
+
+    @app.before_request
     def church_display_auth_guard():
         load_current_user()
 
@@ -115,12 +120,47 @@ def create_app():
 
     @app.after_request
     def church_display_audit_response(response):
+        response.headers["X-Request-ID"] = request_id()
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+        response.headers.setdefault("Referrer-Policy", "same-origin")
         if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
             try:
                 log_audit(status_code=response.status_code)
             except Exception:
                 pass
         return response
+
+    @app.errorhandler(403)
+    def church_display_forbidden(error):
+        return render_template(
+            "error.html",
+            title="Access denied",
+            message="Your account does not have permission to perform this action.",
+            status_code=403,
+            request_id=request_id(),
+        ), 403
+
+    @app.errorhandler(404)
+    def church_display_not_found(error):
+        return render_template(
+            "error.html",
+            title="Page not found",
+            message="The requested page or resource could not be found.",
+            status_code=404,
+            request_id=request_id(),
+        ), 404
+
+    @app.errorhandler(500)
+    def church_display_internal_error(error):
+        log_exception(error)
+        return render_template(
+            "error.html",
+            title="Something went wrong",
+            message="The Hub could not complete this request. Use the reference ID when reviewing logs or requesting support.",
+            status_code=500,
+            request_id=request_id(),
+        ), 500
 
     @app.context_processor
     def church_display_auth_context():

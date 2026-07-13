@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - Church Display{% endblock %}
+{% block content %}
+<div class="section error-panel">
+  <p class="error-code">{{ status_code }}</p>
+  <h2>{{ title }}</h2>
+  <p>{{ message }}</p>
+  {% if request_id %}
+    <p class="muted">Reference ID: <code>{{ request_id }}</code></p>
+  {% endif %}
+  <div class="toolbar">
+    <a class="button-link" href="/">Dashboard</a>
+    <button type="button" onclick="history.back()">Go Back</button>
+  </div>
+</div>
+{% endblock %}
