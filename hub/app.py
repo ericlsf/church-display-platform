@@ -27,6 +27,8 @@ from routes.sites import sites_bp
 from routes.notifications import notifications_bp
 from routes.search import search_bp
 from routes.resilience import resilience_bp
+from routes.history import history_bp
+from routes.simulation import simulation_bp
 from services.startup import run_startup_checks
 from services.request_context import assign_request_id, log_exception, request_id
 
@@ -58,6 +60,8 @@ def create_app():
     app.register_blueprint(notifications_bp)
     app.register_blueprint(search_bp)
     app.register_blueprint(resilience_bp)
+    app.register_blueprint(history_bp)
+    app.register_blueprint(simulation_bp)
 
     # v2.6.0 auth hooks
     app.secret_key = os.environ.get(
