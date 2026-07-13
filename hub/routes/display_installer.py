@@ -11,17 +11,14 @@ display_installer_bp = Blueprint(
     url_prefix="/install/display",
 )
 
-STATIC_INSTALLER = (
-    Path(__file__).resolve().parent.parent
-    / "static"
-    / "install-display.sh"
-)
+STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+BOOTSTRAP_FILE = STATIC_DIR / "install-display-bootstrap.sh"
 
 
 @display_installer_bp.route("")
 def download_installer():
     hub_url = request.host_url.rstrip("/")
-    script = STATIC_INSTALLER.read_text(encoding="utf-8")
+    script = BOOTSTRAP_FILE.read_text(encoding="utf-8")
     script = script.replace("__HUB_URL__", hub_url)
 
     return Response(
@@ -35,11 +32,9 @@ def download_installer():
 
 
 @display_installer_bp.route("/package.tar.gz")
-def download_display_package():
-    package = build_display_package()
-
+def download_package():
     return send_file(
-        package,
+        build_display_package(),
         mimetype="application/gzip",
         as_attachment=True,
         download_name=f"church-display-{current_version()}.tar.gz",
@@ -48,9 +43,9 @@ def download_display_package():
 
 
 @display_installer_bp.route("/command")
-def install_command():
+def command():
     hub_url = request.host_url.rstrip("/")
     return Response(
-        f"curl -fsSL {hub_url}/install/display | bash\n",
+        f"bash <(curl -fsSL {hub_url}/install/display)\n",
         mimetype="text/plain",
     )

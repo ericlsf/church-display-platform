@@ -1,123 +1,167 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-USER_NAME="${USER}"
-SERVICE_DIR="/etc/systemd/system"
 ENV_DIR="/etc/church-display"
+SERVICE_DIR="/etc/systemd/system"
+SUDOERS_FILE="/etc/sudoers.d/church-display-agent"
 
-DISPLAY_SERVICE="$SERVICE_DIR/church-display.service"
-AGENT_SERVICE="$SERVICE_DIR/church-display-agent.service"
-SYNC_SERVICE="$SERVICE_DIR/church-display-sync.service"
-SYNC_TIMER="$SERVICE_DIR/church-display-sync.timer"
-REGISTER_SERVICE="$SERVICE_DIR/church-display-register.service"
-REGISTER_TIMER="$SERVICE_DIR/church-display-register.timer"
-HEARTBEAT_SERVICE="$SERVICE_DIR/church-display-heartbeat.service"
-HEARTBEAT_TIMER="$SERVICE_DIR/church-display-heartbeat.timer"
-PREVIEW_SERVICE="$SERVICE_DIR/church-display-preview.service"
-PREVIEW_TIMER="$SERVICE_DIR/church-display-preview.timer"
-JOBS_SERVICE="$SERVICE_DIR/church-display-jobs.service"
-JOBS_TIMER="$SERVICE_DIR/church-display-jobs.timer"
+HUB_URL="${CHURCH_DISPLAY_HUB_URL:-}"
+DISPLAY_NAME="${CHURCH_DISPLAY_NAME:-$(hostname)}"
+DISPLAY_ID="${CHURCH_DISPLAY_ID:-$(hostname)}"
+AUTO_START="${CHURCH_DISPLAY_AUTO_START:-yes}"
+NON_INTERACTIVE="no"
 
-cd "$APP_DIR"
+usage() {
+  cat <<'EOF'
+Usage:
+  ./install.sh --hub-url URL [options]
 
-echo "Installing Church Display Agent from:"
-echo "$APP_DIR"
-echo
+Options:
+  --hub-url URL
+  --display-name NAME
+  --display-id ID
+  --no-player
+  --non-interactive
+EOF
+}
 
-python3 -m venv venv
-source venv/bin/activate
-python -m pip install --upgrade pip
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --hub-url)
+      HUB_URL="${2:-}"
+      shift 2
+      ;;
+    --display-name)
+      DISPLAY_NAME="${2:-}"
+      shift 2
+      ;;
+    --display-id)
+      DISPLAY_ID="${2:-}"
+      shift 2
+      ;;
+    --no-player)
+      AUTO_START="no"
+      shift
+      ;;
+    --non-interactive)
+      NON_INTERACTIVE="yes"
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage
+      exit 2
+      ;;
+  esac
+done
 
-if [ -f requirements.txt ]; then
-  python -m pip install -r requirements.txt
-else
-  python -m pip install PySide6 requests pillow watchdog
+if [[ "$(id -u)" -eq 0 ]]; then
+  echo "Run this installer as the desktop user, not with sudo." >&2
+  exit 1
 fi
 
-mkdir -p media status logs config/backups scripts
+INSTALL_USER="$USER"
+INSTALL_UID="$(id -u)"
+HUB_URL="${HUB_URL%/}"
 
-if [ ! -f config/config.json ]; then
-  cat > config/config.json <<'EOF'
+if [[ -z "$HUB_URL" ]]; then
+  if [[ "$NON_INTERACTIVE" == "yes" ]]; then
+    echo "--hub-url is required." >&2
+    exit 2
+  fi
+  read -rp "Hub URL: " HUB_URL
+  HUB_URL="${HUB_URL%/}"
+fi
+
+if [[ -z "$DISPLAY_NAME" && "$NON_INTERACTIVE" != "yes" ]]; then
+  read -rp "Display name [$(hostname)]: " DISPLAY_NAME
+  DISPLAY_NAME="${DISPLAY_NAME:-$(hostname)}"
+fi
+
+VERSION="$(cat "$APP_DIR/VERSION" 2>/dev/null || echo unknown)"
+VERSION="${VERSION#v}"
+
+echo
+echo "Installing Church Display"
+echo "-------------------------"
+echo "Hub:     $HUB_URL"
+echo "ID:      $DISPLAY_ID"
+echo "Name:    $DISPLAY_NAME"
+echo "Path:    $APP_DIR"
+echo
+
+echo "Installing operating-system dependencies..."
+sudo apt-get update
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  curl \
+  ffmpeg \
+  grim \
+  imagemagick \
+  jq \
+  libegl1 \
+  libgl1 \
+  libxkbcommon-x11-0 \
+  libxcb-cursor0 \
+  python3 \
+  python3-pip \
+  python3-venv \
+  scrot
+
+echo "Creating Python environment..."
+cd "$APP_DIR"
+rm -rf venv
+python3 -m venv venv
+source venv/bin/activate
+python -m pip install --upgrade pip wheel
+python -m pip install -r requirements.txt
+
+echo "Preparing local data directories..."
+mkdir -p media status logs config/backups
+
+if [[ -d scripts ]]; then
+  find scripts -maxdepth 1 -type f -name '*.sh' -exec chmod +x {} +
+fi
+
+if [[ ! -f config/config.json ]]; then
+  cat > config/config.json <<'JSON'
 {
-  "overlay": {
-    "enabled": true,
-    "text": "Welcome"
-  },
-  "clock": {
-    "enabled": true
-  },
-  "timings": {
-    "image_duration": 8
-  },
+  "overlay": {"enabled": true, "text": "Welcome"},
+  "clock": {"enabled": true},
+  "timings": {"image_duration": 8},
   "countdown": {
     "enabled": true,
     "start_minutes": 20,
     "services": [
-      {
-        "day": "Sunday",
-        "time": "08:00"
-      },
-      {
-        "day": "Sunday",
-        "time": "09:30"
-      },
-      {
-        "day": "Sunday",
-        "time": "11:15"
-      }
+      {"day": "Sunday", "time": "08:00"},
+      {"day": "Sunday", "time": "09:30"},
+      {"day": "Sunday", "time": "11:15"}
     ]
   },
   "dynamic_countdowns": [],
   "scheduled_overlays": [],
-  "sync": {
-    "remote": "gdrive",
-    "folder": "Weekly"
-  }
+  "sync": {"remote": "hub", "folder": ""}
 }
-EOF
+JSON
 fi
 
-sudo mkdir -p "$ENV_DIR"
-
-if [ ! -f "$ENV_DIR/register.env" ]; then
-  read -rp "Hub URL, example http://192.168.1.50:8090: " HUB_URL_VALUE
-  HUB_URL_VALUE="${HUB_URL_VALUE:-http://127.0.0.1:8090}"
-
-  sudo tee "$ENV_DIR/register.env" >/dev/null <<EOF
-HUB_URL=$HUB_URL_VALUE
+echo "Writing Hub connection settings..."
+sudo install -d -m 0755 "$ENV_DIR"
+sudo tee "$ENV_DIR/heartbeat.env" >/dev/null <<EOF
+HUB_URL=$HUB_URL
+DISPLAY_ID=$DISPLAY_ID
+DISPLAY_NAME=$DISPLAY_NAME
 DISPLAY_PORT=8080
-DISPLAY_VERSION=1.3.0
+DISPLAY_VERSION=$VERSION
 EOF
-fi
+sudo cp "$ENV_DIR/heartbeat.env" "$ENV_DIR/register.env"
 
-if [ ! -f "$ENV_DIR/heartbeat.env" ]; then
-  sudo cp "$ENV_DIR/register.env" "$ENV_DIR/heartbeat.env"
-  echo "DISPLAY_ID=$(hostname)" | sudo tee -a "$ENV_DIR/heartbeat.env" >/dev/null
-fi
-
-sudo tee "$DISPLAY_SERVICE" >/dev/null <<EOF
-[Unit]
-Description=Church Display
-After=graphical-session.target
-PartOf=graphical-session.target
-
-[Service]
-Type=simple
-User=$USER_NAME
-WorkingDirectory=$APP_DIR
-ExecStart=$APP_DIR/venv/bin/python -m app.main
-Restart=always
-RestartSec=2
-
-Environment=QT_QPA_PLATFORM=wayland
-Environment=XDG_RUNTIME_DIR=/run/user/1000
-
-[Install]
-WantedBy=default.target
-EOF
-
-sudo tee "$AGENT_SERVICE" >/dev/null <<EOF
+echo "Installing services..."
+sudo tee "$SERVICE_DIR/church-display-agent.service" >/dev/null <<EOF
 [Unit]
 Description=Church Display Agent
 After=network-online.target
@@ -125,10 +169,10 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=$USER_NAME
+User=$INSTALL_USER
 WorkingDirectory=$APP_DIR
 EnvironmentFile=-$ENV_DIR/heartbeat.env
-Environment=XDG_RUNTIME_DIR=/run/user/1000
+Environment=XDG_RUNTIME_DIR=/run/user/$INSTALL_UID
 Environment=WAYLAND_DISPLAY=wayland-0
 Environment=DISPLAY=:0
 ExecStart=$APP_DIR/venv/bin/python -m agent.agent
@@ -139,163 +183,135 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
-sudo tee "$SYNC_SERVICE" >/dev/null <<EOF
+sudo tee "$SERVICE_DIR/church-display.service" >/dev/null <<EOF
 [Unit]
-Description=Church Display Media Sync
-After=network-online.target
-Wants=network-online.target
+Description=Church Display Player
+After=graphical.target
+Wants=graphical.target
 
 [Service]
-Type=oneshot
-User=$USER_NAME
+Type=simple
+User=$INSTALL_USER
 WorkingDirectory=$APP_DIR
-ExecStart=$APP_DIR/scripts/sync_media.sh
-EOF
-
-sudo tee "$SYNC_TIMER" >/dev/null <<'EOF'
-[Unit]
-Description=Run Church Display Media Sync every minute
-
-[Timer]
-OnBootSec=30
-OnUnitActiveSec=60
-AccuracySec=10
-Persistent=true
+Environment=QT_QPA_PLATFORM=wayland
+Environment=XDG_RUNTIME_DIR=/run/user/$INSTALL_UID
+Environment=WAYLAND_DISPLAY=wayland-0
+Environment=DISPLAY=:0
+ExecStartPre=/usr/bin/test -S /run/user/$INSTALL_UID/wayland-0
+ExecStart=$APP_DIR/venv/bin/python -m app.main
+Restart=always
+RestartSec=3
 
 [Install]
-WantedBy=timers.target
+WantedBy=graphical.target
 EOF
 
-sudo tee "$REGISTER_SERVICE" >/dev/null <<EOF
-[Unit]
-Description=Register Church Display with Hub
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=oneshot
-EnvironmentFile=-$ENV_DIR/register.env
-ExecStart=$APP_DIR/scripts/register_with_hub.sh
+sudo tee "$SUDOERS_FILE" >/dev/null <<EOF
+$INSTALL_USER ALL=(root) NOPASSWD: /usr/bin/systemctl start church-display.service, /usr/bin/systemctl stop church-display.service, /usr/bin/systemctl restart church-display.service, /usr/bin/systemctl restart church-display-agent.service, /usr/sbin/reboot, /usr/sbin/shutdown
 EOF
+sudo chmod 0440 "$SUDOERS_FILE"
+sudo visudo -cf "$SUDOERS_FILE" >/dev/null
 
-sudo tee "$REGISTER_TIMER" >/dev/null <<'EOF'
-[Unit]
-Description=Register Church Display with Hub periodically
-
-[Timer]
-OnBootSec=45
-OnUnitActiveSec=60
-AccuracySec=10
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-EOF
-
-sudo tee "$HEARTBEAT_SERVICE" >/dev/null <<EOF
-[Unit]
-Description=Send Church Display heartbeat to Hub
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=oneshot
-EnvironmentFile=-$ENV_DIR/heartbeat.env
-ExecStart=$APP_DIR/scripts/heartbeat_to_hub.sh
-EOF
-
-sudo tee "$HEARTBEAT_TIMER" >/dev/null <<'EOF'
-[Unit]
-Description=Send Church Display heartbeat every 30 seconds
-
-[Timer]
-OnBootSec=30
-OnUnitActiveSec=30
-AccuracySec=5
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-EOF
-
-sudo tee "$PREVIEW_SERVICE" >/dev/null <<EOF
-[Unit]
-Description=Upload Church Display preview image to Hub
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=oneshot
-EnvironmentFile=-$ENV_DIR/heartbeat.env
-ExecStart=$APP_DIR/scripts/upload_preview_to_hub.sh
-EOF
-
-sudo tee "$PREVIEW_TIMER" >/dev/null <<'EOF'
-[Unit]
-Description=Upload Church Display preview image every minute
-
-[Timer]
-OnBootSec=60
-OnUnitActiveSec=60
-AccuracySec=10
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-EOF
-
-sudo tee "$JOBS_SERVICE" >/dev/null <<EOF
-[Unit]
-Description=Process Church Display Hub jobs
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=oneshot
-EnvironmentFile=-$ENV_DIR/heartbeat.env
-ExecStart=$APP_DIR/scripts/process_jobs.sh
-EOF
-
-sudo tee "$JOBS_TIMER" >/dev/null <<'EOF'
-[Unit]
-Description=Poll Church Display Hub for jobs
-
-[Timer]
-OnBootSec=30
-OnUnitActiveSec=10
-AccuracySec=2
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-EOF
-
-chmod +x scripts/*.sh 2>/dev/null || true
+for unit in \
+  church-display-jobs.timer \
+  church-display-heartbeat.timer \
+  church-display-preview.timer \
+  church-display-sync.timer \
+  church-display-register.timer
+do
+  sudo systemctl disable --now "$unit" 2>/dev/null || true
+done
 
 sudo systemctl daemon-reload
+sudo systemctl enable church-display-agent.service
+
+if [[ "$AUTO_START" == "yes" ]]; then
+  sudo systemctl enable church-display.service
+else
+  sudo systemctl disable church-display.service 2>/dev/null || true
+fi
+
+echo "Checking Hub connectivity..."
+curl -fsS --max-time 15 "$HUB_URL/setup" >/dev/null
+
+echo "Registering with the Hub..."
+IP_ADDRESS="$(hostname -I | awk '{print $1}')"
+DISPLAY_HOST="http://${IP_ADDRESS}:8080"
+
+python3 - "$HUB_URL" "$DISPLAY_NAME" "$DISPLAY_ID" "$IP_ADDRESS" "$DISPLAY_HOST" "$VERSION" <<'PY'
+import json
+import sys
+from urllib import request
+
+hub_url, name, display_id, ip, host, version = sys.argv[1:7]
+
+payload = {
+    "name": name,
+    "hostname": display_id,
+    "id": display_id,
+    "ip": ip,
+    "host": host,
+    "version": version,
+}
+
+body = json.dumps(payload).encode("utf-8")
+req = request.Request(
+    f"{hub_url.rstrip('/')}/discovery/register",
+    data=body,
+    headers={"Content-Type": "application/json"},
+    method="POST",
+)
+
+with request.urlopen(req, timeout=15) as response:
+    response.read()
+PY
+
+echo "Starting services..."
+sudo systemctl restart church-display-agent.service
+
+if [[ "$AUTO_START" == "yes" ]]; then
+  sudo systemctl restart church-display.service || true
+fi
+
+sleep 5
+
+FAILURES=0
+
+if systemctl is-active --quiet church-display-agent.service; then
+  echo "PASS  Agent is running"
+else
+  echo "FAIL  Agent is not running"
+  FAILURES=$((FAILURES + 1))
+fi
+
+if curl -fsS --max-time 10 \
+  "$HUB_URL/api/v1/jobs/next?display_id=$DISPLAY_ID" >/dev/null; then
+  echo "PASS  Hub job endpoint is reachable"
+else
+  echo "FAIL  Hub job endpoint is not reachable"
+  FAILURES=$((FAILURES + 1))
+fi
+
+if [[ "$AUTO_START" == "yes" ]]; then
+  if systemctl is-active --quiet church-display.service; then
+    echo "PASS  Display player is running"
+  else
+    echo "WARN  Player is waiting for the graphical Wayland session"
+  fi
+fi
+
+if [[ "$FAILURES" -gt 0 ]]; then
+  echo
+  echo "Installation completed with $FAILURES failed check(s)."
+  echo "Run:"
+  echo "  sudo journalctl -u church-display-agent.service -n 100 --no-pager"
+  exit 1
+fi
 
 echo
-echo "Install complete."
+echo "Installation complete."
+echo "Approve this display at:"
+echo "  $HUB_URL/setup"
 echo
-echo "Enable display service:"
-echo "sudo systemctl enable --now church-display.service"
-echo
-echo "Enable new Python agent service:"
-echo "sudo systemctl enable --now church-display-agent.service"
-echo
-echo "Disable legacy timers once agent is running:"
-echo "sudo systemctl disable --now church-display-jobs.timer"
-echo "sudo systemctl disable --now church-display-heartbeat.timer"
-echo "sudo systemctl disable --now church-display-preview.timer"
-echo "sudo systemctl disable --now church-display-sync.timer"
-echo
-echo "Optional legacy background timers:"
-echo "sudo systemctl enable --now church-display-sync.timer"
-echo "sudo systemctl enable --now church-display-register.timer"
-echo "sudo systemctl enable --now church-display-heartbeat.timer"
-echo "sudo systemctl enable --now church-display-preview.timer"
-echo "sudo systemctl enable --now church-display-jobs.timer"
-echo
-echo "Manual dev run:"
-echo "cd $APP_DIR && source venv/bin/activate && QT_QPA_PLATFORM=xcb python -m app.main"
-
+echo "Pending display:"
+echo "  $DISPLAY_NAME ($DISPLAY_ID)"
