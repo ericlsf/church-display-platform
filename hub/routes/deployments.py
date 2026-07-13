@@ -1,9 +1,7 @@
-from urllib.parse import quote
-
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from services.config import load_config, load_hub_settings
-from services.display_releases import build_release_package
+from services.display_artifacts import create_artifact
 from services.events import log_event
 from services.fleet_state import build_fleet_state
 from services.jobs import create_job, list_jobs
@@ -30,11 +28,13 @@ def package_base_url():
 
 
 def queue_deploy_job(display_id, target, dry_run):
-    release = build_release_package(target)
-    encoded_target = quote(target, safe="")
+    # Build and persist once. The job's checksum and URL both reference this
+    # exact immutable file.
+    artifact = create_artifact(target)
+    sha256 = artifact["sha256"]
     package_url = (
         f"{package_base_url()}/api/v1/display-releases/"
-        f"{encoded_target}/package.tar.gz"
+        f"artifacts/{sha256}.tar.gz"
     )
 
     create_job(
@@ -44,17 +44,17 @@ def queue_deploy_job(display_id, target, dry_run):
             "target": target,
             "dry_run": dry_run,
             "package_url": package_url,
-            "sha256": release["sha256"],
-            "commit": release["commit"],
-            "package_size": release["size"],
-            "deployment_mode": "hub_package",
+            "sha256": sha256,
+            "commit": artifact.get("commit", ""),
+            "package_size": artifact["size"],
+            "deployment_mode": "immutable_hub_artifact",
         },
     )
 
     mode = "dry run" if str(dry_run).lower() != "false" else "real deploy"
     log_event(
-        f"Queued {mode} display-package deployment of "
-        f"{target} for {display_id}"
+        f"Queued {mode} immutable display deployment of "
+        f"{target} for {display_id} ({sha256[:12]})"
     )
 
 
@@ -73,7 +73,7 @@ def deployments_page():
         outdated_rows=state.get("outdated_rows", []),
         outdated_count=state.get("outdated_count", 0),
         deploy_jobs=deploy_jobs(100),
-        deployment_mode="Hub package",
+        deployment_mode="Immutable Hub artifact",
     )
 
 
