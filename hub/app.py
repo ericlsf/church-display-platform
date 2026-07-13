@@ -29,6 +29,7 @@ from routes.search import search_bp
 from routes.resilience import resilience_bp
 from routes.history import history_bp
 from routes.simulation import simulation_bp
+from routes.display_installer import display_installer_bp
 from services.startup import run_startup_checks
 from services.request_context import assign_request_id, log_exception, request_id
 
@@ -62,6 +63,7 @@ def create_app():
     app.register_blueprint(resilience_bp)
     app.register_blueprint(history_bp)
     app.register_blueprint(simulation_bp)
+    app.register_blueprint(display_installer_bp)
 
     # v2.6.0 auth hooks
     app.secret_key = os.environ.get(
@@ -77,6 +79,9 @@ def create_app():
         "/discovery/register",
         "/api/v1/heartbeat",
         "/api/v1/preview",
+        "/install/display",
+        "/install/display/package.tar.gz",
+        "/install/display/command",
     }
 
     api_prefixes = (
