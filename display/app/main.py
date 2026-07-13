@@ -17,6 +17,7 @@ from PySide6.QtMultimediaWidgets import QVideoWidget
 from app.logging_setup import setup_logging
 from app.media import scan_media
 from app.admin_server import start_admin_server
+from app.cursor import hide_cursor
 
 
 IMAGE_EXT = {".jpg", ".jpeg", ".png", ".webp"}
@@ -572,6 +573,7 @@ class Player(QWidget):
 def main():
     setup_logging()
     app = QApplication(sys.argv)
+    hide_cursor(app)
 
     player = Player()
     app._player = player

@@ -1,0 +1,32 @@
+{% macro provisioning_card(display, status) %}
+<div class="card provisioning-card state-{{ status.state }}">
+  <h3>{{ display.name }}</h3>
+  <p><strong>ID:</strong> {{ display.id }}</p>
+  <p><strong>Playlist:</strong> {{ display.assigned_folder or "Not assigned" }}</p>
+  <p><strong>Health:</strong> {{ status.score }}%</p>
+
+  <ul class="check-list">
+    <li>{{ "✓" if status.checks.heartbeat else "✕" }} Heartbeat</li>
+    <li>{{ "✓" if status.checks.player else "✕" }} Player</li>
+    <li>{{ "✓" if status.checks.playlist else "✕" }} Playlist</li>
+    <li>{{ "✓" if status.checks.media else "✕" }} Media</li>
+    <li>{{ "✓" if status.checks.sync else "✕" }} Last sync</li>
+  </ul>
+
+  {% if status.state == "ready" %}
+    <p class="online">● Ready</p>
+  {% elif status.state == "provisioning" %}
+    <p class="warning">● Provisioning</p>
+  {% else %}
+    <p class="offline">● Needs Attention</p>
+  {% endif %}
+
+  {% if display.assigned_folder and status.state != "ready" %}
+    <form method="POST" action="/provisioning/{{ display.id }}/retry">
+      <button class="primary" type="submit">
+        Retry Initial Provisioning
+      </button>
+    </form>
+  {% endif %}
+</div>
+{% endmacro %}
