@@ -3,29 +3,47 @@
 {% block content %}
 <div class="section">
   <h2>Manage Displays</h2>
-  <p class="muted">Add, rename, test, remove, or recover display boards.</p>
+  <p class="muted">
+    Configure identity, presentation, and recovery settings for each display.
+  </p>
   {% if test_message %}<p><strong>{{ test_message }}</strong></p>{% endif %}
 </div>
 
 <div class="section">
   <h2>Add Display</h2>
   <form method="POST" action="/displays/add">
-    <label>Name</label><input name="name" placeholder="Lobby Display">
-    <label>Admin URL or IP</label><input name="host" placeholder="http://192.168.1.101:8080">
-    <label>Username, optional</label><input name="username" placeholder="admin">
-    <label>Password, optional</label><input name="password" type="password">
+    <label>Name</label>
+    <input name="name" placeholder="Lobby Display">
+
+    <label>Admin URL or IP</label>
+    <input name="host" placeholder="http://192.168.1.101:8080">
+
+    <label>Username, optional</label>
+    <input name="username" placeholder="admin">
+
+    <label>Password, optional</label>
+    <input name="password" type="password">
+
     <button class="primary" type="submit">Add Display</button>
   </form>
 </div>
 
 <div class="section">
   <h2>Configured Displays</h2>
+
   <div class="grid">
   {% for row in rows %}
+    {% set p = row.presentation %}
     <div class="card">
       <h3>{{ row.name }}</h3>
-      <p class="{{ 'online' if row.online else 'offline' }}">{{ '● Online' if row.online else '○ Offline' }}</p>
-      {% if row.message %}<p class="muted">{{ row.message }}</p>{% endif %}
+
+      <p class="{{ 'online' if row.online else 'offline' }}">
+        {{ '● Online' if row.online else '○ Offline' }}
+      </p>
+
+      {% if row.message %}
+        <p class="muted">{{ row.message }}</p>
+      {% endif %}
 
       <p>
         <strong>Display App:</strong>
@@ -34,37 +52,115 @@
         </span>
       </p>
 
-      {% if row.heartbeat_fresh and not row.display_app_running %}
-        <form method="POST" action="/fleet/{{ row.id }}/restart">
-          <button class="safe" type="submit">Start Display App</button>
-        </form>
-      {% else %}
-        <form method="POST" action="/fleet/{{ row.id }}/restart">
-          <button type="submit">Restart Display App</button>
-        </form>
-      {% endif %}
-
-      <form method="POST" action="/displays/update">
-        <input type="hidden" name="id" value="{{ row.id }}">
-        <label>Name</label><input name="name" value="{{ row.name }}">
-        <label>Host</label><input name="host" value="{{ row.host }}">
-        <label>Username</label><input name="username" value="{{ row.username }}">
-        <label>Password</label><input name="password" type="password" value="{{ row.password }}">
-        <button class="primary" type="submit">Save</button>
+      <form method="POST" action="/fleet/{{ row.id }}/restart">
+        <button
+          class="{{ 'safe' if row.heartbeat_fresh and not row.display_app_running else '' }}"
+          type="submit"
+        >
+          {{ 'Start Display App' if row.heartbeat_fresh and not row.display_app_running else 'Restart Display App' }}
+        </button>
       </form>
 
-      <form method="POST" action="/displays/test">
-        <input type="hidden" name="host" value="{{ row.host }}">
-        <input type="hidden" name="username" value="{{ row.username }}">
-        <input type="hidden" name="password" value="{{ row.password }}">
-        <button class="safe" type="submit">Test Local Admin</button>
-      </form>
+      <details class="settings-panel" open>
+        <summary><strong>Presentation Settings</strong></summary>
+
+        <form method="POST" action="/displays/presentation">
+          <input type="hidden" name="id" value="{{ row.id }}">
+
+          <label class="checkbox-row">
+            <input
+              type="checkbox"
+              name="overlay_enabled"
+              {% if p.overlay.enabled %}checked{% endif %}
+            >
+            Show overlay text
+          </label>
+
+          <label>Overlay Text</label>
+          <input
+            name="overlay_text"
+            maxlength="160"
+            value="{{ p.overlay.text }}"
+            placeholder="Welcome to our church"
+          >
+
+          <label class="checkbox-row">
+            <input
+              type="checkbox"
+              name="clock_enabled"
+              {% if p.clock.enabled %}checked{% endif %}
+            >
+            Show clock
+          </label>
+
+          <label class="checkbox-row">
+            <input
+              type="checkbox"
+              name="countdown_enabled"
+              {% if p.countdown.enabled %}checked{% endif %}
+            >
+            Enable countdown
+          </label>
+
+          <label>Countdown Display Window (minutes)</label>
+          <input
+            type="number"
+            min="0"
+            max="180"
+            name="countdown_start_minutes"
+            value="{{ p.countdown.start_minutes }}"
+          >
+
+          <label>Image Duration (seconds)</label>
+          <input
+            type="number"
+            min="1"
+            max="300"
+            name="image_duration"
+            value="{{ p.timings.image_duration }}"
+          >
+
+          <button class="primary" type="submit">
+            Save and Send to Display
+          </button>
+        </form>
+      </details>
+
+      <details class="settings-panel">
+        <summary><strong>Connection Settings</strong></summary>
+
+        <form method="POST" action="/displays/update">
+          <input type="hidden" name="id" value="{{ row.id }}">
+
+          <label>Name</label>
+          <input name="name" value="{{ row.name }}">
+
+          <label>Host</label>
+          <input name="host" value="{{ row.host }}">
+
+          <label>Username</label>
+          <input name="username" value="{{ row.username }}">
+
+          <label>Password</label>
+          <input name="password" type="password" value="{{ row.password }}">
+
+          <button class="primary" type="submit">Save Connection</button>
+        </form>
+
+        <form method="POST" action="/displays/test">
+          <input type="hidden" name="host" value="{{ row.host }}">
+          <input type="hidden" name="username" value="{{ row.username }}">
+          <input type="hidden" name="password" value="{{ row.password }}">
+          <button class="safe" type="submit">Test Local Admin</button>
+        </form>
+
+        <p><a href="{{ row.host }}" target="_blank">Open Local Admin</a></p>
+      </details>
 
       <form method="POST" action="/displays/remove">
         <input type="hidden" name="id" value="{{ row.id }}">
         <button class="danger" type="submit">Remove</button>
       </form>
-      <p><a href="{{ row.host }}" target="_blank">Open Local Admin</a></p>
     </div>
   {% endfor %}
   </div>

@@ -295,3 +295,28 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
   .command-button kbd { display:none; }
   .primary-nav,.section-nav { padding-bottom:4px; }
 }
+
+/* v4.3.1 display presentation settings */
+
+.settings-panel {
+  margin: 1rem 0;
+  border-top: 1px solid var(--border, #d9dde3);
+  padding-top: 0.75rem;
+}
+
+.settings-panel summary {
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0.75rem 0;
+}
+
+.checkbox-row input {
+  width: auto;
+  margin: 0;
+}
