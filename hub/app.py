@@ -31,6 +31,7 @@ from routes.history import history_bp
 from routes.simulation import simulation_bp
 from routes.display_installer import display_installer_bp
 from routes.provisioning import provisioning_bp
+from routes.display_releases import display_releases_bp
 from services.startup import run_startup_checks
 from services.request_context import assign_request_id, log_exception, request_id
 
@@ -66,6 +67,7 @@ def create_app():
     app.register_blueprint(simulation_bp)
     app.register_blueprint(display_installer_bp)
     app.register_blueprint(provisioning_bp)
+    app.register_blueprint(display_releases_bp)
 
     # v2.6.0 auth hooks
     app.secret_key = os.environ.get(
@@ -90,6 +92,7 @@ def create_app():
         "/api/v1/jobs/next",
         "/api/v1/jobs/",
         "/api/v1/content/",
+        "/api/v1/display-releases/",
     )
 
     @app.before_request
