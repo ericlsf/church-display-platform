@@ -843,3 +843,9 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
     grid-column: 1 / -1;
   }
 }
+
+/* v5.5.2 update card */
+.update-stat-card{gap:.45rem}
+.update-stat-card form{margin:.25rem 0 0}
+.update-available-label{color:#ef6c00;font-weight:700}
+.compact-upgrade-button{min-height:2.1rem;padding:.35rem .7rem;width:100%}

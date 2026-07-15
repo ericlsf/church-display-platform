@@ -37,6 +37,28 @@
     <strong>{{ fleet.health_score|default(0) }}%</strong>
     <span>Health</span>
   </div>
+
+  <div class="stat-card update-stat-card">
+    {% if upgrade.update_available and not upgrade.active_job %}
+      <span class="update-available-label">Update Available</span>
+      <strong>{{ upgrade.current_version }} &rarr; {{ upgrade.latest_version }}</strong>
+      <form method="POST" action="/display/{{ display.id }}/upgrade">
+        <input type="hidden" name="target" value="{{ upgrade.latest_version }}">
+        <input type="hidden" name="mode" value="deploy">
+        {% if maintenance.enabled %}
+          <input type="hidden" name="override_maintenance" value="on">
+        {% endif %}
+        <button class="primary compact-upgrade-button" type="submit">Upgrade Now</button>
+      </form>
+    {% elif upgrade.active_job %}
+      <strong>{{ upgrade.active_job.progress|default(0) }}%</strong>
+      <span>Upgrade in progress</span>
+    {% else %}
+      <strong>{{ upgrade.current_version }}</strong>
+      <span>Software Current</span>
+    {% endif %}
+  </div>
+
   <div class="stat-card">
     <strong>{{ fleet.version|default("unknown") }}</strong>
     <span>Version</span>
@@ -231,7 +253,7 @@
   </div>
 </div>
 
-<div class="section">
+<div class="section" id="software-upgrade">
   <div class="section-heading-row">
     <div>
       <h2>Software Upgrade</h2>
