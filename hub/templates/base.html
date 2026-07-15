@@ -89,6 +89,7 @@
             <a class="{{ 'active' if active == 'releases' else '' }}" href="/releases">Releases</a>
             <a class="{{ 'active' if active == 'users' else '' }}" href="/users">Users</a>
             <a class="{{ 'active' if active == 'audit' else '' }}" href="/audit">Audit</a>
+<a class="notification-nav" data-notification-link href="/notifications" aria-label="Notifications">Notifications<span class="notification-badge" data-notification-badge hidden>0</span></a>
             <a class="{{ 'active' if active == 'setup' else '' }}" href="/setup">Setup</a>
         </nav>
         {% endif %}
@@ -204,5 +205,6 @@
     });
 })();
 </script>
+<script src="/static/notifications.js"></script>
 </body>
 </html>

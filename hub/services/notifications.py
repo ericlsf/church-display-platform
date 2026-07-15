@@ -1,105 +1,195 @@
-import hashlib
 import json
+import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 
-from services.config import CONFIG_DIR, load_pending
-from services.fleet_state import build_fleet_state
+from services.config import load_config
 from services.jobs import list_jobs
-from services.resilience import load_resilience
-
-DISMISSALS_FILE = CONFIG_DIR / "notification_dismissals.json"
 
 
-def _load_dismissals():
+ROOT = Path(__file__).resolve().parents[2]
+NOTIFICATIONS_FILE = ROOT / "hub" / "config" / "notifications.json"
+PENDING_FILE = ROOT / "hub" / "config" / "pending_displays.json"
+
+PROBLEM_JOB_STATUSES = {"failed", "timed_out", "cancelled"}
+SUCCESS_JOB_TYPES = {
+    "deploy_update",
+    "set_sync_folder",
+    "sync_now",
+    "restart_display",
+    "apply_display_settings",
+}
+
+
+def _now():
+    return datetime.now(timezone.utc).isoformat()
+
+
+def load_notifications():
+    if not NOTIFICATIONS_FILE.exists():
+        return {"notifications": [], "seen_sources": []}
     try:
-        data = json.loads(DISMISSALS_FILE.read_text())
+        data = json.loads(NOTIFICATIONS_FILE.read_text(encoding="utf-8"))
     except Exception:
-        data = {"dismissed": []}
-    data.setdefault("dismissed", [])
-    return set(data["dismissed"])
+        data = {"notifications": [], "seen_sources": []}
+    data.setdefault("notifications", [])
+    data.setdefault("seen_sources", [])
+    return data
 
 
-def _save_dismissals(values):
-    DISMISSALS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    tmp = DISMISSALS_FILE.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps({"dismissed": sorted(values)}, indent=2))
-    tmp.replace(DISMISSALS_FILE)
+def save_notifications(data):
+    NOTIFICATIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    temp = NOTIFICATIONS_FILE.with_suffix(".json.tmp")
+    temp.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    temp.replace(NOTIFICATIONS_FILE)
 
 
-def fingerprint(kind, key, message):
-    raw = f"{kind}|{key}|{message}".encode("utf-8")
-    return hashlib.sha256(raw).hexdigest()[:20]
+def _add(data, source_key, level, title, message, target="", link=""):
+    if source_key in data["seen_sources"]:
+        return None
+
+    item = {
+        "id": str(uuid.uuid4()),
+        "source_key": source_key,
+        "level": level,
+        "title": title,
+        "message": message,
+        "target": target,
+        "link": link,
+        "created_at": _now(),
+        "read": False,
+        "dismissed": False,
+        "resolved": False,
+    }
+    data["notifications"].append(item)
+    data["seen_sources"].append(source_key)
+    return item
+
+
+def _pending_displays():
+    if not PENDING_FILE.exists():
+        return []
+    try:
+        data = json.loads(PENDING_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+    return data.get("pending", [])
+
+
+def refresh_notifications():
+    data = load_notifications()
+    changed = False
+
+    for pending in _pending_displays():
+        source_key = f"pending:{pending.get('requested_id') or pending.get('host')}"
+        item = _add(
+            data,
+            source_key,
+            "info",
+            "Display awaiting approval",
+            (
+                f"{pending.get('name', 'New display')} is waiting "
+                "for enrollment approval."
+            ),
+            target=pending.get("requested_id", ""),
+            link="/setup",
+        )
+        changed = changed or bool(item)
+
+    for job in list_jobs(500):
+        job_id = job.get("id")
+        status = str(job.get("status", "")).lower()
+        job_type = job.get("type", "job")
+        display_id = job.get("display_id", "")
+        message = job.get("message", "")
+
+        if status in PROBLEM_JOB_STATUSES:
+            item = _add(
+                data,
+                f"job-failed:{job_id}",
+                "error",
+                f"{job_type.replace('_', ' ').title()} failed",
+                message or f"Job failed for {display_id}.",
+                target=display_id,
+                link="/errors",
+            )
+            changed = changed or bool(item)
+        elif status == "success" and job_type in SUCCESS_JOB_TYPES:
+            item = _add(
+                data,
+                f"job-success:{job_id}",
+                "success",
+                f"{job_type.replace('_', ' ').title()} completed",
+                message or f"Job completed for {display_id}.",
+                target=display_id,
+                link="/jobs",
+            )
+            changed = changed or bool(item)
+
+    config = load_config()
+    for display in config.get("displays", []):
+        display_id = display.get("id", "")
+        if display.get("maintenance", {}).get("enabled"):
+            continue
+        if display.get("online") is False:
+            item = _add(
+                data,
+                f"display-offline:{display_id}",
+                "warning",
+                "Display offline",
+                f"{display.get('name', display_id)} is offline.",
+                target=display_id,
+                link="/operations-center",
+            )
+            changed = changed or bool(item)
+
+    if changed:
+        save_notifications(data)
+
+    return data
+
+
+def visible_notifications(limit=100):
+    data = refresh_notifications()
+    rows = [
+        item
+        for item in data["notifications"]
+        if not item.get("dismissed")
+    ]
+    rows.sort(key=lambda item: item.get("created_at", ""), reverse=True)
+    return rows[:limit]
+
+
+def unread_count():
+    return sum(
+        1
+        for item in visible_notifications(1000)
+        if not item.get("read")
+    )
+
+
+def mark_read(notification_id=None, all_notifications=False):
+    data = load_notifications()
+    for item in data["notifications"]:
+        if all_notifications or item.get("id") == notification_id:
+            item["read"] = True
+    save_notifications(data)
 
 
 def dismiss(notification_id):
-    values = _load_dismissals()
-    values.add(notification_id)
-    _save_dismissals(values)
+    data = load_notifications()
+    for item in data["notifications"]:
+        if item.get("id") == notification_id:
+            item["dismissed"] = True
+            item["read"] = True
+            break
+    save_notifications(data)
 
 
-def clear_dismissals():
-    _save_dismissals(set())
-
-
-def build_notifications(include_dismissed=False):
-    state = build_fleet_state()
-    dismissed = _load_dismissals()
-    items = []
-
-    def add(kind, level, title, message, key, href=""):
-        item_id = fingerprint(kind, key, message)
-        item = {
-            "id": item_id,
-            "kind": kind,
-            "level": level,
-            "title": title,
-            "message": message,
-            "href": href,
-            "dismissed": item_id in dismissed,
-        }
-        if include_dismissed or not item["dismissed"]:
-            items.append(item)
-
-    resilience = load_resilience()
-    if resilience.get("maintenance", {}).get("enabled"):
-        add("maintenance", "warning", "Maintenance mode enabled", resilience["maintenance"].get("message", "Maintenance in progress"), "global", "/resilience")
-
-    for row in state.get("rows", []):
-        display_id = row.get("id", "")
-        name = row.get("name", display_id or "Display")
-        if not row.get("online"):
-            add("display_offline", "danger", "Display offline", f"{name} is offline.", display_id, "/operations")
-        if str(row.get("sync_state", "")).lower() in {"error", "failed"}:
-            add("sync_failed", "danger", "Sync failed", f"{name} is reporting a sync failure.", display_id, "/jobs")
-        if row.get("update_available"):
-            add("update_available", "warning", "Update available", f"{name} can be updated to {row.get('latest_tag')}.", display_id, "/deployments")
-        if row.get("git", {}).get("dirty") == "yes":
-            add("dirty_tree", "warning", "Uncommitted changes", f"{name} has uncommitted local changes.", display_id, "/system")
-
-    pending_count = len(load_pending().get("pending", []))
-    if pending_count:
-        add("pending_enrollment", "warning", "Pending enrollment", f"{pending_count} display(s) are waiting for approval.", str(pending_count), "/setup")
-
-    for job in list_jobs(100):
-        if job.get("status") == "failed":
-            add(
-                "job_failed",
-                "danger",
-                "Job failed",
-                f"{job.get('type')} for {job.get('display_id')}: {job.get('message') or 'No details'}",
-                job.get("id", ""),
-                "/jobs",
-            )
-
-    priority = {"danger": 0, "warning": 1, "info": 2}
-    items.sort(key=lambda item: (priority.get(item["level"], 9), item["title"], item["message"]))
-    return items
-
-
-def notification_summary():
-    items = build_notifications()
-    return {
-        "total": len(items),
-        "danger": sum(1 for item in items if item["level"] == "danger"),
-        "warning": sum(1 for item in items if item["level"] == "warning"),
-    }
+def clear_resolved():
+    data = load_notifications()
+    for item in data["notifications"]:
+        if item.get("resolved") or item.get("level") == "success":
+            item["dismissed"] = True
+            item["read"] = True
+    save_notifications(data)
