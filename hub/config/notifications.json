@@ -1065,6 +1065,45 @@
       "read": false,
       "dismissed": false,
       "resolved": false
+    },
+    {
+      "id": "78500c65-87db-44d7-b6a0-7a2d9e324959",
+      "source_key": "job-success:c9ea2dfc-f02f-418d-94c9-cb4f3ecd60a9",
+      "level": "success",
+      "title": "Deploy Update completed",
+      "message": "Display software updated to v5.5.1; display service verified. Agent will restart.",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T20:18:43.282488+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "27a14822-4680-4c8f-926d-2c9b84073975",
+      "source_key": "job-success:87a49bd8-48e0-46a3-bb32-c51432cd9397",
+      "level": "success",
+      "title": "Deploy Update completed",
+      "message": "DRY RUN OK: v5.5.2 downloaded, checksum verified, and staged source compiled successfully",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T20:23:20.001236+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "f3e12cd2-3288-4882-93df-874b15cb6ae1",
+      "source_key": "job-success:f63ce75d-bede-4285-810f-7b0982d7b5e4",
+      "level": "success",
+      "title": "Deploy Update completed",
+      "message": "Display software updated to v5.5.2; display service verified. Agent will restart.",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T20:24:57.141787+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
     }
   ],
   "seen_sources": [
@@ -1149,6 +1188,9 @@
     "job-success:79b7bda4-c234-43e3-806b-a35c75172f0f",
     "job-success:1d11b21c-e8f5-43a8-a363-493fd6900740",
     "job-success:c508ac24-c8cc-4119-8d8e-36f2c53eb13a",
-    "job-success:8986dd5b-f449-47a1-a015-be91c98c14d9"
+    "job-success:8986dd5b-f449-47a1-a015-be91c98c14d9",
+    "job-success:c9ea2dfc-f02f-418d-94c9-cb4f3ecd60a9",
+    "job-success:87a49bd8-48e0-46a3-bb32-c51432cd9397",
+    "job-success:f63ce75d-bede-4285-810f-7b0982d7b5e4"
   ]
 }
