@@ -27,9 +27,12 @@ from pathlib import Path
 path = Path("display/agent/jobs/update.py")
 text = path.read_text(encoding="utf-8")
 
-dependency = text.index("_install_dependencies(report)")
-record = text.index("record_installed_release(")
-restart = text.index("_restart_and_verify(report)")
+handler_start = text.index("def handle_deploy_update")
+handler = text[handler_start:]
+
+dependency = handler.index("_install_dependencies(report)")
+record = handler.index("record_installed_release(")
+restart = handler.index("_restart_and_verify(report)")
 
 assert dependency < record < restart
 
