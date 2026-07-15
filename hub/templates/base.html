@@ -51,6 +51,7 @@
 <a href="/fleet-map">Fleet Map</a>
 <a href="/fleet-config">Groups & Maintenance</a>
 <a href="/operations-center">Operations Center</a>
+<a href="/display-profiles">Display Profiles</a>
             <a class="{{ 'active' if active in ['operations','deployments','jobs','history','management','resilience'] else '' }}" href="/operations">Operations</a>
             {% if not current_user or current_user.role == 'admin' %}
                 <a class="{{ 'active' if active in ['releases','system','users','audit','setup'] else '' }}" href="/system">Administration</a>

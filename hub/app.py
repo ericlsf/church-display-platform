@@ -38,6 +38,7 @@ from routes.rollouts import rollouts_bp
 from routes.audit import audit_bp
 from routes.groups_maintenance import groups_maintenance_bp
 from routes.fleet_map import fleet_map_bp
+from routes.display_profiles import display_profiles_bp
 from services.startup import run_startup_checks
 from services.request_context import assign_request_id, log_exception, request_id
 
@@ -80,6 +81,7 @@ def create_app():
     app.register_blueprint(audit_bp)
     app.register_blueprint(groups_maintenance_bp)
     app.register_blueprint(fleet_map_bp)
+    app.register_blueprint(display_profiles_bp)
 
     # v2.6.0 auth hooks
     app.secret_key = os.environ.get(

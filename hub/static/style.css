@@ -571,3 +571,54 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
   margin-top: 0.9rem;
   font-size: 0.9rem;
 }
+
+/* v4.12.0 display profiles */
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: 1rem;
+}
+
+.profile-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.profile-card-header,
+.profile-actions,
+.profile-import {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.profile-card-header {
+  justify-content: space-between;
+}
+
+.profile-actions {
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.profile-preview {
+  display: grid;
+  gap: 0.45rem;
+  margin: 1rem 0;
+}
+
+.profile-preview > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--border, #d9dde3);
+}
+
+.profile-preview span {
+  text-align: right;
+  color: var(--muted, #667085);
+}

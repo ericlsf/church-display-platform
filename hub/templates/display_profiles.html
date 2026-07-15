@@ -1,0 +1,412 @@
+{% extends "base.html" %}
+{% block title %}Display Profiles - Church Display Hub{% endblock %}
+
+{% block content %}
+<div class="section">
+  <div class="section-heading-row">
+    <div>
+      <h2>Display Profiles</h2>
+      <p class="muted">
+        Save reusable presentation settings and apply them to displays or
+        saved groups.
+      </p>
+    </div>
+
+    <form
+      method="POST"
+      action="/display-profiles/import"
+      enctype="multipart/form-data"
+      class="profile-import"
+    >
+      <input
+        type="file"
+        name="profile_file"
+        accept="application/json,.json"
+        required
+      >
+      <button type="submit">Import Profile</button>
+    </form>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Create Profile</h2>
+
+  <form method="POST" action="/display-profiles/save">
+    <input type="hidden" name="profile_id" value="">
+
+    <div class="profile-form-grid">
+      <label>
+        Profile Name
+        <input
+          name="name"
+          required
+          placeholder="Lobby"
+        >
+      </label>
+
+      <label>
+        Description
+        <input
+          name="description"
+          maxlength="500"
+          placeholder="Lobby screens with clock and overlay"
+        >
+      </label>
+
+      <label class="checkbox-row">
+        <input
+          type="checkbox"
+          name="overlay_enabled"
+          checked
+        >
+        Overlay enabled
+      </label>
+
+      <label>
+        Overlay Text
+        <input
+          name="overlay_text"
+          maxlength="160"
+          value="Welcome"
+        >
+      </label>
+
+      <label class="checkbox-row">
+        <input
+          type="checkbox"
+          name="clock_enabled"
+          checked
+        >
+        Clock enabled
+      </label>
+
+      <label class="checkbox-row">
+        <input
+          type="checkbox"
+          name="countdown_enabled"
+          checked
+        >
+        Countdown enabled
+      </label>
+
+      <label>
+        Countdown Window
+        <input
+          type="number"
+          min="0"
+          max="180"
+          name="countdown_start_minutes"
+          value="20"
+        >
+      </label>
+
+      <label>
+        Image Duration
+        <input
+          type="number"
+          min="1"
+          max="300"
+          name="image_duration"
+          value="8"
+        >
+      </label>
+    </div>
+
+    <button class="primary" type="submit">
+      Create Profile
+    </button>
+  </form>
+</div>
+
+<div class="section">
+  <h2>Saved Profiles</h2>
+
+  {% if profiles %}
+    <div class="profile-grid">
+      {% for profile in profiles %}
+        {% set settings = profile.settings %}
+        <div class="card profile-card">
+          <div class="profile-card-header">
+            <div>
+              <h3>{{ profile.name }}</h3>
+              <p class="muted">{{ profile.id }}</p>
+            </div>
+
+            {% if profile.id == default_profile_id %}
+              <span class="status-pill online">Default</span>
+            {% endif %}
+          </div>
+
+          {% if profile.description %}
+            <p>{{ profile.description }}</p>
+          {% endif %}
+
+          <div class="profile-preview">
+            <div>
+              <strong>Overlay</strong>
+              <span>
+                {{ "On" if settings.overlay.enabled else "Off" }}
+                {% if settings.overlay.text %}
+                  · {{ settings.overlay.text }}
+                {% endif %}
+              </span>
+            </div>
+
+            <div>
+              <strong>Clock</strong>
+              <span>
+                {{ "On" if settings.clock.enabled else "Off" }}
+              </span>
+            </div>
+
+            <div>
+              <strong>Countdown</strong>
+              <span>
+                {{ "On" if settings.countdown.enabled else "Off" }}
+                · {{ settings.countdown.start_minutes }} min
+              </span>
+            </div>
+
+            <div>
+              <strong>Image Duration</strong>
+              <span>{{ settings.timings.image_duration }} sec</span>
+            </div>
+          </div>
+
+          <details class="settings-panel">
+            <summary><strong>Edit Profile</strong></summary>
+
+            <form method="POST" action="/display-profiles/save">
+              <input
+                type="hidden"
+                name="profile_id"
+                value="{{ profile.id }}"
+              >
+
+              <label>
+                Name
+                <input
+                  name="name"
+                  required
+                  value="{{ profile.name }}"
+                >
+              </label>
+
+              <label>
+                Description
+                <input
+                  name="description"
+                  maxlength="500"
+                  value="{{ profile.description }}"
+                >
+              </label>
+
+              <label class="checkbox-row">
+                <input
+                  type="checkbox"
+                  name="overlay_enabled"
+                  {% if settings.overlay.enabled %}checked{% endif %}
+                >
+                Overlay enabled
+              </label>
+
+              <label>
+                Overlay Text
+                <input
+                  name="overlay_text"
+                  maxlength="160"
+                  value="{{ settings.overlay.text }}"
+                >
+              </label>
+
+              <label class="checkbox-row">
+                <input
+                  type="checkbox"
+                  name="clock_enabled"
+                  {% if settings.clock.enabled %}checked{% endif %}
+                >
+                Clock enabled
+              </label>
+
+              <label class="checkbox-row">
+                <input
+                  type="checkbox"
+                  name="countdown_enabled"
+                  {% if settings.countdown.enabled %}checked{% endif %}
+                >
+                Countdown enabled
+              </label>
+
+              <label>
+                Countdown Window
+                <input
+                  type="number"
+                  min="0"
+                  max="180"
+                  name="countdown_start_minutes"
+                  value="{{ settings.countdown.start_minutes }}"
+                >
+              </label>
+
+              <label>
+                Image Duration
+                <input
+                  type="number"
+                  min="1"
+                  max="300"
+                  name="image_duration"
+                  value="{{ settings.timings.image_duration }}"
+                >
+              </label>
+
+              <button class="primary" type="submit">
+                Save Profile
+              </button>
+            </form>
+          </details>
+
+          <details class="settings-panel">
+            <summary><strong>Apply Profile</strong></summary>
+
+            <form method="POST" action="/display-profiles/apply">
+              <input
+                type="hidden"
+                name="profile_id"
+                value="{{ profile.id }}"
+              >
+
+              <label>Saved Groups</label>
+              <div class="checkbox-grid">
+                {% for group in groups %}
+                  <label class="checkbox-row">
+                    <input
+                      type="checkbox"
+                      name="group_ids"
+                      value="{{ group.id }}"
+                    >
+                    {{ group.name }}
+                  </label>
+                {% endfor %}
+              </div>
+
+              <label>Individual Displays</label>
+              <div class="checkbox-grid">
+                {% for display in displays %}
+                  <label class="checkbox-row">
+                    <input
+                      type="checkbox"
+                      name="display_ids"
+                      value="{{ display.id }}"
+                    >
+                    {{ display.name }}
+                  </label>
+                {% endfor %}
+              </div>
+
+              <button class="primary" type="submit">
+                Apply to Selected Targets
+              </button>
+            </form>
+          </details>
+
+          {% if profile.history %}
+            <details class="settings-panel">
+              <summary>
+                <strong>
+                  Version History ({{ profile.history|length }})
+                </strong>
+              </summary>
+
+              <div class="compact-list">
+                {% for revision in profile.history %}
+                  <div class="compact-row">
+                    <div>
+                      <strong>{{ revision.saved_at }}</strong>
+                      <span class="muted">
+                        {{ revision.saved_by }}
+                      </span>
+                    </div>
+
+                    <div>
+                      {{ revision.name }}
+                    </div>
+
+                    <form
+                      method="POST"
+                      action="/display-profiles/restore"
+                    >
+                      <input
+                        type="hidden"
+                        name="profile_id"
+                        value="{{ profile.id }}"
+                      >
+                      <input
+                        type="hidden"
+                        name="revision_index"
+                        value="{{ loop.index0 }}"
+                      >
+                      <button type="submit">Restore</button>
+                    </form>
+                  </div>
+                {% endfor %}
+              </div>
+            </details>
+          {% endif %}
+
+          <div class="profile-actions">
+            <form method="POST" action="/display-profiles/default">
+              <input
+                type="hidden"
+                name="profile_id"
+                value="{% if profile.id == default_profile_id %}{% else %}{{ profile.id }}{% endif %}"
+              >
+              <button type="submit">
+                {% if profile.id == default_profile_id %}
+                  Clear Default
+                {% else %}
+                  Make Default
+                {% endif %}
+              </button>
+            </form>
+
+            <form method="POST" action="/display-profiles/clone">
+              <input
+                type="hidden"
+                name="profile_id"
+                value="{{ profile.id }}"
+              >
+              <input
+                type="hidden"
+                name="name"
+                value="{{ profile.name }} Copy"
+              >
+              <button type="submit">Clone</button>
+            </form>
+
+            <a
+              class="button"
+              href="/display-profiles/{{ profile.id }}/export.json"
+            >
+              Export
+            </a>
+
+            <form method="POST" action="/display-profiles/delete">
+              <input
+                type="hidden"
+                name="profile_id"
+                value="{{ profile.id }}"
+              >
+              <button class="danger" type="submit">
+                Delete
+              </button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">No display profiles have been created.</p>
+  {% endif %}
+</div>
+{% endblock %}
