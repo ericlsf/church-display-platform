@@ -909,6 +909,45 @@
       "read": false,
       "dismissed": false,
       "resolved": false
+    },
+    {
+      "id": "cbd3c0ba-5dea-42e5-a753-8d7a65dcda23",
+      "source_key": "job-success:2fbc8ca8-018c-42fa-a0e0-7dd29d3ee37c",
+      "level": "success",
+      "title": "Sync Now completed",
+      "message": "Sync completed for Missions",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T19:15:54.236487+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "44aa4ee7-f9de-45dd-b215-84bcbd56aa3d",
+      "source_key": "job-success:32e64adf-4f92-4f82-a042-f34d98b783ce",
+      "level": "success",
+      "title": "Deploy Update completed",
+      "message": "DRY RUN OK: v5.3.1 downloaded, checksum verified, and staged source compiled successfully",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T19:16:27.337805+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "278289ab-7e6c-4e09-a3af-4c152f70e1fb",
+      "source_key": "job-success:6d45c6ae-08a8-4d15-9d78-2b217de758ad",
+      "level": "success",
+      "title": "Deploy Update completed",
+      "message": "Display software updated to v5.3.1; display service verified. Agent will restart.",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T19:17:27.018676+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
     }
   ],
   "seen_sources": [
@@ -981,6 +1020,9 @@
     "job-success:2f93f308-8797-478b-b66e-0eaa3d566639",
     "job-success:37b9212a-a329-4d20-985a-19f19a022d12",
     "job-success:d2ece1ad-bf81-4c0c-8930-9037fa992703",
-    "job-success:3f38b18d-e006-45c5-a668-3b9592bf65f1"
+    "job-success:3f38b18d-e006-45c5-a668-3b9592bf65f1",
+    "job-success:2fbc8ca8-018c-42fa-a0e0-7dd29d3ee37c",
+    "job-success:32e64adf-4f92-4f82-a042-f34d98b783ce",
+    "job-success:6d45c6ae-08a8-4d15-9d78-2b217de758ad"
   ]
 }

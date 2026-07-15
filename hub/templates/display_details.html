@@ -157,76 +157,6 @@
   </div>
 </div>
 
-<div class="section">
-  <div class="section-heading-row">
-    <h2>Recent Jobs</h2>
-    <a href="/jobs?display_id={{ display.id }}">View All</a>
-  </div>
-
-  <div class="compact-list">
-    {% for job in jobs %}
-      <div class="compact-row">
-        <div>
-          <strong>{{ job.type|replace("_", " ")|title }}</strong>
-          <span class="muted">{{ job.created_at }}</span>
-        </div>
-        <div>{{ job.status|title }}</div>
-        <div>{{ job.progress|default(0) }}%</div>
-      </div>
-    {% else %}
-      <p class="muted">No jobs for this display.</p>
-    {% endfor %}
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-heading-row">
-    <h2>Recent Audit Activity</h2>
-    <a href="/audit?q={{ display.id }}">View All</a>
-  </div>
-
-  <div class="compact-list">
-    {% for row in audit_rows %}
-      <div class="compact-row">
-        <div>
-          <strong>{{ row.action|replace("_", " ") }}</strong>
-          <span class="muted">{{ row.timestamp }}</span>
-        </div>
-        <div>{{ row.actor }}</div>
-        <div>{{ row.status|title }}</div>
-      </div>
-    {% else %}
-      <p class="muted">No audit activity for this display.</p>
-    {% endfor %}
-  </div>
-</div>
-
-<div class="section">
-  <div class="breadcrumbs">
-    <a href="/operator/displays">Displays</a>
-    <span>›</span>
-    <strong>{{ display.name }}</strong>
-  </div>
-</div>
-
-<div class="section">
-  <div class="section-heading-row">
-    <h2>Last 10 Minutes</h2>
-    <button type="button" id="refresh-display-activity">Refresh</button>
-  </div>
-
-  <div
-    id="display-activity"
-    data-display-id="{{ display.id }}"
-    class="activity-timeline"
-  >
-    <p class="muted">Loading recent activity…</p>
-  </div>
-</div>
-
-<script src="/static/display-activity.js"></script>
-
-
 <div class="section" data-live-display="{{ display.id }}">
   <div class="section-heading-row">
     <div>
@@ -301,6 +231,215 @@
   </div>
 </div>
 
+<div class="section">
+  <div class="section-heading-row">
+    <div>
+      <h2>Software Upgrade</h2>
+      <p class="muted">
+        Compare versions, run a preflight dry run, or deploy directly.
+      </p>
+    </div>
+    <a href="/deployments">All Deployments</a>
+  </div>
+
+  <div class="upgrade-grid">
+    <div class="metric-card">
+      <span>Current Version</span>
+      <strong>{{ upgrade.current_version }}</strong>
+    </div>
+
+    <div class="metric-card">
+      <span>Latest Version</span>
+      <strong>{{ upgrade.latest_version or "Unknown" }}</strong>
+    </div>
+
+    <div class="metric-card">
+      <span>Status</span>
+      <strong>
+        {% if upgrade.active_job %}
+          {{ upgrade.active_job.status|title }}
+        {% elif upgrade.update_available %}
+          Update Available
+        {% else %}
+          Current
+        {% endif %}
+      </strong>
+    </div>
+  </div>
+
+  {% if upgrade.active_job %}
+    <div class="deployment-progress-card">
+      <div class="section-heading-row">
+        <div>
+          <strong>
+            {{ upgrade.active_job.payload.target or "Deployment" }}
+          </strong>
+          <p class="muted">
+            {{ upgrade.active_job.message or upgrade.active_job.status }}
+          </p>
+        </div>
+        <span class="status-pill">
+          {{ upgrade.active_job.progress|default(0) }}%
+        </span>
+      </div>
+
+      <div class="progress-track">
+        <div
+          class="progress-fill"
+          style="--progress: {{ upgrade.active_job.progress|default(0) }}%"
+        ></div>
+      </div>
+    </div>
+  {% else %}
+    <form
+      method="POST"
+      action="/display/{{ display.id }}/upgrade"
+      class="upgrade-form"
+    >
+      <label>
+        Target Version
+        <select name="target" required>
+          <option value="">Choose version</option>
+          {% for tag in upgrade.release_tags %}
+            <option
+              value="{{ tag }}"
+              {% if tag == upgrade.latest_version %}selected{% endif %}
+            >
+              {{ tag }}
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>
+        Deployment Mode
+        <select name="mode">
+          <option value="dry_run">
+            Dry Run — verify only
+          </option>
+          <option value="deploy">
+            Deploy and restart
+          </option>
+        </select>
+      </label>
+
+      {% if maintenance.enabled %}
+        <label class="checkbox-row">
+          <input
+            type="checkbox"
+            name="override_maintenance"
+          >
+          Override maintenance protection
+        </label>
+      {% endif %}
+
+      <button class="primary" type="submit">
+        Start Upgrade
+      </button>
+    </form>
+  {% endif %}
+
+  {% if upgrade.last_job
+        and upgrade.last_job.status in
+          ["failed", "timed_out", "cancelled"] %}
+    <div class="warning-panel">
+      <strong>Last deployment did not complete successfully.</strong>
+      <p>
+        {{ upgrade.last_job.message or "The display reported a deployment failure." }}
+      </p>
+
+      <form
+        method="POST"
+        action="/display/{{ display.id }}/rollback"
+      >
+        <input
+          type="hidden"
+          name="failed_job_id"
+          value="{{ upgrade.last_job.id }}"
+        >
+        <button class="danger" type="submit">
+          Queue Rollback
+        </button>
+      </form>
+    </div>
+  {% endif %}
+</div>
+
+<div class="section">
+  <div class="section-heading-row">
+    <h2>Recent Jobs</h2>
+    <a href="/jobs?display_id={{ display.id }}">View All</a>
+  </div>
+
+  <div class="compact-list">
+    {% for job in jobs %}
+      <div class="compact-row">
+        <div>
+          <strong>{{ job.type|replace("_", " ")|title }}</strong>
+          <span class="muted">{{ job.created_at }}</span>
+        </div>
+        <div>{{ job.status|title }}</div>
+        <div>{{ job.progress|default(0) }}%</div>
+      </div>
+    {% else %}
+      <p class="muted">No jobs for this display.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-heading-row">
+    <h2>Recent Audit Activity</h2>
+    <a href="/audit?q={{ display.id }}">View All</a>
+  </div>
+
+  <div class="compact-list">
+    {% for row in audit_rows %}
+      <div class="compact-row">
+        <div>
+          <strong>{{ row.action|replace("_", " ") }}</strong>
+          <span class="muted">{{ row.timestamp }}</span>
+        </div>
+        <div>{{ row.actor }}</div>
+        <div>{{ row.status|title }}</div>
+      </div>
+    {% else %}
+      <p class="muted">No audit activity for this display.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="section">
+  <div class="breadcrumbs">
+    <a href="/operator/displays">Displays</a>
+    <span>›</span>
+    <strong>{{ display.name }}</strong>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-heading-row">
+    <h2>Last 10 Minutes</h2>
+    <button type="button" id="refresh-display-activity">Refresh</button>
+  </div>
+
+  <div
+    id="display-activity"
+    data-display-id="{{ display.id }}"
+    class="activity-timeline"
+  >
+    <p class="muted">Loading recent activity…</p>
+  </div>
+</div>
+
+<script src="/static/display-activity.js"></script>
+
+
+
+
 <script src="/static/live-display-health.js"></script>
+
+
+
 
 {% endblock %}

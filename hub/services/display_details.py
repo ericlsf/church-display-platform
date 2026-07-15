@@ -5,6 +5,7 @@ from services.display_profiles import load_profiles
 from services.drive import list_drive_folders
 from services.fleet_operations import fleet_rows
 from services.jobs import list_jobs
+from services.display_upgrades import display_upgrade_state
 
 
 def get_display_details(display_id):
@@ -101,4 +102,8 @@ def get_display_details(display_id):
         "current_folder": current_folder,
         "available_folders": available_folders,
         "folder_error": folder_error,
+        "upgrade": display_upgrade_state(
+            display_id,
+            fleet.get("version", ""),
+        ),
     }
