@@ -883,6 +883,32 @@
       "read": false,
       "dismissed": false,
       "resolved": false
+    },
+    {
+      "id": "a9fbef03-7b42-4365-87e4-833515c608ed",
+      "source_key": "job-success:d2ece1ad-bf81-4c0c-8930-9037fa992703",
+      "level": "success",
+      "title": "Apply Display Settings completed",
+      "message": "Presentation settings applied; player will reload them automatically",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T16:34:23.153431+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "d2ef062b-d641-400c-8a86-4543be22ff93",
+      "source_key": "job-success:3f38b18d-e006-45c5-a668-3b9592bf65f1",
+      "level": "success",
+      "title": "Set Sync Folder completed",
+      "message": "Playlist Missions assigned and synchronized",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T16:34:23.153544+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
     }
   ],
   "seen_sources": [
@@ -953,6 +979,8 @@
     "job-failed:02b4e22c-a28b-4b89-92e0-cd51bf0f2ece",
     "job-failed:5965bd7a-245b-4724-b93f-7a3ca8644250",
     "job-success:2f93f308-8797-478b-b66e-0eaa3d566639",
-    "job-success:37b9212a-a329-4d20-985a-19f19a022d12"
+    "job-success:37b9212a-a329-4d20-985a-19f19a022d12",
+    "job-success:d2ece1ad-bf81-4c0c-8930-9037fa992703",
+    "job-success:3f38b18d-e006-45c5-a668-3b9592bf65f1"
   ]
 }

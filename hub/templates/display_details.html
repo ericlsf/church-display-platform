@@ -200,4 +200,30 @@
     {% endfor %}
   </div>
 </div>
+
+<div class="section">
+  <div class="breadcrumbs">
+    <a href="/operator/displays">Displays</a>
+    <span>›</span>
+    <strong>{{ display.name }}</strong>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-heading-row">
+    <h2>Last 10 Minutes</h2>
+    <button type="button" id="refresh-display-activity">Refresh</button>
+  </div>
+
+  <div
+    id="display-activity"
+    data-display-id="{{ display.id }}"
+    class="activity-timeline"
+  >
+    <p class="muted">Loading recent activity…</p>
+  </div>
+</div>
+
+<script src="/static/display-activity.js"></script>
+
 {% endblock %}

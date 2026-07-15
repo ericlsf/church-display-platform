@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Set Up {{ display.name }} - Church Display Hub{% endblock %}
+
+{% block content %}
+<div class="section">
+  <div class="breadcrumbs">
+    <a href="/operator/displays">Displays</a>
+    <span>›</span>
+    <strong>{{ display.name }}</strong>
+    <span>›</span>
+    <strong>Setup</strong>
+  </div>
+
+  <h2>Set Up {{ display.name }}</h2>
+  <p class="muted">
+    Complete the core configuration in one guided step.
+  </p>
+</div>
+
+<div class="section setup-wizard-card">
+  <div class="wizard-progress">
+    <span class="complete">✓ Connected</span>
+    <span>1. Location</span>
+    <span>2. Content</span>
+    <span>3. Profile</span>
+    <span>4. Finish</span>
+  </div>
+
+  <form method="POST" action="/operator/setup/{{ display.id }}/finish">
+    <label>Location / Group</label>
+    <select name="group_id">
+      <option value="">No group</option>
+      {% for group in groups %}
+        <option value="{{ group.id }}">{{ group.name }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Content Folder</label>
+    <select name="folder" required>
+      <option value="">Choose a content folder</option>
+      {% for folder in folders %}
+        <option value="{{ folder }}">{{ folder }}</option>
+      {% endfor %}
+    </select>
+
+    {% if folder_error %}
+      <p class="warning">
+        The folder list could not be refreshed: {{ folder_error }}
+      </p>
+    {% elif not folders %}
+      <p class="muted">
+        No content folders are available from the configured Drive remote.
+      </p>
+    {% endif %}
+
+    <label>Display Profile</label>
+    <select name="profile_id">
+      <option value="">No profile</option>
+      {% for profile in profiles %}
+        <option value="{{ profile.id }}">{{ profile.name }}</option>
+      {% endfor %}
+    </select>
+
+    <label class="checkbox-row">
+      <input type="checkbox" name="overlay_enabled" checked>
+      Show overlay
+    </label>
+
+    <label>Overlay Text</label>
+    <input
+      name="overlay_text"
+      maxlength="160"
+      value="Welcome"
+    >
+
+    <button class="primary" type="submit" {% if not folders %}disabled{% endif %}>
+      Finish Setup
+    </button>
+  </form>
+</div>
+{% endblock %}

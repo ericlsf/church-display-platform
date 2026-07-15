@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Displays - Church Display Hub{% endblock %}
+
+{% block content %}
+<div class="section">
+  <div class="breadcrumbs">
+    <a href="/">Home</a>
+    <span>›</span>
+    <strong>Displays</strong>
+  </div>
+
+  <div class="section-heading-row">
+    <div>
+      <h2>Displays</h2>
+      <p class="muted">
+        See the essentials at a glance and open one management page for each display.
+      </p>
+    </div>
+    <a class="button" href="/setup">Enroll Display</a>
+  </div>
+</div>
+
+<div class="operator-card-grid">
+  {% for card in cards %}
+    <div class="card operator-display-card">
+      <div class="operator-card-header">
+        <div>
+          <h3>{{ card.name }}</h3>
+          <span class="muted">{{ card.id }}</span>
+        </div>
+
+        <span class="status-pill
+          {% if card.readiness == 'ready' %}online
+          {% elif card.readiness == 'maintenance' %}warning
+          {% else %}offline{% endif %}">
+          {{ card.readiness|replace("_", " ")|title }}
+        </span>
+      </div>
+
+      <div class="operator-card-facts">
+        <div><span>Version</span><strong>{{ card.version }}</strong></div>
+        <div><span>Folder</span><strong>{{ card.assigned_folder or "Not assigned" }}</strong></div>
+        <div><span>Profile</span><strong>{{ card.profile_name or "None" }}</strong></div>
+        <div><span>Last Sync</span><strong>{{ card.last_sync or "Unknown" }}</strong></div>
+        <div><span>Pending Jobs</span><strong>{{ card.pending_jobs }}</strong></div>
+        <div><span>Media</span><strong>{{ card.media_count }}</strong></div>
+      </div>
+
+      <div class="operator-card-actions">
+        <a class="button primary" href="/display/{{ card.id }}">Manage</a>
+
+        {% if not card.get("provisioning_complete", False) %}
+          <a class="button" href="/operator/setup/{{ card.id }}">Finish Setup</a>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

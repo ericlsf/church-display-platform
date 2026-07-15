@@ -643,3 +643,99 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
   border-radius: 0.6rem;
   background: rgba(127, 127, 127, 0.06);
 }
+
+/* v5.1.0 operator experience */
+
+.breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-size: 0.92rem;
+}
+
+.operator-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: 1rem;
+}
+
+.operator-card-header,
+.operator-card-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.operator-card-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  margin: 1rem 0;
+}
+
+.operator-card-facts div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.operator-card-facts span {
+  color: var(--muted, #667085);
+  font-size: 0.85rem;
+}
+
+.operator-card-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.setup-wizard-card {
+  max-width: 760px;
+}
+
+.wizard-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.wizard-progress span {
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(127, 127, 127, 0.09);
+}
+
+.wizard-progress .complete {
+  color: #2e7d32;
+}
+
+.activity-timeline {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.activity-item {
+  display: grid;
+  grid-template-columns: minmax(150px, auto) 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--border, #d9dde3);
+}
+
+.activity-item div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+@media (max-width: 760px) {
+  .operator-card-facts,
+  .activity-item {
+    grid-template-columns: 1fr;
+  }
+}
