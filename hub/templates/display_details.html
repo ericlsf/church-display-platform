@@ -226,4 +226,81 @@
 
 <script src="/static/display-activity.js"></script>
 
+
+<div class="section" data-live-display="{{ display.id }}">
+  <div class="section-heading-row">
+    <div>
+      <h2>Live Device Health</h2>
+      <span class="live-indicator">Updates every 15 seconds</span>
+    </div>
+  </div>
+
+  <div class="display-details-grid">
+    <div class="card preview-card">
+      {% set preview_url = fleet.get("preview_url") or fleet.get("screenshot_url") %}
+      <img
+        data-live-preview
+        src="{{ preview_url or '' }}"
+        alt="Current screenshot from {{ display.name }}"
+        {% if not preview_url %}hidden{% endif %}
+      >
+      <div class="preview-empty" {% if preview_url %}hidden{% endif %}>
+        No screenshot available
+      </div>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <span>Status</span>
+        <strong data-live-status>
+          {{ fleet.get("readiness", "unknown")|replace("_", " ")|title }}
+        </strong>
+      </div>
+
+      <div class="metric-card">
+        <span>Version</span>
+        <strong data-live-version>{{ fleet.get("version", "unknown") }}</strong>
+      </div>
+
+      <div class="metric-card">
+        <span>Media Files</span>
+        <strong data-live-media>{{ fleet.get("media_count", 0) }}</strong>
+      </div>
+
+      <div class="metric-card">
+        <span>CPU Temperature</span>
+        <strong data-live-temp>
+          {% if fleet.get("cpu_temperature") is not none %}
+            {{ fleet.get("cpu_temperature") }}°C
+          {% else %}
+            Unknown
+          {% endif %}
+        </strong>
+      </div>
+
+      <div class="metric-card">
+        <span>Storage</span>
+        <strong data-live-storage>
+          {% if fleet.get("storage_percent") is not none %}
+            {{ fleet.get("storage_percent") }}% used
+          {% elif fleet.get("disk_percent") is not none %}
+            {{ fleet.get("disk_percent") }}% used
+          {% else %}
+            Unknown
+          {% endif %}
+        </strong>
+      </div>
+
+      <div class="metric-card">
+        <span>Last Heartbeat</span>
+        <strong data-live-heartbeat>
+          {{ fleet.get("last_heartbeat") or fleet.get("last_seen") or "Unknown" }}
+        </strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/live-display-health.js"></script>
+
 {% endblock %}
