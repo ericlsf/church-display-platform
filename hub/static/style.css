@@ -379,3 +379,24 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
 .compact-list{display:grid;gap:.35rem}
 .compact-row{display:grid;grid-template-columns:minmax(180px,2fr) 1fr 1fr;gap:1rem;align-items:center;padding:.65rem 0;border-bottom:1px solid var(--border,#d9dde3)}
 @media(max-width:760px){.operations-heading,.section-heading-row,.quick-display-title{align-items:flex-start;flex-direction:column}.compact-row{grid-template-columns:1fr;gap:.25rem}}
+
+/* v4.7.0 scheduled rollouts */
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.rollout-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.rollout-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}

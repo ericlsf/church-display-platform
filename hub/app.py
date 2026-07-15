@@ -34,6 +34,7 @@ from routes.provisioning import provisioning_bp
 from routes.display_releases import display_releases_bp
 from routes.fleet_operations import fleet_operations_bp
 from routes.operations_center import operations_center_bp
+from routes.rollouts import rollouts_bp
 from services.startup import run_startup_checks
 from services.request_context import assign_request_id, log_exception, request_id
 
@@ -72,6 +73,7 @@ def create_app():
     app.register_blueprint(display_releases_bp)
     app.register_blueprint(fleet_operations_bp)
     app.register_blueprint(operations_center_bp)
+    app.register_blueprint(rollouts_bp)
 
     # v2.6.0 auth hooks
     app.secret_key = os.environ.get(

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Scheduled Rollouts - Church Display Hub{% endblock %}
+
+{% block content %}
+<div class="section">
+  <h2>Scheduled Rollouts</h2>
+  <p class="muted">
+    Schedule display updates, deploy to a canary first, and automatically pause
+    if the canary or any later display fails.
+  </p>
+</div>
+
+<div class="section">
+  <h2>Create Rollout</h2>
+  <form method="POST" action="/rollouts/create">
+    <label>Version</label>
+    <select name="target" required>
+      {% for tag in release_tags %}
+        <option value="{{ tag }}" {% if tag == latest_tag %}selected{% endif %}>
+          {{ tag }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <label>Start Time</label>
+    <input type="datetime-local" name="scheduled_for">
+    <small class="muted">Leave blank to start immediately.</small>
+
+    <label>Displays</label>
+    <div class="checkbox-grid">
+      {% for display in displays %}
+        <label class="checkbox-row">
+          <input
+            type="checkbox"
+            name="display_ids"
+            value="{{ display.id }}"
+          >
+          {{ display.name }} <span class="muted">({{ display.id }})</span>
+        </label>
+      {% endfor %}
+    </div>
+
+    <label>Canary Display</label>
+    <select name="canary_display_id">
+      <option value="">No canary; deploy to all selected displays</option>
+      {% for display in displays %}
+        <option value="{{ display.id }}">{{ display.name }}</option>
+      {% endfor %}
+    </select>
+
+    <label class="checkbox-row">
+      <input type="checkbox" name="pause_on_failure" checked>
+      Pause the rollout if any deployment fails
+    </label>
+
+    <label class="checkbox-row">
+      <input type="checkbox" name="dry_run">
+      Dry run only
+    </label>
+
+    <button class="primary" type="submit">Schedule Rollout</button>
+  </form>
+</div>
+
+<div class="section">
+  <h2>Rollout Timeline</h2>
+
+  {% if rollouts %}
+    <div class="rollout-list">
+      {% for rollout in rollouts %}
+        <div class="card rollout-card">
+          <div class="rollout-header">
+            <div>
+              <h3>{{ rollout.target }}</h3>
+              <span class="muted">{{ rollout.id }}</span>
+            </div>
+            <span class="status-pill">{{ rollout.status|replace("_", " ")|title }}</span>
+          </div>
+
+          <p>{{ rollout.message }}</p>
+          <p><strong>Scheduled:</strong> {{ rollout.scheduled_for }}</p>
+          {% if rollout.canary_display_id %}
+            <p><strong>Canary:</strong> {{ rollout.canary_display_id }}</p>
+          {% endif %}
+
+          <div class="compact-list">
+            {% for job in rollout.job_states %}
+              <div class="compact-row">
+                <div><strong>{{ job.display_name }}</strong></div>
+                <div>{{ job.status|title }}</div>
+                <div>{{ job.progress }}%</div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="context-actions">
+            {% if rollout.status == "paused" %}
+              <form method="POST" action="/rollouts/{{ rollout.id }}/resume">
+                <button class="safe" type="submit">Resume Rollout</button>
+              </form>
+            {% endif %}
+            {% if rollout.status not in ["success", "failed", "cancelled"] %}
+              <form method="POST" action="/rollouts/{{ rollout.id }}/cancel">
+                <button class="danger" type="submit">Cancel Rollout</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">No rollouts have been scheduled.</p>
+  {% endif %}
+</div>
+{% endblock %}
