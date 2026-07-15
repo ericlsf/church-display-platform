@@ -630,3 +630,16 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1rem;
 }
+
+/* v5.0.1 display folder picker */
+
+.current-assignment {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.75rem 0 1rem;
+  padding: 0.8rem;
+  border: 1px solid var(--border, #d9dde3);
+  border-radius: 0.6rem;
+  background: rgba(127, 127, 127, 0.06);
+}

@@ -49,25 +49,42 @@
 
 <div class="display-details-grid">
   <div class="section">
-    <h2>Current Configuration</h2>
+    <h2>Content & Overlay</h2>
 
-    <p><strong>Playlist:</strong> {{ fleet.assigned_folder or "Not assigned" }}</p>
-    <p><strong>Host:</strong> {{ display.host or "Unknown" }}</p>
-    <p><strong>Groups:</strong>
-      {% if groups %}
-        {{ groups|map(attribute="name")|join(", ") }}
-      {% else %}
-        None
-      {% endif %}
-    </p>
+    <div class="current-assignment">
+      <span class="muted">Current content folder</span>
+      <strong>
+        {{ current_folder or "No folder assigned" }}
+      </strong>
+    </div>
+
+    {% if folder_error %}
+      <p class="warning">
+        The folder list could not be refreshed: {{ folder_error }}
+      </p>
+    {% endif %}
 
     <form method="POST" action="/display/{{ display.id }}/quick-settings">
-      <label>Content Folder</label>
-      <input
-        name="folder"
-        value="{{ fleet.assigned_folder or '' }}"
-        placeholder="Google Drive folder"
-      >
+      <label>Assign Content Folder</label>
+      <select name="folder" required>
+        <option value="" {% if not current_folder %}selected{% endif %}>
+          Choose a folder
+        </option>
+        {% for folder in available_folders %}
+          <option
+            value="{{ folder }}"
+            {% if folder == current_folder %}selected{% endif %}
+          >
+            {{ folder }}
+          </option>
+        {% endfor %}
+      </select>
+
+      {% if not available_folders %}
+        <p class="muted">
+          No content folders are currently available from the configured Drive remote.
+        </p>
+      {% endif %}
 
       <label class="checkbox-row">
         <input
@@ -85,8 +102,12 @@
         value="{{ presentation.get("overlay", {}).get("text", "Welcome") }}"
       >
 
-      <button class="primary" type="submit">
-        Save and Apply
+      <button
+        class="primary"
+        type="submit"
+        {% if not available_folders %}disabled{% endif %}
+      >
+        Apply Folder and Overlay
       </button>
     </form>
   </div>
