@@ -1,4 +1,7 @@
-from services.notifications import notification_summary
+from services.notifications import (
+    build_notifications,
+    notification_summary,
+)
 from services.auth import init_auth_db, load_current_user, log_audit, user_count
 from routes.auth import auth_bp
 from flask import g, redirect, request, session, url_for

@@ -193,3 +193,53 @@ def clear_resolved():
             item["dismissed"] = True
             item["read"] = True
     save_notifications(data)
+
+
+# ---------------------------------------------------------------------------
+# Backward-compatible dashboard API
+# ---------------------------------------------------------------------------
+
+def build_notifications(limit=100, *args, **kwargs):
+    """
+    Compatibility wrapper for dashboard code written before the
+    Notification Center service was introduced.
+    """
+    try:
+        return visible_notifications(limit=int(limit or 100))
+    except (TypeError, ValueError):
+        return visible_notifications(limit=100)
+
+
+def notification_summary(*args, **kwargs):
+    """
+    Return notification totals in the format expected by older dashboard
+    routes and templates.
+    """
+    rows = visible_notifications(limit=1000)
+
+    unread = sum(
+        1
+        for item in rows
+        if not item.get("read")
+    )
+
+    errors = sum(
+        1
+        for item in rows
+        if item.get("level") == "error"
+    )
+
+    warnings = sum(
+        1
+        for item in rows
+        if item.get("level") == "warning"
+    )
+
+    return {
+        "total": len(rows),
+        "unread": unread,
+        "errors": errors,
+        "warnings": warnings,
+        "items": rows[:5],
+        "notifications": rows[:5],
+    }
