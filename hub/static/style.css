@@ -849,3 +849,25 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
 .update-stat-card form{margin:.25rem 0 0}
 .update-available-label{color:#ef6c00;font-weight:700}
 .compact-upgrade-button{min-height:2.1rem;padding:.35rem .7rem;width:100%}
+
+/* v5.6.0 deployment verification */
+
+.deployment-verification-card {
+  margin-top: 1rem;
+  padding: 0.9rem;
+  border: 1px solid var(--border, #d9dde3);
+  border-radius: 0.7rem;
+}
+
+.deployment-verification-card[data-state="verified"] {
+  border-left: 5px solid #2e7d32;
+}
+
+.deployment-verification-card[data-state="verification_failed"],
+.deployment-verification-card[data-state="failed"] {
+  border-left: 5px solid #c62828;
+}
+
+.deployment-verification-card[data-state="deploying"] {
+  border-left: 5px solid #1565c0;
+}

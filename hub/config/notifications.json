@@ -1104,6 +1104,19 @@
       "read": false,
       "dismissed": false,
       "resolved": false
+    },
+    {
+      "id": "7ed5c722-c30e-40ed-94e1-6c21e1504c7e",
+      "source_key": "job-success:cbf44b25-b189-4ec3-9c91-ab0eb610cd48",
+      "level": "success",
+      "title": "Deploy Update completed",
+      "message": "Display software updated to v5.5.2; display service verified. Agent will restart.",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T20:43:45.032230+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
     }
   ],
   "seen_sources": [
@@ -1191,6 +1204,7 @@
     "job-success:8986dd5b-f449-47a1-a015-be91c98c14d9",
     "job-success:c9ea2dfc-f02f-418d-94c9-cb4f3ecd60a9",
     "job-success:87a49bd8-48e0-46a3-bb32-c51432cd9397",
-    "job-success:f63ce75d-bede-4285-810f-7b0982d7b5e4"
+    "job-success:f63ce75d-bede-4285-810f-7b0982d7b5e4",
+    "job-success:cbf44b25-b189-4ec3-9c91-ab0eb610cd48"
   ]
 }

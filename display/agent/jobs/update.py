@@ -12,6 +12,7 @@ from urllib import request
 from agent.config import APP_DIR
 from agent.utils import run_command
 from agent.version import get_version_info
+from agent.install_version import record_installed_release
 
 
 INSTALL_ROOT = APP_DIR.parent
@@ -268,6 +269,31 @@ def handle_deploy_update(job, report):
             _backup_current(report)
             _install_release(release_root, report)
             _install_dependencies(report)
+
+            report(
+                "running",
+                80,
+                f"Recording installed release {target}",
+            )
+            record_installed_release(
+                APP_DIR,
+                target,
+                sha256=actual_sha256,
+                commit=payload.get("commit", ""),
+                package_url=package_url,
+            )
+
+            recorded = (
+                (APP_DIR / "VERSION")
+                .read_text(encoding="utf-8")
+                .strip()
+            )
+            if recorded != target:
+                raise RuntimeError(
+                    f"Installed VERSION file reports {recorded}; "
+                    f"expected {target}"
+                )
+
             _restart_and_verify(report)
 
             report(

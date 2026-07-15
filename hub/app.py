@@ -48,6 +48,7 @@ from routes.command_center import command_center_bp
 from routes.command_center_home import command_center_home_bp
 from routes.display_upgrades import display_upgrades_bp
 from routes.health_diagnostics import health_diagnostics_bp
+from routes.deployment_verification import deployment_verification_bp
 from services.startup import run_startup_checks
 from services.request_context import assign_request_id, log_exception, request_id
 
@@ -97,6 +98,7 @@ def create_app():
     app.register_blueprint(command_center_home_bp)
     app.register_blueprint(display_upgrades_bp)
     app.register_blueprint(health_diagnostics_bp)
+    app.register_blueprint(deployment_verification_bp)
 
     # v2.6.0 auth hooks
     app.secret_key = os.environ.get(

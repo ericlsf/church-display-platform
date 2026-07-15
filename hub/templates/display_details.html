@@ -264,6 +264,23 @@
     <a href="/deployments">All Deployments</a>
   </div>
 
+<div
+  class="deployment-verification-card"
+  data-deployment-verification
+  data-display-id="{{ display.id }}"
+>
+  <strong data-verification-status>
+    Checking deployment verification…
+  </strong>
+  <p
+    class="muted"
+    data-verification-detail
+  ></p>
+</div>
+
+<script src="/static/deployment-verification.js"></script>
+
+
   <div class="upgrade-grid">
     <div class="metric-card">
       <span>Current Version</span>
