@@ -45,6 +45,7 @@ from routes.display_profiles import display_profiles_bp
 from routes.display_details import display_details_bp
 from routes.operator_experience import operator_experience_bp
 from routes.command_center import command_center_bp
+from routes.command_center_home import command_center_home_bp
 from services.startup import run_startup_checks
 from services.request_context import assign_request_id, log_exception, request_id
 
@@ -91,6 +92,7 @@ def create_app():
     app.register_blueprint(display_details_bp)
     app.register_blueprint(operator_experience_bp)
     app.register_blueprint(command_center_bp)
+    app.register_blueprint(command_center_home_bp)
 
     # v2.6.0 auth hooks
     app.secret_key = os.environ.get(

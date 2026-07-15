@@ -12,7 +12,7 @@ from services.resilience import load_resilience
 dashboard_bp = Blueprint("dashboard", __name__)
 
 
-@dashboard_bp.route("/")
+@dashboard_bp.route("/legacy-dashboard")
 def dashboard():
     state = build_fleet_state()
     rows = state.get("rows", [])
