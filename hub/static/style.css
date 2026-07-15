@@ -400,3 +400,49 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
   justify-content: space-between;
   gap: 1rem;
 }
+
+/* v4.8.0 audit history */
+
+.audit-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: end;
+}
+
+.audit-list {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.audit-row {
+  border: 1px solid var(--border, #d9dde3);
+  border-radius: 0.6rem;
+  padding: 0.65rem 0.85rem;
+}
+
+.audit-row summary {
+  display: grid;
+  grid-template-columns: minmax(175px, 1.3fr) minmax(180px, 2fr) 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  cursor: pointer;
+}
+
+.audit-details {
+  padding-top: 0.75rem;
+}
+
+.audit-details pre {
+  overflow-x: auto;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background: rgba(127, 127, 127, 0.08);
+}
+
+@media (max-width: 760px) {
+  .audit-row summary {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+}

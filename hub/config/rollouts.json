@@ -1,0 +1,28 @@
+{
+  "rollouts": [
+    {
+      "id": "31acf409-e9fa-4dd3-b362-75e36e319ab4",
+      "target": "v4.7.0",
+      "display_ids": [
+        "welcome-center"
+      ],
+      "canary_display_id": "welcome-center",
+      "pause_on_failure": true,
+      "dry_run": false,
+      "scheduled_for": "2026-07-15T12:20:53.150372+00:00",
+      "status": "success",
+      "created_at": "2026-07-15T12:20:53.150495+00:00",
+      "updated_at": "2026-07-15T12:21:54.582598+00:00",
+      "artifact": {
+        "sha256": "76ce1327a723db1e3176a4cf6e9e1f5b0cf6a1b3e6709d92518afec02128b105",
+        "commit": "71cdfbf51d306b4ed026db608ede1f12cabf1b71",
+        "size": 31531,
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/76ce1327a723db1e3176a4cf6e9e1f5b0cf6a1b3e6709d92518afec02128b105.tar.gz"
+      },
+      "jobs": {
+        "welcome-center": "f02429a0-c212-492c-b2d0-e0d19d84120a"
+      },
+      "message": "Rollout completed successfully"
+    }
+  ]
+}
