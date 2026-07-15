@@ -622,3 +622,11 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
   text-align: right;
   color: var(--muted, #667085);
 }
+
+/* v5.0.0 unified display details */
+
+.display-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}

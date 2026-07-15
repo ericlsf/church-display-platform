@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}{{ display.name }} - Church Display Hub{% endblock %}
+
+{% block content %}
+<div class="section">
+  <div class="section-heading-row">
+    <div>
+      <h2>{{ display.name }}</h2>
+      <p class="muted">{{ display.id }}</p>
+    </div>
+
+    <div class="context-actions">
+      <form method="POST" action="/display/{{ display.id }}/action">
+        <input type="hidden" name="action" value="sync">
+        <button type="submit">Sync Now</button>
+      </form>
+
+      <form method="POST" action="/display/{{ display.id }}/action">
+        <input type="hidden" name="action" value="restart">
+        <button type="submit">Restart Player</button>
+      </form>
+
+      <form method="POST" action="/display/{{ display.id }}/action">
+        <input type="hidden" name="action" value="reboot">
+        <button class="danger" type="submit">Reboot</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <strong>{{ fleet.readiness|default("unknown")|replace("_", " ")|title }}</strong>
+    <span>Status</span>
+  </div>
+  <div class="stat-card">
+    <strong>{{ fleet.health_score|default(0) }}%</strong>
+    <span>Health</span>
+  </div>
+  <div class="stat-card">
+    <strong>{{ fleet.version|default("unknown") }}</strong>
+    <span>Version</span>
+  </div>
+  <div class="stat-card">
+    <strong>{{ fleet.media_count|default(0) }}</strong>
+    <span>Media Files</span>
+  </div>
+</div>
+
+<div class="display-details-grid">
+  <div class="section">
+    <h2>Current Configuration</h2>
+
+    <p><strong>Playlist:</strong> {{ fleet.assigned_folder or "Not assigned" }}</p>
+    <p><strong>Host:</strong> {{ display.host or "Unknown" }}</p>
+    <p><strong>Groups:</strong>
+      {% if groups %}
+        {{ groups|map(attribute="name")|join(", ") }}
+      {% else %}
+        None
+      {% endif %}
+    </p>
+
+    <form method="POST" action="/display/{{ display.id }}/quick-settings">
+      <label>Content Folder</label>
+      <input
+        name="folder"
+        value="{{ fleet.assigned_folder or '' }}"
+        placeholder="Google Drive folder"
+      >
+
+      <label class="checkbox-row">
+        <input
+          type="checkbox"
+          name="overlay_enabled"
+          {% if presentation.get("overlay", {}).get("enabled", True) %}checked{% endif %}
+        >
+        Show overlay
+      </label>
+
+      <label>Overlay Text</label>
+      <input
+        name="overlay_text"
+        maxlength="160"
+        value="{{ presentation.get("overlay", {}).get("text", "Welcome") }}"
+      >
+
+      <button class="primary" type="submit">
+        Save and Apply
+      </button>
+    </form>
+  </div>
+
+  <div class="section">
+    <h2>Display Profile</h2>
+
+    <form method="POST" action="/display/{{ display.id }}/profile">
+      <label>Apply Profile</label>
+      <select name="profile_id" required>
+        <option value="">Choose profile</option>
+        {% for profile in profiles %}
+          <option value="{{ profile.id }}">
+            {{ profile.name }}
+          </option>
+        {% endfor %}
+      </select>
+
+      <button class="primary" type="submit">
+        Apply Profile
+      </button>
+    </form>
+  </div>
+
+  <div class="section">
+    <h2>Maintenance</h2>
+
+    <form method="POST" action="/display/{{ display.id }}/maintenance">
+      <label class="checkbox-row">
+        <input
+          type="checkbox"
+          name="enabled"
+          {% if maintenance.enabled %}checked{% endif %}
+        >
+        Maintenance mode
+      </label>
+
+      <label>Reason</label>
+      <input
+        name="reason"
+        maxlength="250"
+        value="{{ maintenance.reason or '' }}"
+      >
+
+      <button type="submit">Save Maintenance State</button>
+    </form>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-heading-row">
+    <h2>Recent Jobs</h2>
+    <a href="/jobs?display_id={{ display.id }}">View All</a>
+  </div>
+
+  <div class="compact-list">
+    {% for job in jobs %}
+      <div class="compact-row">
+        <div>
+          <strong>{{ job.type|replace("_", " ")|title }}</strong>
+          <span class="muted">{{ job.created_at }}</span>
+        </div>
+        <div>{{ job.status|title }}</div>
+        <div>{{ job.progress|default(0) }}%</div>
+      </div>
+    {% else %}
+      <p class="muted">No jobs for this display.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-heading-row">
+    <h2>Recent Audit Activity</h2>
+    <a href="/audit?q={{ display.id }}">View All</a>
+  </div>
+
+  <div class="compact-list">
+    {% for row in audit_rows %}
+      <div class="compact-row">
+        <div>
+          <strong>{{ row.action|replace("_", " ") }}</strong>
+          <span class="muted">{{ row.timestamp }}</span>
+        </div>
+        <div>{{ row.actor }}</div>
+        <div>{{ row.status|title }}</div>
+      </div>
+    {% else %}
+      <p class="muted">No audit activity for this display.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

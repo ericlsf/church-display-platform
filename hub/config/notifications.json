@@ -857,6 +857,32 @@
       "read": false,
       "dismissed": false,
       "resolved": false
+    },
+    {
+      "id": "5d647efa-52a9-4403-beca-b4753a59c547",
+      "source_key": "job-success:2f93f308-8797-478b-b66e-0eaa3d566639",
+      "level": "success",
+      "title": "Deploy Update completed",
+      "message": "DRY RUN OK: v4.13.2 downloaded, checksum verified, and staged source compiled successfully",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T15:29:59.533130+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "62ed22f6-a785-431d-88b6-984e04ff786c",
+      "source_key": "job-success:37b9212a-a329-4d20-985a-19f19a022d12",
+      "level": "success",
+      "title": "Deploy Update completed",
+      "message": "Display software updated to v4.13.2; display service verified. Agent will restart.",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T15:35:49.569994+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
     }
   ],
   "seen_sources": [
@@ -925,6 +951,8 @@
     "job-failed:791058ef-6ace-4286-8f3a-71a7b36a6343",
     "job-success:66c5a1d1-8596-437d-8451-6ee6cea647f7",
     "job-failed:02b4e22c-a28b-4b89-92e0-cd51bf0f2ece",
-    "job-failed:5965bd7a-245b-4724-b93f-7a3ca8644250"
+    "job-failed:5965bd7a-245b-4724-b93f-7a3ca8644250",
+    "job-success:2f93f308-8797-478b-b66e-0eaa3d566639",
+    "job-success:37b9212a-a329-4d20-985a-19f19a022d12"
   ]
 }
