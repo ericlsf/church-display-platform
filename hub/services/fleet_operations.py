@@ -1,8 +1,9 @@
-from services.config import load_config
+from services.config import load_config, load_hub_settings
+from services.display_groups import group_members
+from services.display_artifacts import create_artifact
 from services.fleet_state import build_fleet_state
 from services.jobs import create_job
-from services.display_artifacts import create_artifact
-from services.config import load_hub_settings
+from services.maintenance import in_maintenance
 
 
 def fleet_rows():
@@ -17,23 +18,27 @@ def fleet_rows():
     for display in config.get("displays", []):
         display_id = display.get("id", "")
         health = state_rows.get(display_id, {})
+        maintenance = display.get(
+            "maintenance",
+            {"enabled": False, "reason": ""},
+        )
+
         version = (
             health.get("version")
             or display.get("version")
             or "unknown"
         )
-
         assigned_folder = (
             display.get("assigned_folder")
             or display.get("sync_folder")
             or ""
         )
 
+        media = health.get("media", {})
         media_count = int(
             health.get("media_count")
-            or health.get("media", {}).get("total", 0)
-            if isinstance(health.get("media"), dict)
-            else 0
+            or (media.get("total", 0) if isinstance(media, dict) else 0)
+            or 0
         )
 
         online = bool(health.get("online", False))
@@ -59,7 +64,9 @@ def fleet_rows():
             * 100
         )
 
-        if all(checks.values()):
+        if in_maintenance(display):
+            readiness = "maintenance"
+        elif all(checks.values()):
             readiness = "ready"
         elif not online:
             readiness = "offline"
@@ -80,6 +87,7 @@ def fleet_rows():
             "health_score": score,
             "readiness": readiness,
             "checks": checks,
+            "maintenance": maintenance,
         })
 
     return rows
@@ -96,8 +104,56 @@ def _package_url(sha256):
     )
 
 
-def queue_bulk_action(display_ids, action, payload=None):
+def resolve_targets(display_ids=None, group_ids=None):
+    combined = list(display_ids or [])
+    combined.extend(group_members(group_ids or []))
+
+    result = []
+    seen = set()
+    for display_id in combined:
+        display_id = str(display_id or "").strip()
+        if not display_id or display_id in seen:
+            continue
+        seen.add(display_id)
+        result.append(display_id)
+    return result
+
+
+def queue_bulk_action(
+    display_ids,
+    action,
+    payload=None,
+    group_ids=None,
+    allow_maintenance=False,
+):
     payload = payload or {}
+    targets = resolve_targets(display_ids, group_ids)
+
+    config = load_config()
+    displays = {
+        item.get("id"): item
+        for item in config.get("displays", [])
+    }
+
+    blocked = []
+    eligible = []
+
+    for display_id in targets:
+        display = displays.get(display_id)
+        if not display:
+            continue
+
+        if in_maintenance(display) and not allow_maintenance:
+            blocked.append(display_id)
+        else:
+            eligible.append(display_id)
+
+    if not eligible and blocked:
+        raise ValueError(
+            "All selected displays are in maintenance mode. "
+            "Enable the maintenance override to continue."
+        )
+
     queued = []
 
     if action == "deploy_update":
@@ -116,7 +172,7 @@ def queue_bulk_action(display_ids, action, payload=None):
             "deployment_mode": "immutable_hub_artifact",
         }
 
-        for display_id in display_ids:
+        for display_id in eligible:
             queued.append(
                 create_job(
                     display_id,
@@ -124,24 +180,31 @@ def queue_bulk_action(display_ids, action, payload=None):
                     dict(common),
                 )
             )
-        return queued
-
-    for display_id in display_ids:
-        if action == "sync_now":
-            queued.append(create_job(display_id, "sync_now", {}))
-        elif action == "restart_display":
-            queued.append(create_job(display_id, "restart_display", {}))
-        elif action == "apply_display_settings":
-            queued.append(
-                create_job(
-                    display_id,
-                    "apply_display_settings",
-                    {
-                        "settings": payload.get("settings", {}),
-                    },
+    else:
+        for display_id in eligible:
+            if action == "sync_now":
+                queued.append(create_job(display_id, "sync_now", {}))
+            elif action == "restart_display":
+                queued.append(
+                    create_job(display_id, "restart_display", {})
                 )
-            )
-        else:
-            raise ValueError(f"Unsupported bulk action: {action}")
+            elif action == "apply_display_settings":
+                queued.append(
+                    create_job(
+                        display_id,
+                        "apply_display_settings",
+                        {
+                            "settings": payload.get("settings", {}),
+                        },
+                    )
+                )
+            else:
+                raise ValueError(
+                    f"Unsupported bulk action: {action}"
+                )
 
-    return queued
+    return {
+        "jobs": queued,
+        "queued_display_ids": eligible,
+        "blocked_display_ids": blocked,
+    }

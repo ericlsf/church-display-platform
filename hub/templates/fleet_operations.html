@@ -5,7 +5,8 @@
 <div class="section">
   <h2>Fleet Operations</h2>
   <p class="muted">
-    Review readiness, software versions, and queue actions across multiple displays.
+    Queue actions for individual displays, saved groups, or both. Maintenance
+    displays are skipped unless you explicitly override the protection.
   </p>
 </div>
 
@@ -15,9 +16,33 @@
   <div class="stat-card"><strong>{{ summary.provisioning }}</strong><span>Provisioning</span></div>
   <div class="stat-card"><strong>{{ summary.attention }}</strong><span>Needs Attention</span></div>
   <div class="stat-card"><strong>{{ summary.offline }}</strong><span>Offline</span></div>
+  <div class="stat-card"><strong>{{ summary.maintenance }}</strong><span>Maintenance</span></div>
 </div>
 
 <form method="POST" action="/fleet-operations/bulk">
+  <div class="section">
+    <h3>Target Groups</h3>
+    {% if groups %}
+      <div class="checkbox-grid">
+        {% for group in groups %}
+          <label class="checkbox-row">
+            <input
+              type="checkbox"
+              name="group_ids"
+              value="{{ group.id }}"
+            >
+            {{ group.name }}
+            <span class="muted">({{ group.members|length }})</span>
+          </label>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">
+        No saved groups. Create them under Groups & Maintenance.
+      </p>
+    {% endif %}
+  </div>
+
   <div class="section">
     <div class="fleet-toolbar">
       <label>
@@ -27,7 +52,9 @@
           <option value="sync_now">Sync Now</option>
           <option value="restart_display">Restart Display App</option>
           <option value="deploy_update">Deploy Software</option>
-          <option value="apply_display_settings">Apply Presentation Settings</option>
+          <option value="apply_display_settings">
+            Apply Presentation Settings
+          </option>
         </select>
       </label>
 
@@ -36,12 +63,16 @@
           Version
           <select name="target">
             {% for tag in release_tags %}
-              <option value="{{ tag }}" {% if tag == latest_tag %}selected{% endif %}>
+              <option
+                value="{{ tag }}"
+                {% if tag == latest_tag %}selected{% endif %}
+              >
                 {{ tag }}
               </option>
             {% endfor %}
           </select>
         </label>
+
         <label>
           Mode
           <select name="dry_run">
@@ -58,7 +89,11 @@
         </label>
         <label>
           Overlay text
-          <input name="overlay_text" maxlength="160" placeholder="Welcome">
+          <input
+            name="overlay_text"
+            maxlength="160"
+            placeholder="Welcome"
+          >
         </label>
         <label class="checkbox-row">
           <input type="checkbox" name="clock_enabled" checked>
@@ -70,15 +105,34 @@
         </label>
         <label>
           Countdown window
-          <input type="number" min="0" max="180" name="countdown_start_minutes" value="20">
+          <input
+            type="number"
+            min="0"
+            max="180"
+            name="countdown_start_minutes"
+            value="20"
+          >
         </label>
         <label>
           Image duration
-          <input type="number" min="1" max="300" name="image_duration" value="8">
+          <input
+            type="number"
+            min="1"
+            max="300"
+            name="image_duration"
+            value="8"
+          >
         </label>
       </div>
 
-      <button class="primary" type="submit">Queue for Selected Displays</button>
+      <label class="checkbox-row maintenance-override">
+        <input type="checkbox" name="allow_maintenance">
+        Override maintenance protection
+      </label>
+
+      <button class="primary" type="submit">
+        Queue for Selected Targets
+      </button>
     </div>
   </div>
 
@@ -113,6 +167,11 @@
             <td>
               {% if row.readiness == "ready" %}
                 <span class="online">● Ready</span>
+              {% elif row.readiness == "maintenance" %}
+                <span class="warning">● Maintenance</span>
+                {% if row.maintenance.reason %}
+                  <br><small>{{ row.maintenance.reason }}</small>
+                {% endif %}
               {% elif row.readiness == "offline" %}
                 <span class="offline">● Offline</span>
               {% elif row.readiness == "provisioning" %}
@@ -135,14 +194,19 @@
 <script>
 (() => {
   const selectAll = document.getElementById("select-all-displays");
-  const selectors = Array.from(document.querySelectorAll(".display-selector"));
+  const selectors = Array.from(
+    document.querySelectorAll(".display-selector")
+  );
   const action = document.getElementById("fleet-action");
   const deployOptions = document.getElementById("deploy-options");
-  const presentationOptions = document.getElementById("presentation-options");
+  const presentationOptions = document.getElementById(
+    "presentation-options"
+  );
 
   const refreshOptions = () => {
     deployOptions.hidden = action.value !== "deploy_update";
-    presentationOptions.hidden = action.value !== "apply_display_settings";
+    presentationOptions.hidden =
+      action.value !== "apply_display_settings";
   };
 
   selectAll?.addEventListener("change", () => {
