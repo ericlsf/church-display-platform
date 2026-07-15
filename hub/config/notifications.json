@@ -1013,6 +1013,58 @@
       "read": false,
       "dismissed": false,
       "resolved": false
+    },
+    {
+      "id": "ceca695b-b296-46b6-9872-e5859805e723",
+      "source_key": "job-success:79b7bda4-c234-43e3-806b-a35c75172f0f",
+      "level": "success",
+      "title": "Set Sync Folder completed",
+      "message": "Playlist Missions assigned and synchronized",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T20:07:43.666256+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "d8bfb90a-d2a6-4a36-ab80-a166760b0479",
+      "source_key": "job-success:1d11b21c-e8f5-43a8-a363-493fd6900740",
+      "level": "success",
+      "title": "Apply Display Settings completed",
+      "message": "Presentation settings applied; player will reload them automatically",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T20:08:43.328857+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "a53e5211-67aa-4552-a0a4-67c2d85267d3",
+      "source_key": "job-success:c508ac24-c8cc-4119-8d8e-36f2c53eb13a",
+      "level": "success",
+      "title": "Set Sync Folder completed",
+      "message": "Playlist Missions assigned and synchronized",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T20:08:43.328951+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "9fc8bc00-31b5-40eb-828d-2c14792a08e9",
+      "source_key": "job-success:8986dd5b-f449-47a1-a015-be91c98c14d9",
+      "level": "success",
+      "title": "Apply Display Settings completed",
+      "message": "Presentation settings applied; player will reload them automatically",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T20:08:43.328990+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
     }
   ],
   "seen_sources": [
@@ -1093,6 +1145,10 @@
     "job-success:69bb1650-7eb2-4c67-80dc-aed2f723f385",
     "job-success:27c1a103-31d0-4fd4-b6f7-6dbae30b2780",
     "job-success:fbb8912d-6dae-43f0-a03c-ad14565a98e7",
-    "job-success:461f7446-68f2-4a70-bdda-25808c33cdcc"
+    "job-success:461f7446-68f2-4a70-bdda-25808c33cdcc",
+    "job-success:79b7bda4-c234-43e3-806b-a35c75172f0f",
+    "job-success:1d11b21c-e8f5-43a8-a363-493fd6900740",
+    "job-success:c508ac24-c8cc-4119-8d8e-36f2c53eb13a",
+    "job-success:8986dd5b-f449-47a1-a015-be91c98c14d9"
   ]
 }

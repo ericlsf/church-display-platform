@@ -4,6 +4,7 @@ from services.display_artifacts import create_artifact
 from services.fleet_state import build_fleet_state
 from services.jobs import create_job
 from services.maintenance import in_maintenance
+from services.telemetry_normalization import normalize_fleet_telemetry
 
 
 def fleet_rows():
@@ -18,38 +19,24 @@ def fleet_rows():
     for display in config.get("displays", []):
         display_id = display.get("id", "")
         health = state_rows.get(display_id, {})
+        telemetry = normalize_fleet_telemetry(health, display)
         maintenance = display.get(
             "maintenance",
             {"enabled": False, "reason": ""},
         )
 
-        version = (
-            health.get("version")
-            or display.get("version")
-            or "unknown"
-        )
+        version = telemetry["version"]
         assigned_folder = (
             display.get("assigned_folder")
             or display.get("sync_folder")
             or ""
         )
 
-        media = health.get("media", {})
-        media_count = int(
-            health.get("media_count")
-            or (media.get("total", 0) if isinstance(media, dict) else 0)
-            or 0
-        )
+        media_count = telemetry["media_count"]
 
         online = bool(health.get("online", False))
-        player_running = bool(
-            health.get("display_app_running")
-            or health.get("player_running")
-        )
-        sync_ok = bool(
-            health.get("sync_state") == "success"
-            or health.get("last_sync_status") == "success"
-        )
+        player_running = telemetry["player_running"]
+        sync_ok = telemetry["sync_ok"]
 
         checks = {
             "online": online,
