@@ -790,3 +790,56 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
 .activity-timeline .activity-item:last-child {
   border-bottom: 0;
 }
+
+/* v5.5.0 health diagnostics */
+
+.health-check-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.health-check-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 0.85rem;
+  border: 1px solid var(--border, #d9dde3);
+  border-radius: 0.7rem;
+}
+
+.health-check-row.passed {
+  border-left: 5px solid #2e7d32;
+}
+
+.health-check-row.failed {
+  border-left: 5px solid #ef6c00;
+}
+
+.health-check-icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  font-weight: 700;
+  background: rgba(127, 127, 127, 0.1);
+}
+
+.health-check-content p {
+  margin: 0.2rem 0 0;
+}
+
+.health-score-explanation {
+  margin-top: 0.9rem;
+}
+
+@media (max-width: 700px) {
+  .health-check-row {
+    grid-template-columns: auto 1fr;
+  }
+
+  .health-check-action {
+    grid-column: 1 / -1;
+  }
+}

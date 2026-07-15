@@ -948,6 +948,71 @@
       "read": false,
       "dismissed": false,
       "resolved": false
+    },
+    {
+      "id": "1095ca6e-66cc-4405-a42c-49c46ee5985c",
+      "source_key": "job-success:26937c45-488d-47f8-8a04-d6614464cfbe",
+      "level": "success",
+      "title": "Deploy Update completed",
+      "message": "Display software updated to v5.4.1; display service verified. Agent will restart.",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T19:35:43.363281+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "cf310be1-1fef-49dc-b26c-565d49e27249",
+      "source_key": "job-success:69bb1650-7eb2-4c67-80dc-aed2f723f385",
+      "level": "success",
+      "title": "Apply Display Settings completed",
+      "message": "Presentation settings applied; player will reload them automatically",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T19:47:48.792757+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "50891536-0e64-4bd1-8b85-0ba739b77a1b",
+      "source_key": "job-success:27c1a103-31d0-4fd4-b6f7-6dbae30b2780",
+      "level": "success",
+      "title": "Sync Now completed",
+      "message": "Sync completed for Missions",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T19:56:24.185921+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "333f7787-48cd-4b09-94eb-9e0940b2fe3f",
+      "source_key": "job-success:fbb8912d-6dae-43f0-a03c-ad14565a98e7",
+      "level": "success",
+      "title": "Apply Display Settings completed",
+      "message": "Presentation settings applied; player will reload them automatically",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T19:57:43.423421+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "46202657-6d0c-444e-a083-6ef6736505ec",
+      "source_key": "job-success:461f7446-68f2-4a70-bdda-25808c33cdcc",
+      "level": "success",
+      "title": "Set Sync Folder completed",
+      "message": "Playlist Seasonal assigned and synchronized",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T19:57:43.423499+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
     }
   ],
   "seen_sources": [
@@ -1023,6 +1088,11 @@
     "job-success:3f38b18d-e006-45c5-a668-3b9592bf65f1",
     "job-success:2fbc8ca8-018c-42fa-a0e0-7dd29d3ee37c",
     "job-success:32e64adf-4f92-4f82-a042-f34d98b783ce",
-    "job-success:6d45c6ae-08a8-4d15-9d78-2b217de758ad"
+    "job-success:6d45c6ae-08a8-4d15-9d78-2b217de758ad",
+    "job-success:26937c45-488d-47f8-8a04-d6614464cfbe",
+    "job-success:69bb1650-7eb2-4c67-80dc-aed2f723f385",
+    "job-success:27c1a103-31d0-4fd4-b6f7-6dbae30b2780",
+    "job-success:fbb8912d-6dae-43f0-a03c-ad14565a98e7",
+    "job-success:461f7446-68f2-4a70-bdda-25808c33cdcc"
   ]
 }

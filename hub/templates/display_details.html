@@ -48,7 +48,7 @@
 </div>
 
 <div class="display-details-grid">
-  <div class="section">
+  <div class="section" id="content-settings">
     <h2>Content & Overlay</h2>
 
     <div class="current-assignment">
@@ -364,6 +364,81 @@
     </div>
   {% endif %}
 </div>
+
+
+<div class="section" id="health-diagnostics">
+  <div class="section-heading-row">
+    <div>
+      <h2>Health Diagnostics</h2>
+      <p class="muted">
+        Health is calculated from five checks. Each failed check includes a
+        recommended corrective action.
+      </p>
+    </div>
+
+    <span class="status-pill
+      {% if health_diagnostics.all_healthy %}online{% else %}warning{% endif %}">
+      {{ health_diagnostics.score }}%
+    </span>
+  </div>
+
+  {% if health_diagnostics.all_healthy %}
+    <div class="empty-state">
+      All display health checks are passing.
+    </div>
+  {% else %}
+    <div class="health-check-list">
+      {% for check in health_diagnostics.checks %}
+        <div class="health-check-row {% if check.passed %}passed{% else %}failed{% endif %}">
+          <div class="health-check-icon">
+            {% if check.passed %}✓{% else %}!{% endif %}
+          </div>
+
+          <div class="health-check-content">
+            <strong>{{ check.label }}</strong>
+            <p>{{ check.summary }}</p>
+
+            {% if not check.passed %}
+              <p class="muted">{{ check.guidance }}</p>
+            {% endif %}
+          </div>
+
+          <div class="health-check-action">
+            {% if not check.passed %}
+              <form
+                method="POST"
+                action="/display/{{ display.id }}/health-action"
+              >
+                <input
+                  type="hidden"
+                  name="action"
+                  value="{{ check.action }}"
+                >
+                <button
+                  type="submit"
+                  {% if check.action == "reboot" %}class="danger"{% endif %}
+                >
+                  {{ check.action_label }}
+                </button>
+              </form>
+            {% else %}
+              <span class="online">Passing</span>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if health_diagnostics.failed_count %}
+    <p class="muted health-score-explanation">
+      {{ health_diagnostics.failed_count }} of
+      {{ health_diagnostics.checks|length }} checks are failing.
+      Each check currently contributes equally to the health score.
+    </p>
+  {% endif %}
+</div>
+
 
 <div class="section">
   <div class="section-heading-row">
