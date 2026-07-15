@@ -739,3 +739,13 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
     grid-template-columns: 1fr;
   }
 }
+
+/* v5.3.0 command center */
+
+.command-summary .stat-card{text-decoration:none;color:inherit;transition:transform 120ms ease,box-shadow 120ms ease}
+.command-summary .stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.08)}
+.command-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(390px,1fr));gap:1rem}
+.command-grid>.section{min-width:0}
+.command-row-link{color:inherit;text-decoration:none}
+.command-row-link:hover{background:rgba(127,127,127,.06)}
+@media(max-width:620px){.command-grid{grid-template-columns:1fr}}
