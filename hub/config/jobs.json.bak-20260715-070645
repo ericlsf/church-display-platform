@@ -1,0 +1,2372 @@
+{
+  "jobs": [
+    {
+      "id": "4a38d080-d5bb-4a70-ae83-073b128a5a92",
+      "display_id": "all",
+      "type": "update_check",
+      "payload": {},
+      "status": "success",
+      "progress": 100,
+      "message": "tag=v1.3.1 commit=06e7b59 branch=main dirty=no",
+      "created_at": "2026-07-08T10:37:12",
+      "started_at": "2026-07-08T10:37:13",
+      "updated_at": "2026-07-08T10:37:13",
+      "completed_at": "2026-07-08T10:37:13",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "edfa16c3-1814-45b9-9fe3-1bfd8f730d3f",
+      "display_id": "all",
+      "type": "update_check",
+      "payload": {},
+      "status": "success",
+      "progress": 100,
+      "message": "tag=v1.4.0 commit=06e7b59 branch=main dirty=yes",
+      "created_at": "2026-07-08T12:34:42",
+      "started_at": "2026-07-08T12:34:42",
+      "updated_at": "2026-07-08T12:34:42",
+      "completed_at": "2026-07-08T12:34:42",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "5965bd7a-245b-4724-b93f-7a3ca8644250",
+      "display_id": "all",
+      "type": "deploy_update",
+      "payload": {},
+      "status": "failed",
+      "progress": 100,
+      "message": "Missing target tag/version",
+      "created_at": "2026-07-09T08:39:21",
+      "started_at": "2026-07-09T08:39:24",
+      "updated_at": "2026-07-13T09:46:18",
+      "completed_at": "2026-07-09T08:39:24",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T09:46:18",
+          "status": "acknowledged",
+          "message": "Bulk marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T09:46:18",
+      "acknowledged_note": "Bulk marked resolved by operator"
+    },
+    {
+      "id": "02b4e22c-a28b-4b89-92e0-cd51bf0f2ece",
+      "display_id": "all",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v1.4.0"
+      },
+      "status": "failed",
+      "progress": 100,
+      "message": "Cannot deploy: working tree has uncommitted changes",
+      "created_at": "2026-07-09T08:40:08",
+      "started_at": "2026-07-09T08:40:10",
+      "updated_at": "2026-07-13T09:46:18",
+      "completed_at": "2026-07-09T08:40:10",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T09:46:18",
+          "status": "acknowledged",
+          "message": "Bulk marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T09:46:18",
+      "acknowledged_note": "Bulk marked resolved by operator"
+    },
+    {
+      "id": "66c5a1d1-8596-437d-8451-6ee6cea647f7",
+      "display_id": "all",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v1.4.0"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "DRY RUN OK. Would deploy v1.4.0 (06e7b59f) from v1.4.0-1-g2e55ca3 (2e55ca37). Rollback point would be 2e55ca37. No files changed.",
+      "created_at": "2026-07-09T08:45:33",
+      "started_at": "2026-07-09T08:45:34",
+      "updated_at": "2026-07-09T08:45:35",
+      "completed_at": "2026-07-09T08:45:35",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "791058ef-6ace-4286-8f3a-71a7b36a6343",
+      "display_id": "all",
+      "type": "deploy_update",
+      "payload": {
+        "dry_run": "true"
+      },
+      "status": "failed",
+      "progress": 100,
+      "message": "Missing target tag/version",
+      "created_at": "2026-07-09T10:03:21",
+      "started_at": "2026-07-09T10:03:21",
+      "updated_at": "2026-07-13T09:46:18",
+      "completed_at": "2026-07-09T10:03:21",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T09:46:18",
+          "status": "acknowledged",
+          "message": "Bulk marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T09:46:18",
+      "acknowledged_note": "Bulk marked resolved by operator"
+    },
+    {
+      "id": "5347a056-9544-40db-a52a-c1eb1a192f41",
+      "display_id": "all",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v1.4.1",
+        "dry_run": "true"
+      },
+      "status": "failed",
+      "progress": 100,
+      "message": "Cannot deploy: working tree has uncommitted changes",
+      "created_at": "2026-07-09T10:03:35",
+      "started_at": "2026-07-09T10:03:36",
+      "updated_at": "2026-07-13T09:46:18",
+      "completed_at": "2026-07-09T10:03:36",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T09:46:18",
+          "status": "acknowledged",
+          "message": "Bulk marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T09:46:18",
+      "acknowledged_note": "Bulk marked resolved by operator"
+    },
+    {
+      "id": "ae59b913-b77b-44e9-9a1c-c21815eef03a",
+      "display_id": "all",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v1.4.1",
+        "dry_run": "true"
+      },
+      "status": "failed",
+      "progress": 100,
+      "message": "Cannot deploy: working tree has uncommitted changes",
+      "created_at": "2026-07-09T10:06:27",
+      "started_at": "2026-07-09T10:06:28",
+      "updated_at": "2026-07-13T09:46:18",
+      "completed_at": "2026-07-09T10:06:28",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T09:46:18",
+          "status": "acknowledged",
+          "message": "Bulk marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T09:46:18",
+      "acknowledged_note": "Bulk marked resolved by operator"
+    },
+    {
+      "id": "9fc95496-e620-4671-b8c4-65f00ad8dc82",
+      "display_id": "all",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v1.4.1",
+        "dry_run": "true"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "DRY RUN OK. Would deploy v1.4.1 (2e55ca37) from v1.4.1-1-gab1c2b4 (ab1c2b40). Rollback point would be ab1c2b40. No files changed.",
+      "created_at": "2026-07-09T10:22:34",
+      "started_at": "2026-07-09T10:22:38",
+      "updated_at": "2026-07-09T10:22:38",
+      "completed_at": "2026-07-09T10:22:38",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "8780b5fd-9c1c-4d6a-bf65-a96bc199940a",
+      "display_id": "church-display-hub",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v1.4.1",
+        "dry_run": "false"
+      },
+      "status": "failed",
+      "progress": 100,
+      "message": "Deploy failed display-service verification; rollback attempted to ab1c2b40 but display service is still not active",
+      "created_at": "2026-07-09T10:22:59",
+      "started_at": "2026-07-09T10:23:03",
+      "updated_at": "2026-07-13T09:46:18",
+      "completed_at": "2026-07-09T10:23:15",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T09:46:18",
+          "status": "acknowledged",
+          "message": "Bulk marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T09:46:18",
+      "acknowledged_note": "Bulk marked resolved by operator"
+    },
+    {
+      "id": "322f784b-15de-4094-8053-e90049a1d949",
+      "display_id": "all",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v1.4.1",
+        "dry_run": "true"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "DRY RUN OK. Would reset main to v1.4.1 (2e55ca37) from v1.4.1-3-g6c10897 (6c108978). Rollback point would be 6c108978. No files changed.",
+      "created_at": "2026-07-09T10:50:41",
+      "started_at": "2026-07-09T10:50:43",
+      "updated_at": "2026-07-09T10:50:44",
+      "completed_at": "2026-07-09T10:50:44",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "b6fd0823-3147-4df5-97f1-d9a13e62362c",
+      "display_id": "all",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v1.4.1",
+        "dry_run": "false"
+      },
+      "status": "failed",
+      "progress": 100,
+      "message": "Cannot deploy: working tree has uncommitted changes",
+      "created_at": "2026-07-09T10:55:19",
+      "started_at": "2026-07-13T08:29:51",
+      "updated_at": "2026-07-13T09:46:18",
+      "completed_at": "2026-07-13T08:29:52",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T08:29:51",
+          "status": "timed_out",
+          "message": "Job exceeded timeout"
+        },
+        {
+          "at": "2026-07-13T08:29:51",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T08:29:52",
+          "status": "failed",
+          "message": "Cannot deploy: working tree has uncommitted changes"
+        },
+        {
+          "at": "2026-07-13T09:46:18",
+          "status": "acknowledged",
+          "message": "Bulk marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T09:46:18",
+      "acknowledged_note": "Bulk marked resolved by operator"
+    },
+    {
+      "id": "0d2a3c40-05f7-4e7e-87d9-7e4064767312",
+      "display_id": "church-display-hub",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v1.4.1",
+        "dry_run": "true"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "DRY RUN OK. Would deploy v1.4.1 (2e55ca37) from v1.4.1-4-gbc97b0e (bc97b0e5). Rollback point would be bc97b0e5. No files changed.",
+      "created_at": "2026-07-09T11:07:40",
+      "started_at": "2026-07-09T11:07:41",
+      "updated_at": "2026-07-09T11:07:41",
+      "completed_at": "2026-07-09T11:07:41",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "44fe7937-ea24-40ae-aaa5-d7ec4977aa5b",
+      "display_id": "all",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v1.4.1",
+        "dry_run": "false"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "DRY RUN OK. Would deploy v1.4.1 (2e55ca37) from v1.4.1-4-gbc97b0e (bc97b0e5). Rollback point would be bc97b0e5. No files changed.",
+      "created_at": "2026-07-09T11:07:58",
+      "started_at": "2026-07-09T11:08:02",
+      "updated_at": "2026-07-09T11:08:02",
+      "completed_at": "2026-07-09T11:08:02",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "2c7ad15e-c59a-4b0f-8d9b-a7bdda7aa00d",
+      "display_id": "church-display-hub",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v1.4.1",
+        "dry_run": "false"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "DRY RUN OK. Would deploy v1.4.1 (2e55ca37) from v1.4.1-4-gbc97b0e (bc97b0e5). Rollback point would be bc97b0e5. No files changed.",
+      "created_at": "2026-07-09T11:08:19",
+      "started_at": "2026-07-09T11:08:22",
+      "updated_at": "2026-07-09T11:08:23",
+      "completed_at": "2026-07-09T11:08:23",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "250e86d8-93b0-419f-b3c1-246af4757b44",
+      "display_id": "all",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v1.4.1",
+        "dry_run": "false"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "DRY RUN OK. Would deploy v1.4.1 (2e55ca37) from v1.4.1-4-gbc97b0e (bc97b0e5). Rollback point would be bc97b0e5. No files changed.",
+      "created_at": "2026-07-09T11:08:43",
+      "started_at": "2026-07-09T11:08:43",
+      "updated_at": "2026-07-09T11:08:43",
+      "completed_at": "2026-07-09T11:08:43",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "6c02d0b8-1685-46e9-826d-dc978feea409",
+      "display_id": "all",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v1.4.1",
+        "dry_run": "false"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "DRY RUN OK. Would deploy v1.4.1 (2e55ca37) from v1.4.1-4-gbc97b0e (bc97b0e5). Rollback point would be bc97b0e5. No files changed.",
+      "created_at": "2026-07-09T11:10:58",
+      "started_at": "2026-07-09T11:11:00",
+      "updated_at": "2026-07-09T11:11:00",
+      "completed_at": "2026-07-09T11:11:00",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "73cf6462-9b08-48ce-b005-481c27699f3f",
+      "display_id": "all",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v1.4.2",
+        "dry_run": "true"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "DRY RUN OK. Would reset main to v1.4.2 (bc97b0e5) from v1.4.2 (bc97b0e5). Rollback point would be bc97b0e5. No files changed.",
+      "created_at": "2026-07-09T11:21:33",
+      "started_at": "2026-07-09T11:21:37",
+      "updated_at": "2026-07-09T11:21:37",
+      "completed_at": "2026-07-09T11:21:37",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "b42de571-1752-4561-8d9f-7baa79effcd7",
+      "display_id": "all",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v1.4.2",
+        "dry_run": "false"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Already at v1.4.2 (bc97b0e5)",
+      "created_at": "2026-07-09T11:21:50",
+      "started_at": "2026-07-09T11:21:52",
+      "updated_at": "2026-07-09T11:21:53",
+      "completed_at": "2026-07-09T11:21:53",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "32c65ce0-470a-4c8d-be2e-6bb719e69ceb",
+      "display_id": "church-display-hub",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v1.5.0",
+        "dry_run": "true"
+      },
+      "status": "failed",
+      "progress": 100,
+      "message": "Cannot deploy: working tree has uncommitted changes",
+      "created_at": "2026-07-09T12:19:47",
+      "started_at": "2026-07-09T12:19:51",
+      "updated_at": "2026-07-13T09:46:18",
+      "completed_at": "2026-07-09T12:19:51",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T09:46:18",
+          "status": "acknowledged",
+          "message": "Bulk marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T09:46:18",
+      "acknowledged_note": "Bulk marked resolved by operator"
+    },
+    {
+      "id": "58f9164d-4309-45ce-be15-e836b860a4d3",
+      "display_id": "church-display-hub",
+      "type": "set_sync_folder",
+      "payload": {
+        "remote": "gdrive",
+        "folder": "Missions",
+        "run_now": true,
+        "playlist_order": [
+          "Copy of Lifespring Kids Slide.jpg",
+          "Copy of GOD_S GIRLS slide (9).jpg",
+          "Copy of Hope Gospel Drivers.png"
+        ]
+      },
+      "status": "failed",
+      "progress": 100,
+      "message": "PermissionError: [Errno 13] Permission denied: '/home/lsfservice/church-display-platform/display/scripts/sync_media.sh'",
+      "created_at": "2026-07-09T14:59:06",
+      "started_at": "2026-07-09T14:59:06",
+      "updated_at": "2026-07-13T09:46:18",
+      "completed_at": "2026-07-09T14:59:06",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T09:46:18",
+          "status": "acknowledged",
+          "message": "Bulk marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T09:46:18",
+      "acknowledged_note": "Bulk marked resolved by operator"
+    },
+    {
+      "id": "5ee0e2d3-0051-437e-8d18-509b112813d2",
+      "display_id": "church-display-hub",
+      "type": "set_sync_folder",
+      "payload": {
+        "remote": "gdrive",
+        "folder": "Missions",
+        "run_now": true,
+        "playlist_order": [
+          "Copy of Hope Gospel Drivers.png",
+          "Copy of Lifespring Kids Slide.jpg",
+          "Copy of GOD_S GIRLS slide (9).jpg"
+        ]
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Folder set and sync completed",
+      "created_at": "2026-07-09T15:04:03",
+      "started_at": "2026-07-09T15:04:05",
+      "updated_at": "2026-07-09T15:04:40",
+      "completed_at": "2026-07-09T15:04:40",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "62943928-8d8e-431d-a53f-61a487f55c9a",
+      "display_id": "church-display-hub",
+      "type": "set_sync_folder",
+      "payload": {
+        "remote": "gdrive",
+        "folder": "Missions",
+        "run_now": true,
+        "playlist_order": [
+          "Copy of Lifespring Kids Slide.jpg",
+          "Copy of Hope Gospel Drivers.png",
+          "Copy of GOD_S GIRLS slide (9).jpg"
+        ]
+      },
+      "status": "failed",
+      "progress": 100,
+      "message": "PermissionError: [Errno 13] Permission denied: '/home/lsfservice/church-display-platform/display/scripts/sync_media.sh'",
+      "created_at": "2026-07-09T15:44:58",
+      "started_at": "2026-07-09T15:45:02",
+      "updated_at": "2026-07-13T09:46:18",
+      "completed_at": "2026-07-09T15:45:02",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T09:46:18",
+          "status": "acknowledged",
+          "message": "Bulk marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T09:46:18",
+      "acknowledged_note": "Bulk marked resolved by operator"
+    },
+    {
+      "id": "0d577763-de4f-432c-a548-677a66afdbe7",
+      "display_id": "church-display-hub",
+      "type": "set_sync_folder",
+      "payload": {
+        "remote": "gdrive",
+        "folder": "Weekly",
+        "run_now": true,
+        "playlist_order": [
+          "Contact Us.png",
+          "GOD_S GIRLS slide (9).jpg",
+          "Connect with us.jpg",
+          "01.png",
+          "02.jpg",
+          "CY Welcome.mp4",
+          "Hope Gospel Drivers.png",
+          "Lifespring Kids Slide.jpg",
+          "Nativity Sweeps City - Slow - HD 1080.mp4"
+        ]
+      },
+      "status": "failed",
+      "progress": 100,
+      "message": "PermissionError: [Errno 13] Permission denied: '/home/lsfservice/church-display-platform/display/scripts/sync_media.sh'",
+      "created_at": "2026-07-10T06:48:01",
+      "started_at": "2026-07-10T06:48:02",
+      "updated_at": "2026-07-13T09:46:18",
+      "completed_at": "2026-07-10T06:48:03",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T09:46:18",
+          "status": "acknowledged",
+          "message": "Bulk marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T09:46:18",
+      "acknowledged_note": "Bulk marked resolved by operator"
+    },
+    {
+      "id": "2161a4a4-912a-4955-ad2c-21e3988974f2",
+      "display_id": "church-display-hub",
+      "type": "set_sync_folder",
+      "payload": {
+        "remote": "gdrive",
+        "folder": "Seasonal",
+        "run_now": true,
+        "playlist_order": [
+          "Copy of Connect Card Slide.jpg",
+          "Copy of Bible verse.png",
+          "Copy of Connect with us.jpg",
+          "Copy of GOD_S GIRLS slide (9).jpg",
+          "Nativity Sweeps Hills - Slow - HD 1080.mp4"
+        ]
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Folder set and sync completed",
+      "created_at": "2026-07-10T07:20:49",
+      "started_at": "2026-07-10T07:20:53",
+      "updated_at": "2026-07-10T07:20:57",
+      "completed_at": "2026-07-10T07:20:57",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "1c321e22-a963-4645-8bd7-07c9c7eb1c68",
+      "display_id": "church-display-hub",
+      "type": "set_sync_folder",
+      "payload": {
+        "remote": "gdrive",
+        "folder": "Missions",
+        "run_now": true,
+        "playlist_order": [
+          "Copy of Hope Gospel Drivers.png",
+          "Copy of Lifespring Kids Slide.jpg",
+          "Copy of GOD_S GIRLS slide (9).jpg"
+        ]
+      },
+      "status": "failed",
+      "progress": 100,
+      "message": "Folder set but sync failed",
+      "created_at": "2026-07-10T07:42:07",
+      "started_at": "2026-07-10T07:42:09",
+      "updated_at": "2026-07-13T09:46:12",
+      "completed_at": "2026-07-10T07:42:11",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T09:46:12",
+          "status": "acknowledged",
+          "message": "Marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T09:46:12",
+      "acknowledged_note": "Marked resolved by operator"
+    },
+    {
+      "id": "a9bdc990-fa2e-4f32-83be-6a31f0066baf",
+      "display_id": "church-display-hub",
+      "type": "set_sync_folder",
+      "payload": {
+        "remote": "gdrive",
+        "folder": "Missions",
+        "run_now": true,
+        "playlist_order": [
+          "Copy of Lifespring Kids Slide.jpg",
+          "Copy of Hope Gospel Drivers.png",
+          "Copy of GOD_S GIRLS slide (9).jpg"
+        ]
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Folder set and sync completed",
+      "created_at": "2026-07-10T08:20:28",
+      "started_at": "2026-07-10T08:20:31",
+      "updated_at": "2026-07-10T08:20:32",
+      "completed_at": "2026-07-10T08:20:32",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "7d623116-15f2-4fdd-8869-92327a8f1a3c",
+      "display_id": "church-display-hub",
+      "type": "restart_display",
+      "payload": {},
+      "status": "success",
+      "progress": 100,
+      "message": "Display app is running",
+      "created_at": "2026-07-11T12:02:23",
+      "started_at": "2026-07-11T12:02:24",
+      "updated_at": "2026-07-11T12:02:24",
+      "completed_at": "2026-07-11T12:02:24",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "83c822a3-9b6b-4f31-be0f-6f3d658f60c4",
+      "display_id": "church-display-hub",
+      "type": "restart_display",
+      "payload": {},
+      "status": "success",
+      "progress": 100,
+      "message": "Display app is running",
+      "created_at": "2026-07-13T08:34:54",
+      "started_at": "2026-07-13T08:34:56",
+      "updated_at": "2026-07-13T08:34:56",
+      "completed_at": "2026-07-13T08:34:56",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T08:34:56",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T08:34:56",
+          "status": "success",
+          "message": "Display app is running"
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "662039cb-016c-43c5-bdc5-21efe987ddd5",
+      "display_id": "church-display-hub-2",
+      "type": "restart_display",
+      "payload": {},
+      "status": "cancelled",
+      "progress": 100,
+      "message": "Cancelled by operator",
+      "created_at": "2026-07-13T12:22:20",
+      "started_at": "",
+      "updated_at": "2026-07-13T14:31:41",
+      "completed_at": "2026-07-13T13:56:04",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": true,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T14:31:41",
+          "status": "acknowledged",
+          "message": "Bulk marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T14:31:41",
+      "acknowledged_note": "Bulk marked resolved by operator"
+    },
+    {
+      "id": "023cadb7-aff8-4d46-9ddf-044e01c53903",
+      "display_id": "church-display-hub-2",
+      "type": "restart_display",
+      "payload": {},
+      "status": "cancelled",
+      "progress": 100,
+      "message": "Cancelled by operator",
+      "created_at": "2026-07-13T12:24:37",
+      "started_at": "",
+      "updated_at": "2026-07-13T13:55:24",
+      "completed_at": "2026-07-13T13:55:17",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": true,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T13:55:24",
+          "status": "acknowledged",
+          "message": "Marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T13:55:24",
+      "acknowledged_note": "Marked resolved by operator"
+    },
+    {
+      "id": "300e7d00-87ec-47c4-b7b9-c12756d1b946",
+      "display_id": "welcome-center",
+      "type": "set_sync_folder",
+      "payload": {
+        "remote": "gdrive",
+        "folder": "Missions",
+        "run_now": true,
+        "playlist_order": [
+          "Copy of Lifespring Kids Slide.jpg",
+          "Copy of Hope Gospel Drivers.png",
+          "Copy of GOD_S GIRLS slide (9).jpg"
+        ]
+      },
+      "status": "cancelled",
+      "progress": 100,
+      "message": "Cancelled by operator",
+      "created_at": "2026-07-13T13:34:49",
+      "started_at": "",
+      "updated_at": "2026-07-13T14:31:34",
+      "completed_at": "2026-07-13T14:31:32",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": true,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T13:55:36",
+          "status": "queued",
+          "message": "Manual retry"
+        },
+        {
+          "at": "2026-07-13T14:31:34",
+          "status": "acknowledged",
+          "message": "Marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T14:31:34",
+      "acknowledged_note": "Marked resolved by operator"
+    },
+    {
+      "id": "f3be9040-0dd0-4e9b-a5ce-d7d6f2335298",
+      "display_id": "all",
+      "type": "sync_now",
+      "payload": {},
+      "status": "success",
+      "progress": 100,
+      "message": "Sync completed",
+      "created_at": "2026-07-13T13:37:46",
+      "started_at": "2026-07-13T13:37:47",
+      "updated_at": "2026-07-13T13:38:02",
+      "completed_at": "2026-07-13T13:38:02",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T13:37:47",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T13:38:02",
+          "status": "success",
+          "message": "Sync completed"
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "0e3a9a4a-be6e-4a33-b49d-17f71dcbbdfc",
+      "display_id": "welcome-center",
+      "type": "set_sync_folder",
+      "payload": {
+        "remote": "gdrive",
+        "folder": "Missions",
+        "run_now": true,
+        "playlist_order": [
+          "Copy of Lifespring Kids Slide.jpg",
+          "Copy of Hope Gospel Drivers.png",
+          "Copy of GOD_S GIRLS slide (9).jpg"
+        ]
+      },
+      "status": "cancelled",
+      "progress": 100,
+      "message": "Cancelled by operator",
+      "created_at": "2026-07-13T13:57:48",
+      "started_at": "",
+      "updated_at": "2026-07-13T14:31:27",
+      "completed_at": "2026-07-13T14:31:19",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": true,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T14:31:27",
+          "status": "acknowledged",
+          "message": "Marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T14:31:27",
+      "acknowledged_note": "Marked resolved by operator"
+    },
+    {
+      "id": "c59ea7e2-7369-49bf-b4cb-f8b34ffca8a3",
+      "display_id": "welcome-center",
+      "type": "restart_display",
+      "payload": {},
+      "status": "cancelled",
+      "progress": 100,
+      "message": "Cancelled by operator",
+      "created_at": "2026-07-13T13:58:04",
+      "started_at": "",
+      "updated_at": "2026-07-13T14:31:25",
+      "completed_at": "2026-07-13T14:31:17",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": true,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T14:31:25",
+          "status": "acknowledged",
+          "message": "Marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T14:31:25",
+      "acknowledged_note": "Marked resolved by operator"
+    },
+    {
+      "id": "3ac7f5fd-a0eb-4b08-a6f5-66e8aeeaf039",
+      "display_id": "welcome-center",
+      "type": "set_sync_folder",
+      "payload": {
+        "remote": "gdrive",
+        "folder": "Missions",
+        "run_now": true,
+        "playlist_order": [
+          "Copy of Lifespring Kids Slide.jpg",
+          "Copy of Hope Gospel Drivers.png",
+          "Copy of GOD_S GIRLS slide (9).jpg"
+        ]
+      },
+      "status": "cancelled",
+      "progress": 100,
+      "message": "Cancelled by operator",
+      "created_at": "2026-07-13T14:30:54",
+      "started_at": "",
+      "updated_at": "2026-07-13T14:34:30",
+      "completed_at": "2026-07-13T14:34:24",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": true,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T14:34:30",
+          "status": "acknowledged",
+          "message": "Marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T14:34:30",
+      "acknowledged_note": "Marked resolved by operator"
+    },
+    {
+      "id": "61b4a982-0a85-4057-a967-2407e12b3cb5",
+      "display_id": "all",
+      "type": "sync_now",
+      "payload": {},
+      "status": "success",
+      "progress": 100,
+      "message": "Sync completed",
+      "created_at": "2026-07-13T14:34:36",
+      "started_at": "2026-07-13T14:34:36",
+      "updated_at": "2026-07-13T14:34:37",
+      "completed_at": "2026-07-13T14:34:37",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T14:34:36",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T14:34:37",
+          "status": "success",
+          "message": "Sync completed"
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "0558961d-1845-4d85-b3ec-0120a140a37b",
+      "display_id": "welcome-center",
+      "type": "sync_now",
+      "payload": {},
+      "status": "cancelled",
+      "progress": 100,
+      "message": "Cancelled by operator",
+      "created_at": "2026-07-13T14:34:47",
+      "started_at": "",
+      "updated_at": "2026-07-13T14:44:49",
+      "completed_at": "2026-07-13T14:44:47",
+      "attempt": 0,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": true,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T14:44:49",
+          "status": "acknowledged",
+          "message": "Marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T14:44:49",
+      "acknowledged_note": "Marked resolved by operator"
+    },
+    {
+      "id": "f6f11729-9273-422b-84e3-42c569752d85",
+      "display_id": "welcome-center",
+      "type": "sync_now",
+      "payload": {},
+      "status": "failed",
+      "progress": 100,
+      "message": "Sync failed",
+      "created_at": "2026-07-13T14:58:39",
+      "started_at": "2026-07-13T14:59:13",
+      "updated_at": "2026-07-13T15:15:39",
+      "completed_at": "2026-07-13T14:59:13",
+      "attempt": 2,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T14:58:41",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T14:58:41",
+          "status": "failed",
+          "message": "Sync failed"
+        },
+        {
+          "at": "2026-07-13T14:59:09",
+          "status": "queued",
+          "message": "Manual retry"
+        },
+        {
+          "at": "2026-07-13T14:59:13",
+          "status": "running",
+          "message": "Attempt 2"
+        },
+        {
+          "at": "2026-07-13T14:59:13",
+          "status": "failed",
+          "message": "Sync failed"
+        },
+        {
+          "at": "2026-07-13T15:15:39",
+          "status": "acknowledged",
+          "message": "Marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-13T15:15:39",
+      "acknowledged_note": "Marked resolved by operator"
+    },
+    {
+      "id": "cf652244-bec2-408d-9255-d5934aa377a5",
+      "display_id": "welcome-center",
+      "type": "set_sync_folder",
+      "payload": {
+        "folder": "Missions",
+        "remote": "gdrive"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Folder set and sync completed",
+      "created_at": "2026-07-13T15:16:02",
+      "started_at": "2026-07-13T15:16:02",
+      "updated_at": "2026-07-13T15:16:03",
+      "completed_at": "2026-07-13T15:16:03",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T15:16:02",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T15:16:03",
+          "status": "success",
+          "message": "Folder set and sync completed"
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "6d36f19f-6edd-4684-88f9-2c349cd21624",
+      "display_id": "welcome-center",
+      "type": "set_sync_folder",
+      "payload": {
+        "folder": "Weekly",
+        "remote": "gdrive"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Playlist Weekly assigned and synchronized",
+      "created_at": "2026-07-13T15:45:29",
+      "started_at": "2026-07-13T15:45:31",
+      "updated_at": "2026-07-13T15:46:38",
+      "completed_at": "2026-07-13T15:46:38",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T15:45:31",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T15:46:38",
+          "status": "success",
+          "message": "Playlist Weekly assigned and synchronized"
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "a90bf90e-5980-4e39-ba53-2f4dba5d10b9",
+      "display_id": "welcome-center",
+      "type": "set_sync_folder",
+      "payload": {
+        "folder": "Weekly",
+        "remote": "gdrive"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Playlist Weekly assigned and synchronized",
+      "created_at": "2026-07-13T16:43:40",
+      "started_at": "2026-07-13T16:43:41",
+      "updated_at": "2026-07-13T16:44:23",
+      "completed_at": "2026-07-13T16:44:23",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T16:43:41",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T16:44:23",
+          "status": "success",
+          "message": "Playlist Weekly assigned and synchronized"
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "b4721852-7db5-42f2-b5ee-c8106e8f461c",
+      "display_id": "church-display-hub",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.3.1",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/v4.3.1/package.tar.gz",
+        "sha256": "f6ee337ffc01013da6c545e727a271ec275cd9486b5f5d83c4e0b5066eae1728",
+        "commit": "b2ed6e4e88f4ef83ada4e69da813e36b5aa64b8a",
+        "package_size": 31465,
+        "deployment_mode": "hub_package"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Already at v4.3.1 (b2ed6e4e)",
+      "created_at": "2026-07-13T17:03:56",
+      "started_at": "2026-07-13T17:03:58",
+      "updated_at": "2026-07-13T17:03:59",
+      "completed_at": "2026-07-13T17:03:59",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T17:03:58",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T17:03:59",
+          "status": "success",
+          "message": "Already at v4.3.1 (b2ed6e4e)"
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "dd7ab187-d96d-49bc-91f3-55cd732d0441",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.3.1",
+        "dry_run": "true",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/v4.3.1/package.tar.gz",
+        "sha256": "7ebfdcf552b807630226ec2b553214d4f46f8781bf01f34ebda8ec3e7ae53e61",
+        "commit": "b2ed6e4e88f4ef83ada4e69da813e36b5aa64b8a",
+        "package_size": 31465,
+        "deployment_mode": "hub_package"
+      },
+      "status": "failed",
+      "progress": 100,
+      "message": "Checksum mismatch: expected 7ebfdcf552b807630226ec2b553214d4f46f8781bf01f34ebda8ec3e7ae53e61, received 194f3ffcd7694476efd6acd38266713189f7121f8a986d3940a73512e637e408",
+      "created_at": "2026-07-13T17:04:22",
+      "started_at": "2026-07-13T17:04:26",
+      "updated_at": "2026-07-13T17:04:27",
+      "completed_at": "2026-07-13T17:04:27",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T17:04:26",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T17:04:27",
+          "status": "failed",
+          "message": "Checksum mismatch: expected 7ebfdcf552b807630226ec2b553214d4f46f8781bf01f34ebda8ec3e7ae53e61, received 194f3ffcd7694476efd6acd38266713189f7121f8a986d3940a73512e637e408"
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "c8c912cf-2202-4903-8ec0-9b92e0b63d2e",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.3.1",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/v4.3.1/package.tar.gz",
+        "sha256": "1cbab187942c06d4b5a4ad1f4aeaf682d451f09be2236eaf967fcf785f77283e",
+        "commit": "b2ed6e4e88f4ef83ada4e69da813e36b5aa64b8a",
+        "package_size": 31465,
+        "deployment_mode": "hub_package"
+      },
+      "status": "failed",
+      "progress": 100,
+      "message": "Checksum mismatch: expected 1cbab187942c06d4b5a4ad1f4aeaf682d451f09be2236eaf967fcf785f77283e, received 6268a0e256b7735a01b00bb36df0a09c1490aeb0ea167f00fba1b23cc5713622",
+      "created_at": "2026-07-13T17:04:50",
+      "started_at": "2026-07-13T17:04:52",
+      "updated_at": "2026-07-15T06:48:17",
+      "completed_at": "2026-07-13T17:04:54",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T17:04:52",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T17:04:54",
+          "status": "failed",
+          "message": "Checksum mismatch: expected 1cbab187942c06d4b5a4ad1f4aeaf682d451f09be2236eaf967fcf785f77283e, received 6268a0e256b7735a01b00bb36df0a09c1490aeb0ea167f00fba1b23cc5713622"
+        },
+        {
+          "at": "2026-07-15T06:48:17",
+          "status": "acknowledged",
+          "message": "Marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-15T06:48:17",
+      "acknowledged_note": "Marked resolved by operator"
+    },
+    {
+      "id": "53d8ea3d-296f-4b25-b557-3d8f687fe202",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.3.1",
+        "dry_run": "true",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/v4.3.1/package.tar.gz",
+        "sha256": "27a8f686c2a456c044b30b50c90d85c7ceae06c59a0cc5963279c0b07a428be0",
+        "commit": "b2ed6e4e88f4ef83ada4e69da813e36b5aa64b8a",
+        "package_size": 31465,
+        "deployment_mode": "hub_package"
+      },
+      "status": "failed",
+      "progress": 100,
+      "message": "Checksum mismatch: expected 27a8f686c2a456c044b30b50c90d85c7ceae06c59a0cc5963279c0b07a428be0, received 3667d2f83bbe976315bf50f23af14dde4ede9683df26460bd7c4c9973ace45c3",
+      "created_at": "2026-07-13T17:08:12",
+      "started_at": "2026-07-13T17:08:14",
+      "updated_at": "2026-07-15T06:48:14",
+      "completed_at": "2026-07-13T17:08:15",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T17:08:14",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T17:08:15",
+          "status": "failed",
+          "message": "Checksum mismatch: expected 27a8f686c2a456c044b30b50c90d85c7ceae06c59a0cc5963279c0b07a428be0, received 3667d2f83bbe976315bf50f23af14dde4ede9683df26460bd7c4c9973ace45c3"
+        },
+        {
+          "at": "2026-07-15T06:48:14",
+          "status": "acknowledged",
+          "message": "Marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-15T06:48:14",
+      "acknowledged_note": "Marked resolved by operator"
+    },
+    {
+      "id": "017da80e-d8f7-48e4-8433-463352fc0274",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.3.1",
+        "dry_run": "true",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/ba8814994fe8769689cbd7d1b149172df01a4934e46d19621f34d7c3d85b90c8.tar.gz",
+        "sha256": "ba8814994fe8769689cbd7d1b149172df01a4934e46d19621f34d7c3d85b90c8",
+        "commit": "b2ed6e4e88f4ef83ada4e69da813e36b5aa64b8a",
+        "package_size": 31465,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "DRY RUN OK: v4.3.1 downloaded, checksum verified, and staged source compiled successfully",
+      "created_at": "2026-07-13T17:30:00",
+      "started_at": "2026-07-13T17:30:04",
+      "updated_at": "2026-07-13T17:30:05",
+      "completed_at": "2026-07-13T17:30:05",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T17:30:04",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T17:30:05",
+          "status": "success",
+          "message": "DRY RUN OK: v4.3.1 downloaded, checksum verified, and staged source compiled successfully"
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "20da59bc-d881-43c2-8b97-b78bad454870",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.3.1",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/3f02b8a247681b4d802f538cf6e3d3fcf2e672be510404d1bb9f2849fda81dc8.tar.gz",
+        "sha256": "3f02b8a247681b4d802f538cf6e3d3fcf2e672be510404d1bb9f2849fda81dc8",
+        "commit": "b2ed6e4e88f4ef83ada4e69da813e36b5aa64b8a",
+        "package_size": 31465,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Display software updated to v4.3.1; display service verified. Agent will restart.",
+      "created_at": "2026-07-13T17:30:15",
+      "started_at": "2026-07-13T17:30:20",
+      "updated_at": "2026-07-13T17:30:29",
+      "completed_at": "2026-07-13T17:30:29",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T17:30:20",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T17:30:29",
+          "status": "success",
+          "message": "Display software updated to v4.3.1; display service verified. Agent will restart."
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "7d4f9730-d290-4e9f-b616-bb9bd38001db",
+      "display_id": "welcome-center",
+      "type": "apply_display_settings",
+      "payload": {
+        "settings": {
+          "overlay": {
+            "enabled": true,
+            "text": "WELCOME TO LIFESPRING FELLOWSHIP"
+          },
+          "clock": {
+            "enabled": true
+          },
+          "countdown": {
+            "enabled": true,
+            "start_minutes": 20
+          },
+          "timings": {
+            "image_duration": 8
+          }
+        }
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Presentation settings applied; player will reload them automatically",
+      "created_at": "2026-07-13T17:33:41",
+      "started_at": "2026-07-13T17:33:43",
+      "updated_at": "2026-07-13T17:33:43",
+      "completed_at": "2026-07-13T17:33:43",
+      "attempt": 1,
+      "max_attempts": 3,
+      "timeout_seconds": 120,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T17:33:43",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T17:33:43",
+          "status": "success",
+          "message": "Presentation settings applied; player will reload them automatically"
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "56ceda7e-d4e2-40cb-99be-87dbfd06957d",
+      "display_id": "church-display-hub",
+      "type": "apply_display_settings",
+      "payload": {
+        "settings": {
+          "overlay": {
+            "enabled": true,
+            "text": "WELCOME TO LIFESPRING FELLOWSHIP"
+          },
+          "clock": {
+            "enabled": true
+          },
+          "countdown": {
+            "enabled": true,
+            "start_minutes": 20
+          },
+          "timings": {
+            "image_duration": 8
+          }
+        }
+      },
+      "status": "failed",
+      "progress": 100,
+      "message": "Unknown job type: apply_display_settings",
+      "created_at": "2026-07-13T17:34:17",
+      "started_at": "2026-07-13T17:34:20",
+      "updated_at": "2026-07-15T06:48:05",
+      "completed_at": "2026-07-13T17:34:20",
+      "attempt": 1,
+      "max_attempts": 3,
+      "timeout_seconds": 120,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T17:34:20",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T17:34:20",
+          "status": "failed",
+          "message": "Unknown job type: apply_display_settings"
+        },
+        {
+          "at": "2026-07-15T06:48:05",
+          "status": "acknowledged",
+          "message": "Marked resolved by operator"
+        }
+      ],
+      "acknowledged": true,
+      "acknowledged_at": "2026-07-15T06:48:05",
+      "acknowledged_note": "Marked resolved by operator"
+    },
+    {
+      "id": "c4b50861-18c3-4823-bcf7-4e72e7892fbb",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.4.0",
+        "dry_run": "true",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/214a81e22e0514251848d40004b684179880a840369e98676bf3e1614729d2a6.tar.gz",
+        "sha256": "214a81e22e0514251848d40004b684179880a840369e98676bf3e1614729d2a6",
+        "commit": "9ce203fdf2d153fdcf573ec517f83484ac556a94",
+        "package_size": 31530,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "DRY RUN OK: v4.4.0 downloaded, checksum verified, and staged source compiled successfully",
+      "created_at": "2026-07-13T17:49:46",
+      "started_at": "2026-07-13T17:49:47",
+      "updated_at": "2026-07-13T17:49:47",
+      "completed_at": "2026-07-13T17:49:47",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T17:49:47",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T17:49:47",
+          "status": "success",
+          "message": "DRY RUN OK: v4.4.0 downloaded, checksum verified, and staged source compiled successfully"
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "8292cba1-d0dc-4aca-b70a-93159785fa10",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.4.0",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/166e7153eac656be28392bde6d942155015c6cf52546601fac9c786c0b505ef2.tar.gz",
+        "sha256": "166e7153eac656be28392bde6d942155015c6cf52546601fac9c786c0b505ef2",
+        "commit": "9ce203fdf2d153fdcf573ec517f83484ac556a94",
+        "package_size": 31530,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Display software updated to v4.4.0; display service verified. Agent will restart.",
+      "created_at": "2026-07-13T17:50:00",
+      "started_at": "2026-07-13T17:50:03",
+      "updated_at": "2026-07-13T17:50:11",
+      "completed_at": "2026-07-13T17:50:11",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-13T17:50:03",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-13T17:50:11",
+          "status": "success",
+          "message": "Display software updated to v4.4.0; display service verified. Agent will restart."
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "f0cfbbb7-d3e2-4801-b453-75508014ac37",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.6.0",
+        "dry_run": "true",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/a4ae42daa48a2ee0de2fe0bb1d203392e6800f8206d9bd668fe44ee8b66bcbdc.tar.gz",
+        "sha256": "a4ae42daa48a2ee0de2fe0bb1d203392e6800f8206d9bd668fe44ee8b66bcbdc",
+        "commit": "8cd9e639e0fe5fbf7562bb0e0a8e4fb9ba65ae04",
+        "package_size": 31532,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "DRY RUN OK: v4.6.0 downloaded, checksum verified, and staged source compiled successfully",
+      "created_at": "2026-07-15T06:48:56",
+      "started_at": "2026-07-15T06:48:57",
+      "updated_at": "2026-07-15T06:48:58",
+      "completed_at": "2026-07-15T06:48:58",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-15T06:48:57",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-15T06:48:58",
+          "status": "success",
+          "message": "DRY RUN OK: v4.6.0 downloaded, checksum verified, and staged source compiled successfully"
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "4524f36e-ebab-46d0-98b6-ccae937677ff",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.6.0",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/6a012f82b65553abb0a1ffea5310b7fb4348d94437c7a2d13fc739a882517052.tar.gz",
+        "sha256": "6a012f82b65553abb0a1ffea5310b7fb4348d94437c7a2d13fc739a882517052",
+        "commit": "8cd9e639e0fe5fbf7562bb0e0a8e4fb9ba65ae04",
+        "package_size": 31532,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Display software updated to v4.6.0; display service verified. Agent will restart.",
+      "created_at": "2026-07-15T06:49:10",
+      "started_at": "2026-07-15T06:49:13",
+      "updated_at": "2026-07-15T06:49:22",
+      "completed_at": "2026-07-15T06:49:22",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-15T06:49:13",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-15T06:49:22",
+          "status": "success",
+          "message": "Display software updated to v4.6.0; display service verified. Agent will restart."
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "dbae0b2c-16e3-476f-a341-d5169ffa7874",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.6.0",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/b4329731ee5a30aab19cc66649c189f80ffa2d6cc97646045087813270d47ae3.tar.gz",
+        "sha256": "b4329731ee5a30aab19cc66649c189f80ffa2d6cc97646045087813270d47ae3",
+        "commit": "8cd9e639e0fe5fbf7562bb0e0a8e4fb9ba65ae04",
+        "package_size": 31532,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Display software updated to v4.6.0; display service verified. Agent will restart.",
+      "created_at": "2026-07-15T06:49:14",
+      "started_at": "2026-07-15T06:49:23",
+      "updated_at": "2026-07-15T06:49:31",
+      "completed_at": "2026-07-15T06:49:31",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-15T06:49:23",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-15T06:49:31",
+          "status": "success",
+          "message": "Display software updated to v4.6.0; display service verified. Agent will restart."
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "81cf0e63-7546-471f-b856-e97da269008f",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.6.0",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/b4329731ee5a30aab19cc66649c189f80ffa2d6cc97646045087813270d47ae3.tar.gz",
+        "sha256": "b4329731ee5a30aab19cc66649c189f80ffa2d6cc97646045087813270d47ae3",
+        "commit": "8cd9e639e0fe5fbf7562bb0e0a8e4fb9ba65ae04",
+        "package_size": 31532,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Display software updated to v4.6.0; display service verified. Agent will restart.",
+      "created_at": "2026-07-15T06:49:14",
+      "started_at": "2026-07-15T06:49:31",
+      "updated_at": "2026-07-15T06:49:39",
+      "completed_at": "2026-07-15T06:49:39",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-15T06:49:31",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-15T06:49:39",
+          "status": "success",
+          "message": "Display software updated to v4.6.0; display service verified. Agent will restart."
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "46596f20-f67e-474c-a853-367b9885d6f4",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.6.0",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/7786e40fcb9f1d411710e10539859d355208e3890e8d7d5d82b09c0d1ac2f508.tar.gz",
+        "sha256": "7786e40fcb9f1d411710e10539859d355208e3890e8d7d5d82b09c0d1ac2f508",
+        "commit": "8cd9e639e0fe5fbf7562bb0e0a8e4fb9ba65ae04",
+        "package_size": 31532,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Display software updated to v4.6.0; display service verified. Agent will restart.",
+      "created_at": "2026-07-15T06:49:14",
+      "started_at": "2026-07-15T06:49:40",
+      "updated_at": "2026-07-15T06:49:48",
+      "completed_at": "2026-07-15T06:49:48",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-15T06:49:40",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-15T06:49:48",
+          "status": "success",
+          "message": "Display software updated to v4.6.0; display service verified. Agent will restart."
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "76e27653-a2c9-42f8-849c-4a6f26928b74",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.6.0",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/7786e40fcb9f1d411710e10539859d355208e3890e8d7d5d82b09c0d1ac2f508.tar.gz",
+        "sha256": "7786e40fcb9f1d411710e10539859d355208e3890e8d7d5d82b09c0d1ac2f508",
+        "commit": "8cd9e639e0fe5fbf7562bb0e0a8e4fb9ba65ae04",
+        "package_size": 31532,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Display software updated to v4.6.0; display service verified. Agent will restart.",
+      "created_at": "2026-07-15T06:49:14",
+      "started_at": "2026-07-15T06:49:48",
+      "updated_at": "2026-07-15T06:49:57",
+      "completed_at": "2026-07-15T06:49:57",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-15T06:49:48",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-15T06:49:57",
+          "status": "success",
+          "message": "Display software updated to v4.6.0; display service verified. Agent will restart."
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "60d0d79c-9f1f-44bf-b041-cbcac0afe20a",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.6.0",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/7786e40fcb9f1d411710e10539859d355208e3890e8d7d5d82b09c0d1ac2f508.tar.gz",
+        "sha256": "7786e40fcb9f1d411710e10539859d355208e3890e8d7d5d82b09c0d1ac2f508",
+        "commit": "8cd9e639e0fe5fbf7562bb0e0a8e4fb9ba65ae04",
+        "package_size": 31532,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Display software updated to v4.6.0; display service verified. Agent will restart.",
+      "created_at": "2026-07-15T06:49:14",
+      "started_at": "2026-07-15T06:49:57",
+      "updated_at": "2026-07-15T06:50:06",
+      "completed_at": "2026-07-15T06:50:06",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-15T06:49:57",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-15T06:50:06",
+          "status": "success",
+          "message": "Display software updated to v4.6.0; display service verified. Agent will restart."
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "3e87e519-1cd6-43c4-9be9-82f84059c399",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.6.0",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/7786e40fcb9f1d411710e10539859d355208e3890e8d7d5d82b09c0d1ac2f508.tar.gz",
+        "sha256": "7786e40fcb9f1d411710e10539859d355208e3890e8d7d5d82b09c0d1ac2f508",
+        "commit": "8cd9e639e0fe5fbf7562bb0e0a8e4fb9ba65ae04",
+        "package_size": 31532,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Display software updated to v4.6.0; display service verified. Agent will restart.",
+      "created_at": "2026-07-15T06:49:14",
+      "started_at": "2026-07-15T06:50:06",
+      "updated_at": "2026-07-15T06:50:14",
+      "completed_at": "2026-07-15T06:50:14",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-15T06:50:06",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-15T06:50:14",
+          "status": "success",
+          "message": "Display software updated to v4.6.0; display service verified. Agent will restart."
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "bd228c16-2b65-41a2-acc2-c00f5e967ff6",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.6.0",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/7786e40fcb9f1d411710e10539859d355208e3890e8d7d5d82b09c0d1ac2f508.tar.gz",
+        "sha256": "7786e40fcb9f1d411710e10539859d355208e3890e8d7d5d82b09c0d1ac2f508",
+        "commit": "8cd9e639e0fe5fbf7562bb0e0a8e4fb9ba65ae04",
+        "package_size": 31532,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Display software updated to v4.6.0; display service verified. Agent will restart.",
+      "created_at": "2026-07-15T06:49:14",
+      "started_at": "2026-07-15T06:50:15",
+      "updated_at": "2026-07-15T06:50:23",
+      "completed_at": "2026-07-15T06:50:23",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-15T06:50:15",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-15T06:50:23",
+          "status": "success",
+          "message": "Display software updated to v4.6.0; display service verified. Agent will restart."
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "7ddbfd31-56a2-4281-bb8c-3a99e668910c",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.6.0",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/7786e40fcb9f1d411710e10539859d355208e3890e8d7d5d82b09c0d1ac2f508.tar.gz",
+        "sha256": "7786e40fcb9f1d411710e10539859d355208e3890e8d7d5d82b09c0d1ac2f508",
+        "commit": "8cd9e639e0fe5fbf7562bb0e0a8e4fb9ba65ae04",
+        "package_size": 31532,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Display software updated to v4.6.0; display service verified. Agent will restart.",
+      "created_at": "2026-07-15T06:49:15",
+      "started_at": "2026-07-15T06:50:24",
+      "updated_at": "2026-07-15T06:50:32",
+      "completed_at": "2026-07-15T06:50:32",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-15T06:50:24",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-15T06:50:32",
+          "status": "success",
+          "message": "Display software updated to v4.6.0; display service verified. Agent will restart."
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "afed9c1c-9698-4daf-930e-65ae56d923df",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.6.0",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/7786e40fcb9f1d411710e10539859d355208e3890e8d7d5d82b09c0d1ac2f508.tar.gz",
+        "sha256": "7786e40fcb9f1d411710e10539859d355208e3890e8d7d5d82b09c0d1ac2f508",
+        "commit": "8cd9e639e0fe5fbf7562bb0e0a8e4fb9ba65ae04",
+        "package_size": 31532,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Display software updated to v4.6.0; display service verified. Agent will restart.",
+      "created_at": "2026-07-15T06:49:15",
+      "started_at": "2026-07-15T06:50:32",
+      "updated_at": "2026-07-15T06:50:40",
+      "completed_at": "2026-07-15T06:50:40",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-15T06:50:32",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-15T06:50:40",
+          "status": "success",
+          "message": "Display software updated to v4.6.0; display service verified. Agent will restart."
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "8967b3bc-ffc0-46a3-9696-c1846768c838",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.6.0",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/7786e40fcb9f1d411710e10539859d355208e3890e8d7d5d82b09c0d1ac2f508.tar.gz",
+        "sha256": "7786e40fcb9f1d411710e10539859d355208e3890e8d7d5d82b09c0d1ac2f508",
+        "commit": "8cd9e639e0fe5fbf7562bb0e0a8e4fb9ba65ae04",
+        "package_size": 31532,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Display software updated to v4.6.0; display service verified. Agent will restart.",
+      "created_at": "2026-07-15T06:49:15",
+      "started_at": "2026-07-15T06:50:41",
+      "updated_at": "2026-07-15T06:50:49",
+      "completed_at": "2026-07-15T06:50:49",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-15T06:50:41",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-15T06:50:49",
+          "status": "success",
+          "message": "Display software updated to v4.6.0; display service verified. Agent will restart."
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "e2a71e59-76e6-486d-ab9a-17493dc0ee74",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.6.0",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/49d5491beab21ba50e5620b8dd6f916201fa4830701515391e3fd8096c05a722.tar.gz",
+        "sha256": "49d5491beab21ba50e5620b8dd6f916201fa4830701515391e3fd8096c05a722",
+        "commit": "8cd9e639e0fe5fbf7562bb0e0a8e4fb9ba65ae04",
+        "package_size": 31532,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Display software updated to v4.6.0; display service verified. Agent will restart.",
+      "created_at": "2026-07-15T06:49:15",
+      "started_at": "2026-07-15T06:50:50",
+      "updated_at": "2026-07-15T06:50:58",
+      "completed_at": "2026-07-15T06:50:58",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-15T06:50:50",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-15T06:50:58",
+          "status": "success",
+          "message": "Display software updated to v4.6.0; display service verified. Agent will restart."
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "12aa4b56-8943-4673-8791-3848ac4db8e5",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.6.0",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/49d5491beab21ba50e5620b8dd6f916201fa4830701515391e3fd8096c05a722.tar.gz",
+        "sha256": "49d5491beab21ba50e5620b8dd6f916201fa4830701515391e3fd8096c05a722",
+        "commit": "8cd9e639e0fe5fbf7562bb0e0a8e4fb9ba65ae04",
+        "package_size": 31532,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Display software updated to v4.6.0; display service verified. Agent will restart.",
+      "created_at": "2026-07-15T06:49:15",
+      "started_at": "2026-07-15T06:50:58",
+      "updated_at": "2026-07-15T06:51:07",
+      "completed_at": "2026-07-15T06:51:07",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-15T06:50:58",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-15T06:51:07",
+          "status": "success",
+          "message": "Display software updated to v4.6.0; display service verified. Agent will restart."
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    },
+    {
+      "id": "152e5394-5fd3-4a3f-ac72-c0b8bf72e076",
+      "display_id": "welcome-center",
+      "type": "deploy_update",
+      "payload": {
+        "target": "v4.6.0",
+        "dry_run": "false",
+        "package_url": "http://church-display-hub.local:8090/api/v1/display-releases/artifacts/49d5491beab21ba50e5620b8dd6f916201fa4830701515391e3fd8096c05a722.tar.gz",
+        "sha256": "49d5491beab21ba50e5620b8dd6f916201fa4830701515391e3fd8096c05a722",
+        "commit": "8cd9e639e0fe5fbf7562bb0e0a8e4fb9ba65ae04",
+        "package_size": 31532,
+        "deployment_mode": "immutable_hub_artifact"
+      },
+      "status": "success",
+      "progress": 100,
+      "message": "Display software updated to v4.6.0; display service verified. Agent will restart.",
+      "created_at": "2026-07-15T06:49:15",
+      "started_at": "2026-07-15T06:51:07",
+      "updated_at": "2026-07-15T06:51:15",
+      "completed_at": "2026-07-15T06:51:15",
+      "attempt": 1,
+      "max_attempts": 2,
+      "timeout_seconds": 900,
+      "cancel_requested": false,
+      "cancellable": true,
+      "history": [
+        {
+          "at": "2026-07-15T06:51:07",
+          "status": "running",
+          "message": "Attempt 1"
+        },
+        {
+          "at": "2026-07-15T06:51:15",
+          "status": "success",
+          "message": "Display software updated to v4.6.0; display service verified. Agent will restart."
+        }
+      ],
+      "acknowledged": false,
+      "acknowledged_at": "",
+      "acknowledged_note": ""
+    }
+  ]
+}

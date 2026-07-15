@@ -6,6 +6,7 @@ from services.events import log_event
 from services.fleet_state import build_fleet_state
 from services.jobs import create_job, list_jobs
 from services.releases import latest_git_tag, list_git_tags
+from services.deployment_guard import existing_deployment, unique_display_ids
 
 
 deployments_bp = Blueprint("deployments", __name__, url_prefix="/deployments")
@@ -28,6 +29,9 @@ def package_base_url():
 
 
 def queue_deploy_job(display_id, target, dry_run):
+    existing = existing_deployment(display_id, target, dry_run)
+    if existing:
+        return existing
     # Build and persist once. The job's checksum and URL both reference this
     # exact immutable file.
     artifact = create_artifact(target)
@@ -37,7 +41,7 @@ def queue_deploy_job(display_id, target, dry_run):
         f"artifacts/{sha256}.tar.gz"
     )
 
-    create_job(
+    job = create_job(
         display_id,
         "deploy_update",
         {
@@ -56,6 +60,7 @@ def queue_deploy_job(display_id, target, dry_run):
         f"Queued {mode} immutable display deployment of "
         f"{target} for {display_id} ({sha256[:12]})"
     )
+    return job
 
 
 @deployments_bp.route("")
@@ -79,7 +84,7 @@ def deployments_page():
 
 @deployments_bp.route("/queue", methods=["POST"])
 def queue_deployment():
-    display_ids = request.form.getlist("display_ids")
+    display_ids = unique_display_ids(request.form.getlist("display_ids"))
     target = request.form.get("target", "").strip()
     dry_run = request.form.get("dry_run", "true").strip()
 
@@ -128,14 +133,15 @@ def queue_outdated_deployment():
 
     state = build_fleet_state()
     outdated_rows = state.get("outdated_rows", [])
+    display_ids = unique_display_ids(
+        row.get("id") for row in outdated_rows
+    )
 
     try:
-        for row in outdated_rows:
-            display_id = row.get("id")
-            if display_id:
-                queue_deploy_job(display_id, target, dry_run)
+        for display_id in display_ids:
+            queue_deploy_job(display_id, target, dry_run)
         flash(
-            f"Queued {target} for {len(outdated_rows)} outdated display(s).",
+            f"Queued {target} for {len(display_ids)} outdated display(s).",
             "success",
         )
     except Exception as exc:
