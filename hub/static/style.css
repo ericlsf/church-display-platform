@@ -505,3 +505,69 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
   justify-content: space-between;
   gap: 1rem;
 }
+
+/* v4.11.0 fleet map */
+
+.fleet-map-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 1rem;
+}
+
+.fleet-node {
+  border: 1px solid var(--border, #d9dde3);
+  border-left-width: 6px;
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.fleet-node.state-ready {
+  border-left-color: #2e7d32;
+}
+
+.fleet-node.state-offline,
+.fleet-node.state-needs_attention,
+.fleet-node.state-needs_playlist {
+  border-left-color: #c62828;
+}
+
+.fleet-node.state-maintenance,
+.fleet-node.state-provisioning {
+  border-left-color: #ef6c00;
+}
+
+.fleet-node-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.fleet-node-health {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+  margin: 1rem 0;
+}
+
+.fleet-node-health div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.fleet-node-health span {
+  color: var(--muted, #667085);
+}
+
+.fleet-node-actions {
+  margin-top: 0.75rem;
+}
+
+.fleet-node-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+  font-size: 0.9rem;
+}
