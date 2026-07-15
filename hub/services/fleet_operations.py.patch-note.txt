@@ -1,0 +1,21 @@
+v4.9.0 integration requirements
+
+1. Import:
+   from services.display_groups import group_members
+   from services.maintenance import in_maintenance
+
+2. In fleet_rows(), include:
+   "maintenance": display.get("maintenance", {"enabled": False})
+
+3. Readiness behavior:
+   if in_maintenance(display):
+       readiness = "maintenance"
+
+4. Bulk actions:
+   combine request.form.getlist("display_ids") with group_members(
+       request.form.getlist("group_ids")
+   )
+
+5. Deployment actions:
+   skip displays in maintenance unless the request includes
+   allow_maintenance=true.
