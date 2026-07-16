@@ -1,9 +1,9 @@
 import socket
 
 from agent.api import post_heartbeat
-from agent.config import APP_DIR, DISPLAY_ID, DISPLAY_PORT, DISPLAY_VERSION
+from agent.config import APP_DIR, DISPLAY_ID, DISPLAY_PORT
 from agent.utils import cpu_temp, disk_usage, memory_usage, now_iso, read_json, run_command, uptime
-from agent.version import get_version_info
+from agent.version import get_version_info, installed_version
 
 
 def local_ip():
@@ -65,7 +65,7 @@ def build_heartbeat():
         "hostname": socket.gethostname(),
         "ip": ip,
         "host": f"http://{ip}:{DISPLAY_PORT}",
-        "version": DISPLAY_VERSION,
+        "version": installed_version(),
         "git": get_version_info(),
         "config_version": 1,
         "sent_at": now_iso(),

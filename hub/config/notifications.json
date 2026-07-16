@@ -1117,6 +1117,84 @@
       "read": false,
       "dismissed": false,
       "resolved": false
+    },
+    {
+      "id": "66c0178e-ad3c-436b-8044-943dacc16f8c",
+      "source_key": "job-success:eecd7903-1094-4b11-ac79-bf7337eb1558",
+      "level": "success",
+      "title": "Deploy Update completed",
+      "message": "DRY RUN OK: v5.6.2 downloaded, checksum verified, and staged source compiled successfully",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T21:44:37.274429+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "bf5850d0-267b-4123-ba1f-0484c6491abc",
+      "source_key": "job-success:3d2e3ae0-7572-4364-868b-25a4bb6f6085",
+      "level": "success",
+      "title": "Deploy Update completed",
+      "message": "Display software updated to v5.6.2; display service verified. Agent will restart.",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-15T21:47:30.995466+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "147a4862-4b32-4a5d-b8b0-527d55220b8f",
+      "source_key": "job-success:66e6e7bc-0938-4f8c-b4e6-ef7b169907c4",
+      "level": "success",
+      "title": "Restart Display completed",
+      "message": "Display app is running",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-16T13:18:31.381850+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "7dda3e4b-594d-47ff-a718-57ced0a08f43",
+      "source_key": "job-success:0b2bff7e-eff7-42f8-ad03-080b320fbd4d",
+      "level": "success",
+      "title": "Sync Now completed",
+      "message": "Sync completed for Missions",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-16T13:19:16.738929+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "cb4af675-ca46-42b2-97cc-2a06df707198",
+      "source_key": "job-success:0b231c09-4564-4a91-9e4b-19ea7f87deb9",
+      "level": "success",
+      "title": "Restart Display completed",
+      "message": "Display app is running",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-16T13:21:41.504192+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
+    },
+    {
+      "id": "23102f02-77c8-4f79-a617-cec4f4857db2",
+      "source_key": "job-success:21a487ed-0654-4366-a31e-ff5fedf4d475",
+      "level": "success",
+      "title": "Deploy Update completed",
+      "message": "Display software updated to v5.6.2; display service verified. Agent will restart.",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-16T13:49:27.996745+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
     }
   ],
   "seen_sources": [
@@ -1205,6 +1283,12 @@
     "job-success:c9ea2dfc-f02f-418d-94c9-cb4f3ecd60a9",
     "job-success:87a49bd8-48e0-46a3-bb32-c51432cd9397",
     "job-success:f63ce75d-bede-4285-810f-7b0982d7b5e4",
-    "job-success:cbf44b25-b189-4ec3-9c91-ab0eb610cd48"
+    "job-success:cbf44b25-b189-4ec3-9c91-ab0eb610cd48",
+    "job-success:eecd7903-1094-4b11-ac79-bf7337eb1558",
+    "job-success:3d2e3ae0-7572-4364-868b-25a4bb6f6085",
+    "job-success:66e6e7bc-0938-4f8c-b4e6-ef7b169907c4",
+    "job-success:0b2bff7e-eff7-42f8-ad03-080b320fbd4d",
+    "job-success:0b231c09-4564-4a91-9e4b-19ea7f87deb9",
+    "job-success:21a487ed-0654-4366-a31e-ff5fedf4d475"
   ]
 }
