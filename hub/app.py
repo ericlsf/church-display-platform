@@ -55,6 +55,7 @@ from routes.fleet_dashboard import fleet_dashboard_bp
 from routes.bulk_operations import bulk_operations_bp
 from routes.alert_center import alert_center_bp
 from routes.alert_acknowledgements import alert_acknowledgements_bp
+from routes.alert_rules import alert_rules_bp
 from services.startup import run_startup_checks
 from services.request_context import assign_request_id, log_exception, request_id
 
@@ -111,6 +112,7 @@ def create_app():
     app.register_blueprint(bulk_operations_bp)
     app.register_blueprint(alert_center_bp)
     app.register_blueprint(alert_acknowledgements_bp)
+    app.register_blueprint(alert_rules_bp)
 
     # v2.6.0 auth hooks
     app.secret_key = os.environ.get(

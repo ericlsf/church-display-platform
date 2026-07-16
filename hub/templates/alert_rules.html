@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Alert Rules{% endblock %}
+
+{% block content %}
+<div class="alert-rules-page">
+  <div class="page-header-row">
+    <div>
+      <h1>Alert Rules</h1>
+      <p class="muted">
+        Control when fleet conditions become active alerts.
+      </p>
+    </div>
+
+    <a class="button" href="/alerts/">
+      Back to Alert Center
+    </a>
+  </div>
+
+  <form
+    method="POST"
+    action="/alerts/rules/save"
+    class="alert-rules-form"
+  >
+    <section class="section">
+      <h2>Thresholds</h2>
+
+      <div class="alert-rule-grid">
+        <label>
+          Offline delay (minutes)
+          <input
+            type="number"
+            name="offline_delay_minutes"
+            min="0"
+            max="1440"
+            value="{{ rules.offline_delay_minutes }}"
+          >
+        </label>
+
+        <label>
+          Disk warning (%)
+          <input
+            type="number"
+            name="disk_warning_percent"
+            min="1"
+            max="99"
+            value="{{ rules.disk_warning_percent }}"
+          >
+        </label>
+
+        <label>
+          Disk critical (%)
+          <input
+            type="number"
+            name="disk_critical_percent"
+            min="1"
+            max="100"
+            value="{{ rules.disk_critical_percent }}"
+          >
+        </label>
+
+        <label>
+          Health warning below (%)
+          <input
+            type="number"
+            name="health_warning_percent"
+            min="1"
+            max="100"
+            value="{{ rules.health_warning_percent }}"
+          >
+        </label>
+
+        <label>
+          Health critical below (%)
+          <input
+            type="number"
+            name="health_critical_percent"
+            min="0"
+            max="100"
+            value="{{ rules.health_critical_percent }}"
+          >
+        </label>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Alert Categories</h2>
+
+      <div class="alert-category-grid">
+        {% for key, label in (
+          ("connectivity", "Connectivity"),
+          ("health", "Health"),
+          ("content", "Content & Sync"),
+          ("software", "Software"),
+          ("system", "System"),
+          ("jobs", "Failed Jobs")
+        ) %}
+          <label class="checkbox-row">
+            <input
+              type="checkbox"
+              name="category_{{ key }}"
+              {% if rules.categories[key] %}checked{% endif %}
+            >
+            {{ label }}
+          </label>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Quiet Hours</h2>
+
+      <label class="checkbox-row">
+        <input
+          type="checkbox"
+          name="quiet_hours_enabled"
+          {% if rules.quiet_hours_enabled %}checked{% endif %}
+        >
+        Suppress non-critical alerts during quiet hours
+      </label>
+
+      <div class="alert-rule-grid">
+        <label>
+          Start
+          <input
+            type="time"
+            name="quiet_hours_start"
+            value="{{ rules.quiet_hours_start }}"
+          >
+        </label>
+
+        <label>
+          End
+          <input
+            type="time"
+            name="quiet_hours_end"
+            value="{{ rules.quiet_hours_end }}"
+          >
+        </label>
+      </div>
+    </section>
+
+    <button type="submit" class="primary">
+      Save Alert Rules
+    </button>
+  </form>
+</div>
+{% endblock %}

@@ -2081,3 +2081,39 @@ form[action*="fleet-operations"] {
     min-height: 1px;
   }
 }
+
+
+/* v6.6.0 alert rules */
+.alert-rules-page,
+.alert-rules-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.alert-rule-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.alert-category-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.alert-rules-form input[type="checkbox"] {
+  width: 1rem !important;
+  height: 1rem !important;
+  min-width: 1rem !important;
+  max-width: 1rem !important;
+}
+
+@media (max-width: 760px) {
+  .alert-rule-grid,
+  .alert-category-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
