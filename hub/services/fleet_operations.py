@@ -7,7 +7,7 @@ from services.maintenance import in_maintenance
 from services.telemetry_normalization import normalize_fleet_telemetry
 
 
-def fleet_rows():
+def _fleet_rows_base():
     config = load_config()
     state = build_fleet_state()
     state_rows = {
@@ -195,3 +195,12 @@ def queue_bulk_action(
         "queued_display_ids": eligible,
         "blocked_display_ids": blocked,
     }
+
+
+# v6.4.0 authoritative fleet-row wrapper
+def fleet_rows(*args, **kwargs):
+    from services.fleet_truth import enrich_fleet_rows
+
+    return enrich_fleet_rows(
+        _fleet_rows_base(*args, **kwargs)
+    )

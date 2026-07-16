@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Alert Center{% endblock %}
+{% block content %}
+<div class="alert-center-page">
+  <div class="page-header-row">
+    <div>
+      <h1>Alert Center</h1>
+      <p class="muted">Actionable fleet issues, ordered by severity.</p>
+    </div>
+    <div class="alert-counts">
+      <span class="status-pill critical">{{ center.counts.critical }} critical</span>
+      <span class="status-pill warning">{{ center.counts.warning }} warning</span>
+      <span class="status-pill">{{ center.counts.info }} info</span>
+    </div>
+  </div>
+
+  <div class="alert-toolbar">
+    <button type="button" data-alert-filter="all" class="active">All</button>
+    <button type="button" data-alert-filter="critical">Critical</button>
+    <button type="button" data-alert-filter="warning">Warning</button>
+    <button type="button" data-alert-filter="info">Info</button>
+  </div>
+
+  <div class="alert-list" data-alert-list>
+    {% for alert in center.alerts %}
+      <article class="alert-row {{ alert.severity }}"
+               data-alert-severity="{{ alert.severity }}">
+        <span class="alert-severity-icon">
+          {% if alert.severity == "critical" %}!{% elif alert.severity == "warning" %}⚠{% else %}i{% endif %}
+        </span>
+        <div class="alert-main">
+          <div class="alert-title-row">
+            <strong>{{ alert.title }}</strong>
+            <span class="status-pill {{ alert.severity }}">{{ alert.category }}</span>
+          </div>
+          <p>{{ alert.detail }}</p>
+        </div>
+        <a class="button" href="{{ alert.action_url }}">{{ alert.action_label }}</a>
+      </article>
+    {% else %}
+      <div class="empty-state">No active fleet alerts.</div>
+    {% endfor %}
+  </div>
+</div>
+<script src="/static/alert-center.js"></script>
+{% endblock %}
