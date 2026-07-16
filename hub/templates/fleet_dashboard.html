@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Fleet Dashboard{% endblock %}
+
+{% block content %}
+<div class="fleet-dashboard">
+  <div class="fleet-dashboard-header">
+    <div>
+      <h1>Fleet Dashboard</h1>
+      <p class="muted">
+        Live operational status across all managed displays.
+      </p>
+    </div>
+
+    <div class="fleet-dashboard-actions">
+      <a class="button primary" href="/displays">Manage Displays</a>
+      <a class="button" href="/jobs">Jobs</a>
+      <a class="button" href="/notifications">Alerts</a>
+    </div>
+  </div>
+
+  <div class="fleet-metric-grid">
+    <a class="fleet-metric-card" href="/displays">
+      <span>Online</span>
+      <strong>{{ dashboard.metrics.online }}/{{ dashboard.metrics.total }}</strong>
+      <small>{{ dashboard.metrics.offline }} offline</small>
+    </a>
+
+    <a class="fleet-metric-card" href="#health">
+      <span>Fleet Health</span>
+      <strong>{{ dashboard.metrics.healthy }}</strong>
+      <small>
+        {{ dashboard.metrics.warning }} warning,
+        {{ dashboard.metrics.critical }} critical
+      </small>
+    </a>
+
+    <a class="fleet-metric-card" href="/deployments">
+      <span>Updates</span>
+      <strong>{{ dashboard.metrics.updates }}</strong>
+      <small>{{ dashboard.metrics.active_jobs }} active deployment jobs</small>
+    </a>
+
+    <a class="fleet-metric-card" href="/jobs">
+      <span>Failures</span>
+      <strong>{{ dashboard.metrics.failed_jobs }}</strong>
+      <small>{{ dashboard.metrics.sync_errors }} sync issues</small>
+    </a>
+  </div>
+
+  <div class="fleet-dashboard-grid">
+    <section class="section" id="health">
+      <div class="section-heading-row">
+        <div>
+          <h2>Needs Attention</h2>
+          <p class="muted">
+            Displays with health, connectivity, sync, or software issues.
+          </p>
+        </div>
+        <span class="status-pill">
+          {{ dashboard.attention|length }}
+        </span>
+      </div>
+
+      {% if dashboard.attention %}
+        <div class="fleet-attention-list">
+          {% for item in dashboard.attention %}
+            <a
+              class="fleet-attention-row"
+              href="/display/{{ item.id }}"
+            >
+              <span class="fleet-status-dot {% if item.online %}online{% else %}offline{% endif %}"></span>
+
+              <div class="fleet-attention-main">
+                <strong>{{ item.name }}</strong>
+                <small>
+                  {{ item.version }} · {{ item.folder }}
+                </small>
+              </div>
+
+              <div class="fleet-reason-list">
+                {% for reason in item.reasons %}
+                  <span class="status-pill warning">
+                    {{ reason }}
+                  </span>
+                {% endfor %}
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          All managed displays are healthy.
+        </div>
+      {% endif %}
+    </section>
+
+    <section class="section">
+      <div class="section-heading-row">
+        <div>
+          <h2>Active Deployments</h2>
+          <p class="muted">
+            Updates and other jobs currently in progress.
+          </p>
+        </div>
+        <a href="/deployments">View all</a>
+      </div>
+
+      {% if dashboard.active_jobs %}
+        <div class="compact-job-list">
+          {% for job in dashboard.active_jobs %}
+            <div class="compact-job-row">
+              <div>
+                <strong>{{ job.display_id }}</strong>
+                <small>
+                  {{ job.type }} ·
+                  {{ job.payload.target or job.status }}
+                </small>
+              </div>
+              <span class="status-pill">
+                {{ job.progress|default(0) }}%
+              </span>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          No active fleet jobs.
+        </div>
+      {% endif %}
+    </section>
+
+    <section class="section">
+      <div class="section-heading-row">
+        <div>
+          <h2>Recent Failures</h2>
+          <p class="muted">
+            Most recent fleet job failures.
+          </p>
+        </div>
+        <a href="/jobs">View all</a>
+      </div>
+
+      {% if dashboard.failed_jobs %}
+        <div class="compact-job-list">
+          {% for job in dashboard.failed_jobs %}
+            <div class="compact-job-row failed">
+              <div>
+                <strong>{{ job.display_id }}</strong>
+                <small>
+                  {{ job.message or job.type }}
+                </small>
+              </div>
+              <span class="status-pill warning">
+                {{ job.status }}
+              </span>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          No recent failed jobs.
+        </div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

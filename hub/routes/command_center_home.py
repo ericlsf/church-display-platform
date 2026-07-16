@@ -10,6 +10,6 @@ command_center_home_bp = Blueprint(
 @command_center_home_bp.route("/")
 def home():
     return redirect(
-        url_for("command_center.page"),
+        url_for("fleet_dashboard.page"),
         code=302,
     )
