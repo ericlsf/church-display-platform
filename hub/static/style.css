@@ -1777,3 +1777,129 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
 .alert-title-row{display:flex;gap:.55rem;align-items:center;flex-wrap:wrap}
 .status-pill.critical{border-color:#c62828;color:#ef9a9a}
 @media(max-width:720px){.alert-row{grid-template-columns:auto minmax(0,1fr)}.alert-row>.button{grid-column:1/-1}}
+
+
+/* v6.4.1 fleet operations form layout */
+.fleet-operations-form,
+.fleet-operations-controls,
+.bulk-operation-controls {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0.9rem !important;
+  align-items: stretch !important;
+}
+
+.fleet-operations-form > *,
+.fleet-operations-controls > *,
+.bulk-operation-controls > * {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Each labeled setting gets its own line. */
+.fleet-operations-form label,
+.fleet-operations-controls label,
+.bulk-operation-controls label {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0.35rem !important;
+  align-items: start !important;
+  justify-items: stretch !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.fleet-operations-form input:not([type="checkbox"]),
+.fleet-operations-form select,
+.fleet-operations-form textarea,
+.fleet-operations-controls input:not([type="checkbox"]),
+.fleet-operations-controls select,
+.fleet-operations-controls textarea,
+.bulk-operation-controls input:not([type="checkbox"]),
+.bulk-operation-controls select,
+.bulk-operation-controls textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* Checkbox controls remain compact and left aligned. */
+.fleet-operations-form .checkbox-row,
+.fleet-operations-controls .checkbox-row,
+.bulk-operation-controls .checkbox-row,
+.fleet-operations-form label:has(input[type="checkbox"]),
+.fleet-operations-controls label:has(input[type="checkbox"]),
+.bulk-operation-controls label:has(input[type="checkbox"]) {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 0.6rem !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+}
+
+.fleet-operations-form input[type="checkbox"],
+.fleet-operations-controls input[type="checkbox"],
+.bulk-operation-controls input[type="checkbox"] {
+  width: 1rem !important;
+  height: 1rem !important;
+  min-width: 1rem !important;
+  max-width: 1rem !important;
+  margin: 0 !important;
+  flex: 0 0 1rem !important;
+}
+
+/* Fallback for the existing unclassed Fleet Operations form. */
+form[action*="fleet-operations"] {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0.9rem !important;
+}
+
+form[action*="fleet-operations"] > div,
+form[action*="fleet-operations"] > label {
+  min-width: 0;
+  width: 100%;
+}
+
+form[action*="fleet-operations"] label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.35rem;
+}
+
+form[action*="fleet-operations"] input:not([type="checkbox"]),
+form[action*="fleet-operations"] select,
+form[action*="fleet-operations"] textarea {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+form[action*="fleet-operations"] label:has(input[type="checkbox"]) {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  width: fit-content;
+}
+
+form[action*="fleet-operations"] input[type="checkbox"] {
+  width: 1rem !important;
+  height: 1rem !important;
+  min-width: 1rem !important;
+  max-width: 1rem !important;
+  margin: 0 !important;
+}
+
+/* Keep action buttons together on their own row. */
+.fleet-operations-actions,
+form[action*="fleet-operations"] .actions {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.2rem;
+}
