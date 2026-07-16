@@ -1,5 +1,14 @@
 from agent.api import post_job_status
-from agent.jobs import heartbeat, management, preview, settings, sync, system, update
+from agent.jobs import (
+    heartbeat,
+    management,
+    preview,
+    rollback,
+    settings,
+    sync,
+    system,
+    update,
+)
 
 
 def dispatch(job):
@@ -7,38 +16,99 @@ def dispatch(job):
     job_type = job["type"]
 
     def report(status, progress, message):
-        post_job_status(job_id, status, progress, message)
+        post_job_status(
+            job_id,
+            status,
+            progress,
+            message,
+        )
 
-    report("running", 10, f"Started {job_type}")
+    report(
+        "running",
+        10,
+        f"Started {job_type}",
+    )
 
     try:
         if job_type == "heartbeat":
             heartbeat.handle(job, report)
+
         elif job_type == "sync_now":
             sync.handle_sync_now(job, report)
+
         elif job_type == "set_sync_folder":
-            sync.handle_set_sync_folder(job, report)
+            sync.handle_set_sync_folder(
+                job,
+                report,
+            )
+
         elif job_type == "apply_display_settings":
-            settings.handle_apply_display_settings(job, report)
+            settings.handle_apply_display_settings(
+                job,
+                report,
+            )
+
         elif job_type == "restart_display":
             system.handle_restart(job, report)
+
         elif job_type == "reboot":
             system.handle_reboot(job, report)
+
         elif job_type == "upload_preview":
             preview.handle(job, report)
+
         elif job_type == "update_check":
-            update.handle_update_check(job, report)
+            update.handle_update_check(
+                job,
+                report,
+            )
+
         elif job_type == "deploy_update":
-            update.handle_deploy_update(job, report)
+            update.handle_deploy_update(
+                job,
+                report,
+            )
+
+        elif job_type == "rollback_update":
+            rollback.handle_rollback_update(
+                job,
+                report,
+            )
+
         elif job_type == "collect_logs":
-            management.handle_collect_logs(job, report)
+            management.handle_collect_logs(
+                job,
+                report,
+            )
+
         elif job_type == "list_files":
-            management.handle_list_files(job, report)
+            management.handle_list_files(
+                job,
+                report,
+            )
+
         elif job_type == "read_file":
-            management.handle_read_file(job, report)
+            management.handle_read_file(
+                job,
+                report,
+            )
+
         elif job_type == "service_action":
-            management.handle_service_action(job, report)
+            management.handle_service_action(
+                job,
+                report,
+            )
+
         else:
-            report("failed", 100, f"Unknown job type: {job_type}")
+            report(
+                "failed",
+                100,
+                f"Unknown job type: {job_type}",
+            )
+
     except Exception as exc:
-        report("failed", 100, f"{type(exc).__name__}: {exc}")
+        report(
+            "failed",
+            100,
+            f"{type(exc).__name__}: {exc}",
+        )

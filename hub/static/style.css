@@ -871,3 +871,10 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
 .deployment-verification-card[data-state="deploying"] {
   border-left: 5px solid #1565c0;
 }
+
+/* v5.7.0 deployment timeline */
+.deployment-timeline{display:grid;gap:.55rem}
+.deployment-stage{display:flex;align-items:center;gap:.65rem;color:var(--muted,#667085)}
+.deployment-stage-dot{width:.72rem;height:.72rem;border-radius:999px;background:rgba(127,127,127,.25)}
+.deployment-stage.complete{color:#2e7d32}.deployment-stage.complete .deployment-stage-dot{background:#2e7d32}
+.deployment-stage.active{color:#1565c0;font-weight:700}.deployment-stage.active .deployment-stage-dot{background:#1565c0;box-shadow:0 0 0 4px rgba(21,101,192,.15)}
