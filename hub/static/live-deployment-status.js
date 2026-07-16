@@ -1,65 +1,26 @@
 (() => {
   const page = document.querySelector("[data-live-display]");
   if (!page) return;
+
   const displayId = page.dataset.liveDisplay;
   if (!displayId) return;
 
-  const qs = (selector) => document.querySelector(selector);
+  const card = document.querySelector(".update-stat-card");
+  const verificationCard = document.querySelector(
+    "[data-deployment-verification]"
+  );
+  const timeline = document.querySelector(
+    "[data-deployment-timeline]"
+  );
 
-  const setText = (selector, value) => {
-    const element = qs(selector);
-    if (element && value !== undefined && value !== null) {
-      element.textContent = String(value);
-    }
+  const escapeHtml = (value) => {
+    const element = document.createElement("div");
+    element.textContent = value == null ? "" : String(value);
+    return element.innerHTML;
   };
 
-  const updateTopCard = (verification) => {
-    const card = qs(".update-stat-card");
-    if (!card) return;
-
-    const reported = verification.reported_version || "unknown";
-    const target = verification.target_version || "";
-    const state = verification.state || "idle";
-    const job = verification.job || {};
-    const progress = Number(job.progress || 0);
-
-    card.dataset.deploymentState = state;
-
-    const label = card.querySelector(
-      ".update-available-label, [data-update-label]"
-    );
-    const strong = card.querySelector("strong");
-    const form = card.querySelector("form");
-
-    if (state === "deploying") {
-      if (label) label.textContent = "Upgrade in progress";
-      if (strong) strong.textContent = `${progress}%`;
-      if (form) form.hidden = true;
-    } else if (state === "verified") {
-      if (label) label.textContent = "Version verified";
-      if (strong) strong.textContent = reported;
-      if (form) form.hidden = true;
-    } else if (state === "verification_failed") {
-      if (label) label.textContent = "Verification failed";
-      if (strong) {
-        strong.textContent = target
-          ? `${reported} → ${target}`
-          : reported;
-      }
-      if (form) form.hidden = false;
-    } else if (state === "failed") {
-      if (label) label.textContent = "Deployment failed";
-      if (strong) strong.textContent = reported;
-      if (form) form.hidden = false;
-    } else {
-      if (label) label.textContent = "Software Current";
-      if (strong) strong.textContent = reported;
-    }
-  };
-
-  const updateVerification = (verification) => {
-    const root = qs("[data-deployment-verification]");
-    if (!root) return;
+  const updateVerificationCard = (verification) => {
+    if (!verificationCard) return;
 
     const labels = {
       idle: "No recent deployment",
@@ -70,67 +31,181 @@
     };
 
     const state = verification.state || "idle";
-    root.dataset.state = state;
+    verificationCard.dataset.state = state;
 
-    const status = root.querySelector("[data-verification-status]");
-    const detail = root.querySelector("[data-verification-detail]");
+    const status = verificationCard.querySelector(
+      "[data-verification-status]"
+    );
+    const detail = verificationCard.querySelector(
+      "[data-verification-detail]"
+    );
 
-    if (status) status.textContent = labels[state] || state;
-    if (detail) detail.textContent = verification.message || "";
+    if (status) {
+      status.textContent = labels[state] || state;
+    }
+
+    if (detail) {
+      detail.textContent = verification.message || "";
+    }
   };
 
-  const updateTimeline = (timeline) => {
-    const root = qs("[data-deployment-timeline]");
-    if (!root || !Array.isArray(timeline.stages)) return;
+  const renderUpgradeCard = (verification) => {
+    if (!card) return;
 
-    root.innerHTML = timeline.stages.map((stage) => `
-      <div class="deployment-stage ${stage.state}">
+    const state = verification.state || "idle";
+    const reported =
+      verification.reported_version ||
+      verification.current_version ||
+      "unknown";
+    const target = verification.target_version || "";
+    const job = verification.job || {};
+    const progress = Number(job.progress || 0);
+
+    card.dataset.deploymentState = state;
+
+    let eyebrow = "Software";
+    let value = reported;
+    let detail = "Software Current";
+    let retry = "";
+
+    if (state === "deploying") {
+      eyebrow = "Upgrade in progress";
+      value = `${progress}%`;
+      detail = target
+        ? `Installing ${target}`
+        : "Installing selected release";
+    } else if (state === "verified") {
+      eyebrow = "Version verified";
+      value = reported;
+      detail = target
+        ? `Heartbeat confirmed ${target}`
+        : "Heartbeat confirmed installed version";
+    } else if (state === "verification_failed") {
+      eyebrow = "Verification failed";
+      value = target
+        ? `${reported} → ${target}`
+        : reported;
+      detail =
+        verification.message ||
+        "The heartbeat does not match the deployment target";
+      retry = `
+        <a class="button danger compact-upgrade-button"
+           href="#software-upgrade">
+          Review Upgrade
+        </a>
+      `;
+    } else if (state === "failed") {
+      eyebrow = "Deployment failed";
+      value = reported;
+      detail =
+        verification.message ||
+        "Review the failed deployment";
+      retry = `
+        <a class="button danger compact-upgrade-button"
+           href="#software-upgrade">
+          Review Failure
+        </a>
+      `;
+    }
+
+    card.innerHTML = `
+      <span class="update-available-label">
+        ${escapeHtml(eyebrow)}
+      </span>
+      <strong>${escapeHtml(value)}</strong>
+      <span class="update-card-detail">
+        ${escapeHtml(detail)}
+      </span>
+      ${retry}
+      <a class="button compact-upgrade-button"
+         href="#software-upgrade">
+        Manage Versions
+      </a>
+    `;
+  };
+
+  const renderTimeline = (data) => {
+    if (!timeline || !Array.isArray(data.stages)) return;
+
+    timeline.innerHTML = data.stages.map((stage) => `
+      <div class="deployment-stage ${escapeHtml(stage.state)}">
         <span class="deployment-stage-dot"></span>
-        <span>${stage.label}</span>
+        <span>${escapeHtml(stage.label)}</span>
       </div>
     `).join("");
   };
 
   const refresh = async () => {
-    try {
-      const stamp = Date.now();
+    const stamp = Date.now();
 
+    try {
       const [verificationResponse, timelineResponse] =
         await Promise.all([
           fetch(
-            `/display/${encodeURIComponent(displayId)}/deployment-verification?t=${stamp}`,
-            {credentials: "same-origin", cache: "no-store"}
+            `/display/${encodeURIComponent(displayId)}` +
+            `/deployment-verification?t=${stamp}`,
+            {
+              credentials: "same-origin",
+              cache: "no-store",
+            }
           ),
           fetch(
-            `/display/${encodeURIComponent(displayId)}/deployment-timeline?t=${stamp}`,
-            {credentials: "same-origin", cache: "no-store"}
+            `/display/${encodeURIComponent(displayId)}` +
+            `/deployment-timeline?t=${stamp}`,
+            {
+              credentials: "same-origin",
+              cache: "no-store",
+            }
           ),
         ]);
 
       if (verificationResponse.ok) {
-        const verification = await verificationResponse.json();
+        const verification =
+          await verificationResponse.json();
+
         if (verification.ok) {
-          updateVerification(verification);
-          updateTopCard(verification);
-          setText("[data-live-version]", verification.reported_version);
+          updateVerificationCard(verification);
+          renderUpgradeCard(verification);
+
+          const liveVersion = document.querySelector(
+            "[data-live-version]"
+          );
+
+          if (
+            liveVersion &&
+            verification.reported_version
+          ) {
+            liveVersion.textContent =
+              verification.reported_version;
+          }
         }
       }
 
       if (timelineResponse.ok) {
-        const timeline = await timelineResponse.json();
-        if (timeline.ok) updateTimeline(timeline);
+        const timelineData =
+          await timelineResponse.json();
+
+        if (timelineData.ok) {
+          renderTimeline(timelineData);
+        }
       }
     } catch (_) {
       // Preserve the last successfully rendered state.
     }
   };
 
+  // Prevent older deployment scripts from racing this controller.
+  window.__churchDisplayLiveDeploymentController = true;
+
   refresh();
   window.setInterval(refresh, 5000);
 
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) refresh();
-  });
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+      if (!document.hidden) refresh();
+    }
+  );
 
   window.addEventListener("focus", refresh);
 })();

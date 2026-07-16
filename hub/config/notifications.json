@@ -1221,6 +1221,19 @@
       "read": false,
       "dismissed": false,
       "resolved": false
+    },
+    {
+      "id": "0a00843c-d42a-4e90-983d-0c0724df17ee",
+      "source_key": "job-success:50cac4e3-a39a-4359-a391-596436c02d9a",
+      "level": "success",
+      "title": "Deploy Update completed",
+      "message": "DRY RUN OK: v5.7.3 downloaded, checksum verified, and staged source compiled successfully",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-16T15:05:01.669372+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
     }
   ],
   "seen_sources": [
@@ -1317,6 +1330,7 @@
     "job-success:0b231c09-4564-4a91-9e4b-19ea7f87deb9",
     "job-success:21a487ed-0654-4366-a31e-ff5fedf4d475",
     "job-success:18f7b541-6afa-4263-b6fe-f8a54fbe83e2",
-    "job-success:a84c5c6f-c302-4184-9696-cb9e19e67ca7"
+    "job-success:a84c5c6f-c302-4184-9696-cb9e19e67ca7",
+    "job-success:50cac4e3-a39a-4359-a391-596436c02d9a"
   ]
 }

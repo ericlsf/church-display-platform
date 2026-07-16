@@ -878,3 +878,20 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
 .deployment-stage-dot{width:.72rem;height:.72rem;border-radius:999px;background:rgba(127,127,127,.25)}
 .deployment-stage.complete{color:#2e7d32}.deployment-stage.complete .deployment-stage-dot{background:#2e7d32}
 .deployment-stage.active{color:#1565c0;font-weight:700}.deployment-stage.active .deployment-stage-dot{background:#1565c0;box-shadow:0 0 0 4px rgba(21,101,192,.15)}
+
+/* v5.7.4 stable upgrade card */
+
+.update-stat-card {
+  align-content: start;
+}
+
+.update-card-detail {
+  min-height: 2.4em;
+  color: var(--muted, #667085);
+  font-size: 0.82rem;
+}
+
+.update-stat-card .compact-upgrade-button {
+  margin-top: 0.25rem;
+  text-decoration: none;
+}
