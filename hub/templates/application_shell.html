@@ -1,0 +1,52 @@
+<div class="app-shell" data-app-shell>
+  <aside class="app-sidebar" aria-label="Primary navigation">
+    <div class="app-brand">
+      <a href="/fleet-dashboard">
+        <span class="app-brand-mark">CD</span>
+        <span class="app-brand-copy"><strong>Church Display</strong><small>Operations Hub</small></span>
+      </a>
+      <button type="button" data-shell-collapse aria-label="Collapse navigation" title="Collapse navigation">‹</button>
+    </div>
+    <form class="app-search" action="/search" method="GET">
+      <span aria-hidden="true">⌕</span>
+      <input type="search" name="q" placeholder="Search displays, media, groups…" autocomplete="off">
+    </form>
+    <nav class="app-navigation">
+      {% set sections = [
+        ("dashboard", "⌂", "Dashboard", [("/fleet-dashboard", "⌂", "Overview"), ("/fleet-map", "⌖", "Fleet Map")]),
+        ("fleet", "▣", "Fleet", [("/displays", "▣", "Displays"), ("/groups", "◫", "Groups"), ("/display-profiles", "◧", "Profiles")]),
+        ("media", "▤", "Media", [("/content", "▤", "Content Library"), ("/media", "▥", "Media")]),
+        ("operations", "⚙", "Operations", [("/bulk-operations/", "⇉", "Bulk Operations"), ("/fleet-operations", "⚙", "Fleet Operations"), ("/jobs", "☷", "Jobs"), ("/alerts/", "!", "Alert Center"), ("/history", "◷", "History")]),
+        ("administration", "♙", "Administration", [("/users", "♙", "Users"), ("/releases", "⬆", "Releases"), ("/system", "◉", "System"), ("/alerts/rules/", "≡", "Alert Rules"), ("/setup", "⚒", "Settings")])
+      ] %}
+      {% for section_id, section_icon, section_label, links in sections %}
+      <section class="app-nav-section" data-shell-section="{{ section_id }}">
+        <button type="button" class="app-nav-section-toggle" data-shell-section-toggle="{{ section_id }}" aria-expanded="false">
+          <span><span class="app-nav-icon">{{ section_icon }}</span><span class="app-nav-label">{{ section_label }}</span></span>
+          <span class="app-nav-chevron">›</span>
+        </button>
+        <div class="app-nav-links" data-shell-section-links="{{ section_id }}" hidden>
+          {% for href, icon, label in links %}
+          <a href="{{ href }}" data-shell-route="{{ href }}" title="{{ label }}"><span class="app-nav-icon">{{ icon }}</span><span class="app-nav-label">{{ label }}</span></a>
+          {% endfor %}
+        </div>
+      </section>
+      {% endfor %}
+    </nav>
+    <div class="app-sidebar-footer"><a href="/system/support" title="Support Bundle"><span class="app-nav-icon">?</span><span class="app-nav-label">Support Bundle</span></a></div>
+  </aside>
+  <header class="app-topbar">
+    <button type="button" class="app-mobile-menu" data-shell-mobile-menu aria-label="Open navigation">☰</button>
+    <div class="app-page-label" data-shell-page-label></div>
+    <div class="app-topbar-actions">
+      <button type="button" class="app-command-button" data-shell-command title="Open command palette">⚡ <span>Commands</span> <kbd>Ctrl K</kbd></button>
+      <a href="/notifications" class="app-notification-button" title="Notifications" aria-label="Notifications">●<span data-shell-notification-count hidden></span></a>
+      <div class="app-user-menu">
+        <button type="button" data-shell-user-toggle aria-expanded="false"><span class="app-user-avatar">A</span><span class="app-user-name">Admin</span><span>⌄</span></button>
+        <div data-shell-user-menu hidden><a href="/users">User Administration</a><a href="/alerts/rules/">Alert Rules</a><a href="/system">System</a><hr><a href="/logout">Sign Out</a></div>
+      </div>
+    </div>
+  </header>
+  <div class="app-breadcrumbs" data-shell-breadcrumbs></div>
+  <div class="app-mobile-scrim" data-shell-mobile-scrim hidden></div>
+</div>
