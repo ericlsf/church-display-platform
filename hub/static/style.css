@@ -1173,3 +1173,83 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* v5.9.2 display settings layout */
+
+.display-settings-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+  grid-column: 1 / -1;
+}
+
+.display-settings-content-row {
+  display: block;
+  min-width: 0;
+}
+
+.display-settings-content-row > .section {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.display-settings-secondary-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  min-width: 0;
+}
+
+.display-settings-secondary-row > .section {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* The full-width content row can now use a real two-column editor. */
+.display-settings-content-row
+  [data-content-overlay-editor]
+  .content-editor-grid {
+  grid-template-columns:
+    minmax(320px, 0.95fr)
+    minmax(420px, 1.35fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.display-settings-content-row
+  [data-content-overlay-editor]
+  .content-preview-card {
+  position: sticky;
+  top: 1rem;
+}
+
+.display-settings-content-row
+  [data-content-overlay-editor]
+  .display-preview {
+  width: 100%;
+  max-width: none;
+}
+
+@media (max-width: 1050px) {
+  .display-settings-content-row
+    [data-content-overlay-editor]
+    .content-editor-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .display-settings-content-row
+    [data-content-overlay-editor]
+    .content-preview-card {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .display-settings-secondary-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
