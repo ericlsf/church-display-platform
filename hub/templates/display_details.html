@@ -71,7 +71,71 @@
 
 <div class="display-details-grid">
   <div class="section" id="content-settings" data-content-overlay-editor>
-  <div class="display-settings-layout">
+  
+<div class="display-hero">
+  <div>
+    <div class="display-hero-title-row">
+      <h1>{{ display.name or display.id }}</h1>
+      <span class="status-pill {% if fleet.online %}online{% else %}offline{% endif %}">
+        {% if fleet.online %}Online{% else %}Offline{% endif %}
+      </span>
+    </div>
+
+    <div class="display-hero-meta">
+      <span>Heartbeat: {{ fleet.heartbeat or fleet.heartbeat_age or "Unknown" }}</span>
+      <span>Version: {{ fleet.version or "Unknown" }}</span>
+      <span>Sync: {{ fleet.sync_state or "Unknown" }}</span>
+    </div>
+  </div>
+
+  <div class="display-hero-actions">
+    <a class="button" href="#content-settings">Edit Content</a>
+    <a class="button" href="#health-diagnostics">Health</a>
+    <a class="button" href="#software-upgrade">Software</a>
+  </div>
+</div>
+
+<div class="display-summary-grid">
+  <div class="summary-card">
+    <span>Health</span>
+    <strong>{{ health_diagnostics.score }}%</strong>
+    <small>
+      {% if health_diagnostics.all_healthy %}
+        All checks passing
+      {% else %}
+        {{ health_diagnostics.failed_count }} issue{% if health_diagnostics.failed_count != 1 %}s{% endif %}
+      {% endif %}
+    </small>
+  </div>
+
+  <div class="summary-card">
+    <span>Media</span>
+    <strong>{{ fleet.media_count or 0 }}</strong>
+    <small>local file{% if (fleet.media_count or 0) != 1 %}s{% endif %}</small>
+  </div>
+
+  <div class="summary-card">
+    <span>Content Folder</span>
+    <strong>{{ assigned_folder or fleet.sync_folder or "None" }}</strong>
+    <small>{% if assigned_folder or fleet.sync_folder %}Assigned{% else %}Needs assignment{% endif %}</small>
+  </div>
+
+  <div class="summary-card">
+    <span>Software</span>
+    <strong>{{ upgrade.current_version or fleet.version or "Unknown" }}</strong>
+    <small>
+      {% if upgrade.update_available %}
+        Update available
+      {% elif upgrade.active_job %}
+        Deployment in progress
+      {% else %}
+        Current
+      {% endif %}
+    </small>
+  </div>
+</div>
+
+<div class="display-settings-layout">
   <div class="display-settings-content-row">
 <div class="section-heading-row">
     <div>
@@ -481,78 +545,65 @@
 </div>
 
 
-<div class="section" id="health-diagnostics">
+
+<div class="section compact-section" id="health-diagnostics">
   <div class="section-heading-row">
     <div>
-      <h2>Health Diagnostics</h2>
+      <h2>Device Health</h2>
       <p class="muted">
-        Health is calculated from five checks. Each failed check includes a
-        recommended corrective action.
+        Each failed check includes the fastest available fix.
       </p>
     </div>
 
-    <span class="status-pill
-      {% if health_diagnostics.all_healthy %}online{% else %}warning{% endif %}">
+    <span class="status-pill {% if health_diagnostics.all_healthy %}online{% else %}warning{% endif %}">
       {{ health_diagnostics.score }}%
     </span>
   </div>
 
-  {% if health_diagnostics.all_healthy %}
-    <div class="empty-state">
-      All display health checks are passing.
-    </div>
-  {% else %}
-    <div class="health-check-list">
-      {% for check in health_diagnostics.checks %}
-        <div class="health-check-row {% if check.passed %}passed{% else %}failed{% endif %}">
-          <div class="health-check-icon">
-            {% if check.passed %}✓{% else %}!{% endif %}
-          </div>
+  <div class="health-list-v600">
+    {% for check in health_diagnostics.checks %}
+      <div class="health-row-v600 {% if check.passed %}passed{% else %}failed{% endif %}">
+        <span class="health-icon-v600">
+          {% if check.passed %}✓{% else %}!{% endif %}
+        </span>
 
-          <div class="health-check-content">
-            <strong>{{ check.label }}</strong>
-            <p>{{ check.summary }}</p>
+        <div>
+          <strong>{{ check.label }}</strong>
+          <p>{{ check.summary }}</p>
 
-            {% if not check.passed %}
-              <p class="muted">{{ check.guidance }}</p>
-            {% endif %}
-          </div>
-
-          <div class="health-check-action">
-            {% if not check.passed %}
-              <form
-                method="POST"
-                action="/display/{{ display.id }}/health-action"
-              >
-                <input
-                  type="hidden"
-                  name="action"
-                  value="{{ check.action }}"
-                >
-                <button
-                  type="submit"
-                  {% if check.action == "reboot" %}class="danger"{% endif %}
-                >
-                  {{ check.action_label }}
-                </button>
-              </form>
-            {% else %}
-              <span class="online">Passing</span>
-            {% endif %}
-          </div>
+          {% if not check.passed and check.guidance %}
+            <small>{{ check.guidance }}</small>
+          {% endif %}
         </div>
-      {% endfor %}
-    </div>
-  {% endif %}
 
-  {% if health_diagnostics.failed_count %}
-    <p class="muted health-score-explanation">
-      {{ health_diagnostics.failed_count }} of
-      {{ health_diagnostics.checks|length }} checks are failing.
-      Each check currently contributes equally to the health score.
-    </p>
-  {% endif %}
+        <div class="health-action-v600">
+          {% if check.passed %}
+            <span class="health-ok-label">Passing</span>
+          {% else %}
+            <form
+              method="POST"
+              action="/display/{{ display.id }}/health-action"
+            >
+              <input
+                type="hidden"
+                name="action"
+                value="{{ check.action }}"
+              >
+
+              <button
+                type="submit"
+                class="{% if check.action == 'reboot' %}danger{% endif %}"
+              >
+                {{ check.action_label }}
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
 </div>
+
 
 
 <div class="section">
