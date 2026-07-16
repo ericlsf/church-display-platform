@@ -130,7 +130,7 @@
 </div>
 
 
-  <div class="content-editor-grid">
+  <div class="content-editor-simple">
     <form
       method="POST"
       action="/display/{{ display.id }}/settings"
@@ -234,59 +234,9 @@
       </div>
     </form>
 
-    <div class="content-preview-card">
-      <div class="content-preview-heading">
-        <strong>Live Preview</strong>
-        <span class="muted">Approximate display layout</span>
-      </div>
-
-      <div class="display-preview" data-overlay-preview>
-        {% if fleet.preview_url %}
-          <img
-            src="{{ fleet.preview_url }}"
-            alt="Current preview from {{ display.name }}"
-          >
-        {% else %}
-          <div class="preview-empty">No screenshot available</div>
-        {% endif %}
-
-        <div
-          class="preview-overlay-text"
-          data-preview-text
-        >
-          {{ presentation.overlay.text }}
-        </div>
-
-        <div
-          class="preview-clock"
-          data-preview-clock
-          {% if not presentation.clock.enabled %}hidden{% endif %}
-        >
-          9:30 AM
-        </div>
-
-        <div
-          class="preview-countdown"
-          data-preview-countdown
-          {% if not presentation.countdown.enabled %}hidden{% endif %}
-        >
-          {{ presentation.countdown.text or "Countdown" }}
-        </div>
-      </div>
-
-      <p class="muted">
-        Preview updates immediately. The physical display changes after saving.
-      </p>
-    </div>
+    
   </div>
 </div>
-
-<script src="/static/content-overlay-editor.js"></script>
-
-
-  
-
-  
 </div>
 
 <div class="section" data-live-display="{{ display.id }}">
