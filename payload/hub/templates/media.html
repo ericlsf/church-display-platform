@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Media Library - Church Display Hub{% endblock %}
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='media-library-v960.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='media-library-v970.css') }}">
 
 <div class="media-workspace" data-media-workspace data-remote="{{ drive_remote }}" data-folder="{{ selected_folder }}">
   <header class="media-hero">
@@ -28,20 +28,22 @@
     <article><span>Items</span><strong>{{ analysis["total"] }}</strong></article><article><span>Images</span><strong>{{ analysis["images"] }}</strong></article><article><span>Videos</span><strong>{{ analysis["videos"] }}</strong></article><article><span>Playable</span><strong>{{ analysis["supported"] }}</strong></article><article><span>Storage</span><strong>{{ analysis["total_size_human"] }}</strong></article>
   </section>
 
-  <div class="media-layout">
+  <div class="media-guided-workflow">
+    <section class="media-workflow-label"><span>1</span><div><strong>Choose media</strong><small>Browse and select the content you want to use.</small></div></section>
     <main class="media-main-column">
       <section class="media-panel media-library-panel">
         <div class="media-panel-heading media-library-heading">
           <div><h2>{{ selected_folder }}</h2><p><span data-visible-count>{{ analysis["shown"] }}</span> visible items</p></div>
           <div class="media-view-tools"><label class="media-search"><span>⌕</span><input type="search" placeholder="Search this folder" data-media-search></label><button class="media-icon-button is-active" type="button" data-view="grid" title="Grid view">▦</button><button class="media-icon-button" type="button" data-view="list" title="List view">☷</button></div>
         </div>
+        <div class="media-selection-toolbar"><span><strong data-selected-media-count>0</strong> selected</span><button class="media-button media-button-secondary" type="button" data-clear-media-selection>Clear</button><button class="media-button media-button-primary" type="button" data-add-selected-media disabled>Add selected to sequence</button></div>
         <div class="media-filter-row" role="group" aria-label="Media filters"><button class="media-filter is-active" type="button" data-filter="all">All</button><button class="media-filter" type="button" data-filter="image">Images</button><button class="media-filter" type="button" data-filter="video">Videos</button><button class="media-filter" type="button" data-filter="folder">Folders</button><button class="media-filter" type="button" data-filter="unsupported">Unsupported</button></div>
 
         {% if analysis["items"] %}
         <div class="media-card-grid" data-library-grid>
           {% for item in analysis["items"] %}
-          <article class="media-card {% if not item.supported and not item.is_dir %}is-unsupported{% endif %}" tabindex="0" data-media-item data-kind="{% if item.is_dir %}folder{% else %}{{ item.type }}{% endif %}" data-supported="{{ 'true' if item.supported or item.is_dir else 'false' }}" data-name="{{ item.name|lower }}" data-title="{{ item.name }}" data-path="{{ item.path }}" data-type="{{ item.type|title }}" data-size="{{ item.size_human }}" data-modified="{{ item.modified }}" data-mime="{{ item.mime_type }}" data-resolution="{{ item.resolution }}">
-            <div class="media-card-preview media-preview-{{ item.type }}">
+          <article class="media-card {% if not item.supported and not item.is_dir %}is-unsupported{% endif %}" tabindex="0" draggable="true" data-media-item data-kind="{% if item.is_dir %}folder{% else %}{{ item.type }}{% endif %}" data-supported="{{ 'true' if item.supported or item.is_dir else 'false' }}" data-name="{{ item.name|lower }}" data-title="{{ item.name }}" data-path="{{ item.path }}" data-type="{{ item.type|title }}" data-size="{{ item.size_human }}" data-modified="{{ item.modified }}" data-mime="{{ item.mime_type }}" data-resolution="{{ item.resolution }}">
+            <button class="media-card-select" type="button" data-select-media aria-label="Select media">✓</button><div class="media-card-preview media-preview-{{ item.type }}">
               {% if item.type == 'image' and not item.is_dir %}<img loading="lazy" src="{{ url_for('media.media_preview', remote=drive_remote, folder=selected_folder, path=item.path) }}" alt="Preview of {{ item.name }}" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="media-card-icon" hidden>{{ item.icon }}</span>{% else %}<span class="media-card-icon">{{ item.icon }}</span>{% endif %}
               {% if item.type == 'video' %}<span class="media-play-badge">▶</span>{% endif %}{% if not item.is_dir and not item.supported %}<span class="media-warning-badge">Unsupported</span>{% endif %}
             </div>
@@ -53,14 +55,16 @@
       </section>
     </main>
 
-    <aside class="media-side-column">
-      <section class="media-panel media-playlist-panel">
-        <div class="media-panel-heading"><div><h2>Playlist</h2><p>Drag rows to change playback order</p></div><span class="media-count">{{ analysis["media_items"]|length }}</span></div>
+    <section class="media-workflow-label"><span>2</span><div><strong>Arrange playback</strong><small>This is the only ordering area. Drag rows to set what viewers see.</small></div></section>
+    <div class="media-side-column">
+      <section class="media-panel media-playlist-panel media-playlist-full">
+        <div class="media-panel-heading"><div><h2>Playback sequence</h2><p>Drag media cards here, or use Add selected. Reorder only in this sequence.</p></div><span class="media-count">{{ analysis["media_items"]|length }}</span></div>
         {% if analysis["media_items"] %}<form method="POST" action="/media/order" id="order-form"><input type="hidden" name="remote" value="{{ drive_remote }}"><input type="hidden" name="folder" value="{{ selected_folder }}"><textarea name="playlist_order" id="playlist-order-field" hidden>{% for item in analysis["media_items"] %}{{ item.path }}{% if not loop.last %}\n{% endif %}{% endfor %}</textarea>
-          <div class="playlist-stack" id="playlist-list">{% for item in analysis["media_items"] %}<div class="playlist-item" draggable="true" data-path="{{ item.path }}"><span class="playlist-grip">⠿</span><span class="playlist-index">{{ loop.index }}</span><span class="playlist-thumb">{% if item.type == 'image' %}<img loading="lazy" src="{{ url_for('media.media_preview', remote=drive_remote, folder=selected_folder, path=item.path) }}" alt="">{% else %}{{ item.icon }}{% endif %}</span><span class="playlist-details"><strong>{{ item.name }}</strong><small>{{ item.type|title }} · {{ item.size_human }}</small></span><span class="playlist-controls"><button type="button" data-move="-1" aria-label="Move up">↑</button><button type="button" data-move="1" aria-label="Move down">↓</button></span></div>{% endfor %}</div>
+          <div class="playlist-stack" id="playlist-list" data-playlist-dropzone><div class="playlist-drop-hint">Drag media here to add it to the sequence</div>{% for item in analysis["media_items"] %}<div class="playlist-item" draggable="true" data-path="{{ item.path }}"><span class="playlist-grip">⠿</span><span class="playlist-index">{{ loop.index }}</span><span class="playlist-thumb">{% if item.type == 'image' %}<img loading="lazy" src="{{ url_for('media.media_preview', remote=drive_remote, folder=selected_folder, path=item.path) }}" alt="">{% else %}{{ item.icon }}{% endif %}</span><span class="playlist-details"><strong>{{ item.name }}</strong><small>{{ item.type|title }} · {{ item.size_human }}</small></span><span class="playlist-controls"><button type="button" data-move="-1" aria-label="Move up">↑</button><button type="button" data-move="1" aria-label="Move down">↓</button><button type="button" data-remove-playlist aria-label="Remove">×</button></span></div>{% endfor %}</div>
           <button class="media-button media-button-secondary media-button-block" type="submit">Save order</button></form>{% else %}<div class="media-empty-state media-empty-compact"><strong>No playable media</strong></div>{% endif %}
       </section>
 
+      <section class="media-workflow-label"><span>3</span><div><strong>Choose displays and deploy</strong><small>Review the playback sequence and targets before syncing.</small></div></section>
       <section class="media-panel media-deploy-panel" id="deploy-playlist">
         <div class="media-panel-heading"><div><h2>Deploy</h2><p>Review the target before syncing</p></div></div>
         <form method="POST" action="/media/sync" id="sync-form"><input type="hidden" name="remote" value="{{ drive_remote }}"><input type="hidden" name="folder" value="{{ selected_folder }}"><input type="hidden" name="run_now" value="1"><textarea name="playlist_order" id="sync-playlist-order-field" hidden>{% for item in analysis["media_items"] %}{{ item.path }}{% if not loop.last %}\n{% endif %}{% endfor %}</textarea>
@@ -69,11 +73,11 @@
           <button class="media-button media-button-primary media-button-block" type="submit" data-deploy-button {% if not analysis["media_items"] or not displays %}disabled{% endif %}>Sync selected displays</button><p class="media-form-note">The Hub caches this folder before jobs are queued.</p>
         </form>
       </section>
-    </aside>
+    </div>
   </div>
 
   <aside class="media-details-drawer" data-details-drawer aria-hidden="true"><button class="details-close" type="button" data-details-close aria-label="Close details">×</button><div class="details-preview" data-details-preview><span>🖼</span></div><p class="media-eyebrow">Media details</p><h2 data-details-title>Select an item</h2><dl><div><dt>Type</dt><dd data-details-type>—</dd></div><div><dt>Size</dt><dd data-details-size>—</dd></div><div><dt>Modified</dt><dd data-details-modified>—</dd></div><div><dt>MIME type</dt><dd data-details-mime>—</dd></div><div><dt>Resolution</dt><dd data-details-resolution>—</dd></div><div><dt>Path</dt><dd data-details-path>—</dd></div></dl></aside><div class="drawer-backdrop" data-details-backdrop hidden></div>
   {% endif %}{% endif %}
 </div>
-<script src="{{ url_for('static', filename='media-library-v960.js') }}" defer></script>
+<script src="{{ url_for('static', filename='media-library-v970.js') }}" defer></script>
 {% endblock %}
