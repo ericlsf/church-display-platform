@@ -1,81 +1,45 @@
 {% extends "base.html" %}
 {% block title %}Command Center - Church Display Hub{% endblock %}
 {% block content %}
-<link rel="stylesheet" href="/static/command-center-v930.css">
+<link rel="stylesheet" href="/static/command-center-v940.css">
 <div class="command-cockpit" data-command-center>
   <header class="command-cockpit-header">
-    <div>
-      <h1>Command Center</h1>
-      <p class="muted">See what needs attention, take action, and monitor active work.</p>
-    </div>
-    <div class="command-live-state" aria-live="polite">
-      <span class="command-live-dot" data-live-dot></span>
-      <span data-last-updated>Live</span>
-    </div>
+    <div><h1>Command Center</h1><p class="muted">See what needs attention, take action, and monitor active work.</p></div>
+    <div class="command-live-state" aria-live="polite"><span class="command-live-dot" data-live-dot></span><span data-last-updated>Live</span></div>
   </header>
 
   <section class="command-priority section" id="action-required">
     <div class="section-heading-row command-priority-heading">
-      <div>
-        <span class="command-eyebrow">Priority</span>
-        <h2>Action Required</h2>
-        <p class="muted">Items most likely to affect a display or service.</p>
-      </div>
+      <div><span class="command-eyebrow">Priority</span><h2>Action Required</h2></div>
       <a class="command-section-link" href="/fleet-map">Open Fleet Map</a>
     </div>
-
     {% if attention_rows %}
-    <div class="command-attention-grid" data-attention-list>
+    <div class="command-attention-grid">
       {% for row in attention_rows %}
       <article class="command-attention-card readiness-{{ row.readiness }}">
-        <div class="command-alert-icon" aria-hidden="true">!</div>
+        <div class="command-alert-icon">!</div>
         <div class="command-attention-copy">
           <div class="command-card-title-row">
-            <div class="command-display-identity">
-              <strong>{{ row.name }}</strong>
-              {% if row.id != row.name %}<span class="muted">{{ row.id }}</span>{% endif %}
-            </div>
-            <span class="command-severity-chip">{{ row.readiness|replace("_", " ")|title }}</span>
+            <div class="command-display-identity"><strong>{{ row.name }}</strong>{% if row.id != row.name %}<span class="muted">{{ row.id }}</span>{% endif %}</div>
+            <span class="health-chip chip-{{ row.readiness }}">{{ row.readiness|replace("_", " ")|title }}</span>
           </div>
-          <div class="command-health-inline">
-            <span>Health</span>
-            <div class="command-health-track" aria-label="Health {{ row.health_score }} percent">
-              <span style="width: {{ row.health_score }}%"></span>
-            </div>
-            <strong>{{ row.health_score }}%</strong>
-          </div>
+          <div class="command-health-inline"><span>Health</span><div class="command-health-track"><span style="width: {{ row.health_score }}%"></span></div><strong>{{ row.health_score }}%</strong></div>
         </div>
-        <div class="command-alert-actions">
-          <a class="button command-button-secondary" href="/display/{{ row.id }}">Open</a>
-          <a class="button primary" href="/display/{{ row.id }}">Fix</a>
-        </div>
+        <div class="command-alert-actions"><a class="button command-button-secondary" href="/display/{{ row.id }}">Open</a><a class="button primary" href="/display/{{ row.id }}">Fix</a></div>
       </article>
       {% endfor %}
     </div>
-    {% else %}
-    <div class="command-all-clear" data-all-clear>
-      <strong>Everything looks good</strong>
-      <span>No displays currently need attention.</span>
-    </div>
-    {% endif %}
+    {% else %}<div class="command-all-clear"><strong>Everything looks good</strong><span>No displays currently need attention.</span></div>{% endif %}
   </section>
 
-  <section class="command-metrics" data-command-summary aria-label="Fleet summary">
-    {% for key, label, detail, href, icon in [
-      ("total", "Fleet", summary.healthy ~ " healthy of " ~ summary.total, "/operator/displays", "●"),
-      ("attention", "Attention", summary.offline ~ " offline", "#action-required", "!"),
-      ("active_jobs", "Jobs", summary.failed_jobs ~ " unresolved", "/jobs", "↻"),
-      ("outdated", "Updates", "Latest " ~ (latest_tag or "unknown"), "/deployments", "↑")
-    ] %}
-    <a class="command-metric-card metric-{{ key }}" href="{{ href }}">
-      <span class="command-metric-icon" aria-hidden="true">{{ icon }}</span>
-      <span class="command-metric-copy">
-        <span>{{ label }}</span>
-        <strong data-summary="{{ key }}">{{ summary[key] }}</strong>
-        <small>{{ detail }}</small>
-      </span>
+  <section class="command-metrics" aria-label="Fleet summary">
+    <a class="command-metric-card fleet-health-card" href="/operator/displays">
+      <div class="health-ring" style="--health: {{ summary.health_percent }}"><span data-summary="health_percent">{{ summary.health_percent }}</span><small>%</small></div>
+      <span class="command-metric-copy"><span>Fleet Health</span><strong>{{ summary.healthy }} / {{ summary.total }}</strong><small>Displays healthy</small></span>
     </a>
-    {% endfor %}
+    <a class="command-metric-card metric-attention" href="#action-required"><span class="command-metric-icon">!</span><span class="command-metric-copy"><span>Attention</span><strong data-summary="attention">{{ summary.attention }}</strong><small>{{ summary.offline }} offline</small></span></a>
+    <button class="command-metric-card metric-active_jobs" type="button" data-open-jobs><span class="command-metric-icon">↻</span><span class="command-metric-copy"><span>Jobs</span><strong data-summary="active_jobs">{{ summary.active_jobs }}</strong><small>{{ summary.failed_jobs }} unresolved</small></span></button>
+    <a class="command-metric-card metric-outdated" href="/deployments"><span class="command-metric-icon">↑</span><span class="command-metric-copy"><span>Updates</span><strong data-summary="outdated">{{ summary.outdated }}</strong><small>Latest {{ latest_tag or "unknown" }}</small></span></a>
   </section>
 
   <section class="command-quick-actions" aria-label="Quick actions">
@@ -85,88 +49,57 @@
     <a class="button command-action-button" href="/system/support"><span>↓</span>Support Bundle</a>
   </section>
 
-  <div class="command-work-grid">
-    {% if active_jobs %}
-    <section class="section command-work-card" data-active-jobs-section>
-      <div class="section-heading-row"><h2>Active Jobs</h2><a href="/jobs">View All</a></div>
-      <div class="compact-list" data-active-jobs>
-        {% for job in active_jobs %}
-        <div class="command-job-row" data-job-id="{{ job.id or loop.index }}" data-job-status="{{ job.status }}">
-          <div><strong>{{ job.type|replace("_", " ")|title }}</strong><span class="muted">{{ job.display_id }}</span></div>
-          <div class="command-job-progress"><progress max="100" value="{{ job.progress|default(0) }}"></progress><span>{{ job.progress|default(0) }}%</span></div>
-          <span class="status-pill">{{ job.status|title }}</span>
-        </div>
-        {% endfor %}
+  <div class="command-operations-grid">
+    <section class="section fleet-map-card">
+      <div class="section-heading-row"><div><h2>Fleet Map</h2><p class="muted">Main campus display status</p></div><a href="/fleet-map">Full Map</a></div>
+      <div class="campus-map">
+        {% for row in fleet_rows %}
+        <a class="map-node node-{{ row.readiness }}" href="/display/{{ row.id }}" title="{{ row.name }} — {{ row.readiness|replace('_',' ') }}"><span></span><strong>{{ row.name }}</strong><small>{{ row.readiness|replace('_',' ')|title }}</small></a>
+        {% else %}<div class="command-empty">No displays enrolled.</div>{% endfor %}
       </div>
     </section>
-    {% endif %}
 
-    {% if outdated_rows %}
-    <section class="section command-work-card">
-      <div class="section-heading-row"><h2>Software Updates</h2><a href="/deployments">Deployments</a></div>
-      <p class="muted">Latest release: {{ latest_tag or "Unknown" }}</p>
-      <div class="compact-list">
-        {% for row in outdated_rows %}
-        <a class="command-status-row command-row-link" href="/display/{{ row.id }}">
-          <div><strong>{{ row.name }}</strong><span class="muted">{{ row.id }}</span></div>
-          <span>{{ row.version }}</span><span class="status-pill warning">Update available</span>
-        </a>
-        {% endfor %}
+    <section class="section activity-card">
+      <div class="section-heading-row"><div><h2>Activity</h2><p class="muted">Latest fleet events</p></div><a href="/notifications">View All</a></div>
+      <div class="activity-timeline" data-activity-timeline>
+        {% for item in notifications[:8] %}
+        <a class="activity-event level-{{ item.level }}" href="{{ item.link or '/notifications' }}"><time>{{ item.created_at }}</time><span class="activity-dot"></span><div><strong>{{ item.title }}</strong><small>{{ item.target }}</small></div></a>
+        {% else %}<div class="command-empty">No recent activity.</div>{% endfor %}
       </div>
     </section>
-    {% endif %}
-
-    {% if pending_displays %}
-    <section class="section command-work-card">
-      <div class="section-heading-row"><h2>Pending Enrollment</h2><a href="/setup">Open Setup</a></div>
-      <div class="compact-list">
-        {% for display in pending_displays %}
-        <div class="command-status-row">
-          <div><strong>{{ display.name or "New Display" }}</strong><span class="muted">{{ display.requested_id or display.host or "" }}</span></div>
-          <span>Waiting</span><a href="/setup">Approve</a>
-        </div>
-        {% endfor %}
-      </div>
-    </section>
-    {% endif %}
-
-    {% if maintenance_rows %}
-    <section class="section command-work-card">
-      <div class="section-heading-row"><h2>Maintenance</h2><a href="/fleet-config">Manage</a></div>
-      <div class="compact-list">
-        {% for row in maintenance_rows %}
-        <a class="command-status-row command-row-link" href="/display/{{ row.id }}">
-          <div><strong>{{ row.name }}</strong><span class="muted">{{ row.id }}</span></div>
-          <span>Maintenance</span><span>{{ row.maintenance.reason or "No reason provided" }}</span>
-        </a>
-        {% endfor %}
-      </div>
-    </section>
-    {% endif %}
-
-    {% if notifications %}
-    <section class="section command-work-card">
-      <div class="section-heading-row"><h2>Recent Notifications</h2><a href="/notifications">View All</a></div>
-      <div class="compact-list">
-        {% for item in notifications[:6] %}
-        <a class="command-status-row command-row-link" href="{{ item.link or '/notifications' }}">
-          <div><strong>{{ item.title }}</strong><span class="muted">{{ item.target }}</span></div>
-          <span>{{ item.level|title }}</span><span>{{ item.created_at }}</span>
-        </a>
-        {% endfor %}
-      </div>
-    </section>
-    {% endif %}
   </div>
 
   {% if not active_jobs and not outdated_rows and not pending_displays and not maintenance_rows %}
-  <section class="command-quiet-state section">
-    <strong>✓ Operations are clear</strong>
-    <span>No active jobs, pending enrollment, maintenance, or required software updates.</span>
-  </section>
+  <section class="command-quiet-state section"><strong>✓ Operations are clear</strong><span>No active jobs, pending enrollment, maintenance, or required software updates.</span></section>
   {% endif %}
 
-  <div class="command-toast-stack" data-toast-stack aria-live="polite" aria-atomic="true"></div>
+  <aside class="job-drawer" data-job-drawer aria-hidden="true">
+    <div class="job-drawer-backdrop" data-close-jobs></div>
+    <div class="job-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="job-drawer-title">
+      <header><div><span class="command-eyebrow">Live Operations</span><h2 id="job-drawer-title">Active Jobs</h2></div><button class="icon-button" type="button" data-close-jobs aria-label="Close">×</button></header>
+      <div class="job-drawer-list" data-job-drawer-list>
+        {% for job in active_jobs %}
+        <article class="drawer-job" data-job-id="{{ job.id or loop.index }}"><div><strong>{{ job.type|replace('_',' ')|title }}</strong><span>{{ job.display_id }}</span></div><span class="status-pill">{{ job.status|title }}</span><div class="drawer-progress"><span style="width: {{ job.progress|default(0) }}%"></span></div><small>{{ job.progress|default(0) }}%</small></article>
+        {% else %}<div class="command-empty">No active jobs.</div>{% endfor %}
+      </div>
+      <footer><a class="button" href="/jobs">Open Job History</a></footer>
+    </div>
+  </aside>
+
+  <div class="command-palette" data-command-palette aria-hidden="true">
+    <div class="palette-backdrop" data-close-palette></div>
+    <div class="palette-panel" role="dialog" aria-modal="true" aria-labelledby="palette-title">
+      <label id="palette-title" for="command-search">Command Palette <kbd>Esc</kbd></label>
+      <input id="command-search" type="search" placeholder="Search commands…" autocomplete="off" data-command-search>
+      <div class="palette-results" data-command-results>
+        {% for label, hint, href in [("Add display","Enroll a new player","/setup"),("Deploy update","Open software deployments","/deployments"),("Sync all media","Run fleet media synchronization","/bulk-operations/"),("Open offline displays","Review displays needing attention","/fleet-map"),("Download support bundle","Collect diagnostics","/system/support"),("Open job history","Review fleet jobs","/jobs")] %}
+        <a href="{{ href }}" data-command-item data-search="{{ label|lower }} {{ hint|lower }}"><strong>{{ label }}</strong><span>{{ hint }}</span></a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="command-toast-stack" data-toast-stack aria-live="polite"></div>
 </div>
-<script src="/static/command-center.js"></script>
+<script src="/static/command-center-v940.js"></script>
 {% endblock %}
