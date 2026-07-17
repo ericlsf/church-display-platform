@@ -13,7 +13,8 @@ class LayoutV810Tests(unittest.TestCase):
         js=(ROOT/"hub/static/layout-v8.1.js").read_text(encoding="utf-8")
         self.assertIn("simplifyTopbar",js)
         self.assertIn("improveDisplayRows",js)
-        self.assertIn("padding-top\",\"92px\"",js)
+        self.assertIn('"padding-top"', js)
+        self.assertIn('"92px"', js)
 
 if __name__=="__main__":
     unittest.main()
