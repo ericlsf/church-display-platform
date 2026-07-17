@@ -1260,6 +1260,19 @@
       "read": false,
       "dismissed": false,
       "resolved": false
+    },
+    {
+      "id": "c4b19d94-604d-4c38-917b-843dda7339ad",
+      "source_key": "job-success:bff8fb9b-defd-4a61-80ec-6db174e9b374",
+      "level": "success",
+      "title": "Deploy Update completed",
+      "message": "Display software updated to v9.4.0; display service verified. Agent will restart.",
+      "target": "welcome-center",
+      "link": "/jobs",
+      "created_at": "2026-07-17T16:47:42.367305+00:00",
+      "read": false,
+      "dismissed": false,
+      "resolved": false
     }
   ],
   "seen_sources": [
@@ -1359,6 +1372,7 @@
     "job-success:a84c5c6f-c302-4184-9696-cb9e19e67ca7",
     "job-success:50cac4e3-a39a-4359-a391-596436c02d9a",
     "job-success:aed3ca89-0245-4610-bafe-32dc495ff63c",
-    "job-failed:ae04935c-473d-4ff4-9f4d-cb85765cb4e1"
+    "job-failed:ae04935c-473d-4ff4-9f4d-cb85765cb4e1",
+    "job-success:bff8fb9b-defd-4a61-80ec-6db174e9b374"
   ]
 }
