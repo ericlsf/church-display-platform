@@ -1,166 +1,79 @@
 {% extends "base.html" %}
 {% block title %}Media Library - Church Display Hub{% endblock %}
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='media-library-v950.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='media-library-v960.css') }}">
 
-<div class="media-workspace" data-media-workspace>
+<div class="media-workspace" data-media-workspace data-remote="{{ drive_remote }}" data-folder="{{ selected_folder }}">
   <header class="media-hero">
-    <div>
-      <p class="media-eyebrow">Content Operations</p>
-      <h1>Media Library</h1>
-      <p class="media-subtitle">Browse Drive, arrange playback order, and deploy content without leaving the workspace.</p>
-    </div>
-    <div class="media-hero-actions">
-      <a class="media-button media-button-secondary" href="/content">Content overview</a>
-      {% if selected_folder %}
-      <button class="media-button media-button-primary" type="button" data-scroll-to-deploy>Deploy playlist</button>
-      {% endif %}
-    </div>
+    <div><p class="media-eyebrow">Content Operations</p><h1>Media Library</h1><p class="media-subtitle">Preview, arrange, inspect, and deploy content from one workspace.</p></div>
+    <div class="media-hero-actions"><a class="media-button media-button-secondary" href="/content">Content overview</a>{% if selected_folder %}<button class="media-button media-button-primary" type="button" data-scroll-to-deploy>Deploy playlist</button>{% endif %}</div>
   </header>
 
   <section class="media-panel media-source-panel">
-    <div class="media-panel-heading">
-      <div>
-        <h2>Source</h2>
-        <p>Connected to <strong>{{ drive_remote }}</strong></p>
-      </div>
-      {% if drive_error %}<span class="media-status media-status-error">Drive unavailable</span>{% else %}<span class="media-status media-status-ok">Drive connected</span>{% endif %}
-    </div>
-
-    {% if drive_error %}<div class="media-alert media-alert-error">{{ drive_error }}</div>{% endif %}
-
     <form method="GET" action="/media" class="media-browser-form">
-      <label class="media-field">
-        <span>Drive folder</span>
-        <select name="folder">
-          <option value="">Choose a folder</option>
-          {% for folder in drive_folders %}
-          <option value="{{ folder }}" {% if folder == selected_folder %}selected{% endif %}>{{ folder }}</option>
-          {% endfor %}
-        </select>
-      </label>
+      <label class="media-field"><span>Drive folder</span><select name="folder"><option value="">Choose a folder</option>{% for folder in drive_folders %}<option value="{{ folder }}" {% if folder == selected_folder %}selected{% endif %}>{{ folder }}</option>{% endfor %}</select></label>
       <label class="media-check"><input type="checkbox" name="recursive" value="1" {% if recursive %}checked{% endif %}> Include subfolders</label>
-      <label class="media-check"><input type="checkbox" name="supported_only" value="1" {% if supported_only %}checked{% endif %}> Supported media only</label>
+      <label class="media-check"><input type="checkbox" name="supported_only" value="1" {% if supported_only %}checked{% endif %}> Supported only</label>
       <button class="media-button media-button-primary" type="submit">Open folder</button>
+      <span class="media-status {% if drive_error %}media-status-error{% else %}media-status-ok{% endif %}">{% if drive_error %}Drive unavailable{% else %}Drive connected{% endif %}</span>
     </form>
+    {% if drive_error %}<div class="media-alert media-alert-error">{{ drive_error }}</div>{% endif %}
   </section>
 
   {% if analysis %}
-  <nav class="media-breadcrumbs" aria-label="Media folder">
-    <a href="/media">Drive</a>
-    {% for crumb in analysis["breadcrumbs"] %}<span>›</span><a href="/media?folder={{ crumb.path }}">{{ crumb.name }}</a>{% endfor %}
-  </nav>
+  <nav class="media-breadcrumbs" aria-label="Media folder"><a href="/media">Drive</a>{% for crumb in analysis["breadcrumbs"] %}<span>›</span><a href="/media?folder={{ crumb.path }}">{{ crumb.name }}</a>{% endfor %}</nav>
+  {% if analysis["error"] %}<div class="media-alert media-alert-error">{{ analysis["error"] }}</div>{% else %}
 
-  {% if analysis["error"] %}
-  <div class="media-alert media-alert-error">{{ analysis["error"] }}</div>
-  {% else %}
   <section class="media-metrics" aria-label="Folder summary">
-    <article><span>Items</span><strong>{{ analysis["total"] }}</strong></article>
-    <article><span>Images</span><strong>{{ analysis["images"] }}</strong></article>
-    <article><span>Videos</span><strong>{{ analysis["videos"] }}</strong></article>
-    <article><span>Supported</span><strong>{{ analysis["supported"] }}</strong></article>
-    <article><span>Storage</span><strong>{{ analysis["total_size_human"] }}</strong></article>
+    <article><span>Items</span><strong>{{ analysis["total"] }}</strong></article><article><span>Images</span><strong>{{ analysis["images"] }}</strong></article><article><span>Videos</span><strong>{{ analysis["videos"] }}</strong></article><article><span>Playable</span><strong>{{ analysis["supported"] }}</strong></article><article><span>Storage</span><strong>{{ analysis["total_size_human"] }}</strong></article>
   </section>
 
   <div class="media-layout">
     <main class="media-main-column">
-      <section class="media-panel">
+      <section class="media-panel media-library-panel">
         <div class="media-panel-heading media-library-heading">
-          <div>
-            <h2>{{ selected_folder }}</h2>
-            <p>{{ analysis["shown"] }} visible item{% if analysis["shown"] != 1 %}s{% endif %}</p>
-          </div>
-          <div class="media-view-tools">
-            <label class="media-search"><span aria-hidden="true">⌕</span><input type="search" placeholder="Filter this folder" data-media-search></label>
-            <button class="media-icon-button is-active" type="button" data-view="grid" title="Grid view">▦</button>
-            <button class="media-icon-button" type="button" data-view="list" title="List view">☷</button>
-          </div>
+          <div><h2>{{ selected_folder }}</h2><p><span data-visible-count>{{ analysis["shown"] }}</span> visible items</p></div>
+          <div class="media-view-tools"><label class="media-search"><span>⌕</span><input type="search" placeholder="Search this folder" data-media-search></label><button class="media-icon-button is-active" type="button" data-view="grid" title="Grid view">▦</button><button class="media-icon-button" type="button" data-view="list" title="List view">☷</button></div>
         </div>
-
-        <div class="media-filter-row" role="group" aria-label="Media filters">
-          <button class="media-filter is-active" type="button" data-filter="all">All</button>
-          <button class="media-filter" type="button" data-filter="image">Images</button>
-          <button class="media-filter" type="button" data-filter="video">Videos</button>
-          <button class="media-filter" type="button" data-filter="folder">Folders</button>
-          <button class="media-filter" type="button" data-filter="unsupported">Unsupported</button>
-        </div>
+        <div class="media-filter-row" role="group" aria-label="Media filters"><button class="media-filter is-active" type="button" data-filter="all">All</button><button class="media-filter" type="button" data-filter="image">Images</button><button class="media-filter" type="button" data-filter="video">Videos</button><button class="media-filter" type="button" data-filter="folder">Folders</button><button class="media-filter" type="button" data-filter="unsupported">Unsupported</button></div>
 
         {% if analysis["items"] %}
         <div class="media-card-grid" data-library-grid>
           {% for item in analysis["items"] %}
-          <article class="media-card {% if not item.supported and not item.is_dir %}is-unsupported{% endif %}" data-media-item data-kind="{% if item.is_dir %}folder{% else %}{{ item.type }}{% endif %}" data-supported="{{ 'true' if item.supported or item.is_dir else 'false' }}" data-name="{{ item.name|lower }}">
+          <article class="media-card {% if not item.supported and not item.is_dir %}is-unsupported{% endif %}" tabindex="0" data-media-item data-kind="{% if item.is_dir %}folder{% else %}{{ item.type }}{% endif %}" data-supported="{{ 'true' if item.supported or item.is_dir else 'false' }}" data-name="{{ item.name|lower }}" data-title="{{ item.name }}" data-path="{{ item.path }}" data-type="{{ item.type|title }}" data-size="{{ item.size_human }}" data-modified="{{ item.modified }}" data-mime="{{ item.mime_type }}" data-resolution="{{ item.resolution }}">
             <div class="media-card-preview media-preview-{{ item.type }}">
-              <span class="media-card-icon">{{ item.icon }}</span>
-              {% if not item.is_dir and not item.supported %}<span class="media-warning-badge">Unsupported</span>{% endif %}
+              {% if item.type == 'image' and not item.is_dir %}<img loading="lazy" src="{{ url_for('media.media_preview', remote=drive_remote, folder=selected_folder, path=item.path) }}" alt="Preview of {{ item.name }}" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="media-card-icon" hidden>{{ item.icon }}</span>{% else %}<span class="media-card-icon">{{ item.icon }}</span>{% endif %}
+              {% if item.type == 'video' %}<span class="media-play-badge">▶</span>{% endif %}{% if not item.is_dir and not item.supported %}<span class="media-warning-badge">Unsupported</span>{% endif %}
             </div>
-            <div class="media-card-body">
-              {% if item.is_dir %}<a class="media-card-title" href="/media?folder={{ item.child_folder }}">{{ item.name }}</a>{% else %}<strong class="media-card-title">{{ item.name }}</strong>{% endif %}
-              <div class="media-card-meta"><span>{{ item.type|title }}</span>{% if not item.is_dir %}<span>{{ item.size_human }}</span>{% endif %}</div>
-              {% if item.modified %}<time>{{ item.modified }}</time>{% endif %}
-            </div>
+            <div class="media-card-body">{% if item.is_dir %}<a class="media-card-title" href="/media?folder={{ item.child_folder }}">{{ item.name }}</a>{% else %}<strong class="media-card-title">{{ item.name }}</strong>{% endif %}<div class="media-card-meta"><span>{{ item.type|title }}</span>{% if not item.is_dir %}<span>{{ item.size_human }}</span>{% endif %}</div></div>
           </article>
           {% endfor %}
-        </div>
-        <div class="media-empty-filter" data-empty-filter hidden>No media matches the current filter.</div>
-        {% else %}
-        <div class="media-empty-state"><strong>This folder is empty</strong><span>Add media in Drive, then refresh this page.</span></div>
-        {% endif %}
+        </div><div class="media-empty-filter" data-empty-filter hidden>No media matches your search or filter.</div>
+        {% else %}<div class="media-empty-state"><strong>This folder is empty</strong><span>Add media in Drive, then refresh this page.</span></div>{% endif %}
       </section>
     </main>
 
     <aside class="media-side-column">
       <section class="media-panel media-playlist-panel">
-        <div class="media-panel-heading">
-          <div><h2>Playlist</h2><p>Drag to set playback order</p></div>
-          <span class="media-count">{{ analysis["media_items"]|length }}</span>
-        </div>
-
-        {% if analysis["media_items"] %}
-        <form method="POST" action="/media/order" id="order-form">
-          <input type="hidden" name="remote" value="{{ drive_remote }}">
-          <input type="hidden" name="folder" value="{{ selected_folder }}">
-          <textarea name="playlist_order" id="playlist-order-field" hidden>{% for item in analysis["media_items"] %}{{ item.path }}{% if not loop.last %}
-{% endif %}{% endfor %}</textarea>
-          <div class="playlist-stack" id="playlist-list">
-            {% for item in analysis["media_items"] %}
-            <div class="playlist-item" draggable="true" data-path="{{ item.path }}">
-              <span class="playlist-grip">⠿</span><span class="playlist-index">{{ loop.index }}</span><span class="playlist-type">{{ item.icon }}</span>
-              <span class="playlist-details"><strong>{{ item.name }}</strong><small>{{ item.type|title }} · {{ item.size_human }}</small></span>
-              <span class="playlist-controls"><button type="button" data-move="-1" aria-label="Move up">↑</button><button type="button" data-move="1" aria-label="Move down">↓</button></span>
-            </div>
-            {% endfor %}
-          </div>
-          <button class="media-button media-button-secondary media-button-block" type="submit">Save order</button>
-        </form>
-        {% else %}
-        <div class="media-empty-state media-empty-compact"><strong>No playable media</strong><span>Choose a folder containing supported images or video.</span></div>
-        {% endif %}
+        <div class="media-panel-heading"><div><h2>Playlist</h2><p>Drag rows to change playback order</p></div><span class="media-count">{{ analysis["media_items"]|length }}</span></div>
+        {% if analysis["media_items"] %}<form method="POST" action="/media/order" id="order-form"><input type="hidden" name="remote" value="{{ drive_remote }}"><input type="hidden" name="folder" value="{{ selected_folder }}"><textarea name="playlist_order" id="playlist-order-field" hidden>{% for item in analysis["media_items"] %}{{ item.path }}{% if not loop.last %}\n{% endif %}{% endfor %}</textarea>
+          <div class="playlist-stack" id="playlist-list">{% for item in analysis["media_items"] %}<div class="playlist-item" draggable="true" data-path="{{ item.path }}"><span class="playlist-grip">⠿</span><span class="playlist-index">{{ loop.index }}</span><span class="playlist-thumb">{% if item.type == 'image' %}<img loading="lazy" src="{{ url_for('media.media_preview', remote=drive_remote, folder=selected_folder, path=item.path) }}" alt="">{% else %}{{ item.icon }}{% endif %}</span><span class="playlist-details"><strong>{{ item.name }}</strong><small>{{ item.type|title }} · {{ item.size_human }}</small></span><span class="playlist-controls"><button type="button" data-move="-1" aria-label="Move up">↑</button><button type="button" data-move="1" aria-label="Move down">↓</button></span></div>{% endfor %}</div>
+          <button class="media-button media-button-secondary media-button-block" type="submit">Save order</button></form>{% else %}<div class="media-empty-state media-empty-compact"><strong>No playable media</strong></div>{% endif %}
       </section>
 
       <section class="media-panel media-deploy-panel" id="deploy-playlist">
-        <div class="media-panel-heading"><div><h2>Deploy</h2><p>Send this playlist to displays</p></div></div>
-        <form method="POST" action="/media/sync" id="sync-form">
-          <input type="hidden" name="remote" value="{{ drive_remote }}">
-          <input type="hidden" name="folder" value="{{ selected_folder }}">
-          <input type="hidden" name="run_now" value="1">
-          <textarea name="playlist_order" id="sync-playlist-order-field" hidden>{% for item in analysis["media_items"] %}{{ item.path }}{% if not loop.last %}
-{% endif %}{% endfor %}</textarea>
-          <div class="display-selection-heading"><span>Displays</span><button type="button" data-select-all>Select all</button></div>
-          <div class="display-selection-list">
-            {% for display in displays %}
-            <label class="display-choice"><input type="checkbox" name="display_ids" value="{{ display.id }}"><span><strong>{{ display.name }}</strong><small>{{ display.id }}</small></span></label>
-            {% else %}
-            <div class="media-empty-state media-empty-compact"><span>No displays are enrolled.</span></div>
-            {% endfor %}
-          </div>
-          <button class="media-button media-button-primary media-button-block" type="submit" {% if not analysis["media_items"] or not displays %}disabled{% endif %}>Sync selected displays</button>
-          <p class="media-form-note">The Hub caches the folder before jobs are queued.</p>
+        <div class="media-panel-heading"><div><h2>Deploy</h2><p>Review the target before syncing</p></div></div>
+        <form method="POST" action="/media/sync" id="sync-form"><input type="hidden" name="remote" value="{{ drive_remote }}"><input type="hidden" name="folder" value="{{ selected_folder }}"><input type="hidden" name="run_now" value="1"><textarea name="playlist_order" id="sync-playlist-order-field" hidden>{% for item in analysis["media_items"] %}{{ item.path }}{% if not loop.last %}\n{% endif %}{% endfor %}</textarea>
+          <div class="deploy-summary"><div><span>Playlist</span><strong>{{ selected_folder }}</strong></div><div><span>Items</span><strong>{{ analysis["media_items"]|length }}</strong></div><div><span>Estimated runtime</span><strong>{{ analysis["playlist_runtime_human"] }}</strong></div><div><span>Selected displays</span><strong data-selected-display-count>0</strong></div></div>
+          <div class="display-selection-heading"><span>Displays</span><button type="button" data-select-all>Select all</button></div><div class="display-selection-list">{% for display in displays %}<label class="display-choice"><input type="checkbox" name="display_ids" value="{{ display.id }}"><span><strong>{{ display.name }}</strong><small>{{ display.id }}</small></span></label>{% else %}<div class="media-empty-state media-empty-compact"><span>No displays are enrolled.</span></div>{% endfor %}</div>
+          <button class="media-button media-button-primary media-button-block" type="submit" data-deploy-button {% if not analysis["media_items"] or not displays %}disabled{% endif %}>Sync selected displays</button><p class="media-form-note">The Hub caches this folder before jobs are queued.</p>
         </form>
       </section>
     </aside>
   </div>
-  {% endif %}
-  {% endif %}
+
+  <aside class="media-details-drawer" data-details-drawer aria-hidden="true"><button class="details-close" type="button" data-details-close aria-label="Close details">×</button><div class="details-preview" data-details-preview><span>🖼</span></div><p class="media-eyebrow">Media details</p><h2 data-details-title>Select an item</h2><dl><div><dt>Type</dt><dd data-details-type>—</dd></div><div><dt>Size</dt><dd data-details-size>—</dd></div><div><dt>Modified</dt><dd data-details-modified>—</dd></div><div><dt>MIME type</dt><dd data-details-mime>—</dd></div><div><dt>Resolution</dt><dd data-details-resolution>—</dd></div><div><dt>Path</dt><dd data-details-path>—</dd></div></dl></aside><div class="drawer-backdrop" data-details-backdrop hidden></div>
+  {% endif %}{% endif %}
 </div>
-<script src="{{ url_for('static', filename='media-library-v950.js') }}" defer></script>
+<script src="{{ url_for('static', filename='media-library-v960.js') }}" defer></script>
 {% endblock %}
