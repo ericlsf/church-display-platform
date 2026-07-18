@@ -1,0 +1,29 @@
+{% extends "application_shell.html" %}
+{% block title %}Content Deployments - Church Display{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='content-deployments-v1200.css') }}">{% endblock %}
+{% block content %}
+<div class="cdp-deploy-page">
+  <header class="cdp-deploy-header">
+    <div><span class="eyebrow">CONTENT OPERATIONS</span><h1>Deployment Center</h1><p>Build a draft, review the impact, publish, and roll back from one place.</p></div>
+    <div class="source-pill">Google Drive</div>
+  </header>
+
+  <section class="deploy-panel composer">
+    <div class="panel-title"><div><h2>Create deployment draft</h2><p>Nothing changes on a display until you publish.</p></div></div>
+    <form method="post" action="/content-deployments/draft" class="deploy-form">
+      <label><span>Name</span><input name="name" placeholder="Sunday morning"></label>
+      <label><span>Google Drive folder / playlist</span><select name="folder" required><option value="">Choose content…</option>{% for folder in folders %}<option value="{{ folder }}">{{ folder }}</option>{% endfor %}</select></label>
+      <fieldset><legend>Target displays</legend><div class="target-grid">{% for display in displays %}<label class="target-card"><input type="checkbox" name="display_ids" value="{{ display.id }}"><span><strong>{{ display.name }}</strong><small>Current: {{ display.assigned_folder or display.sync_folder or 'Unassigned' }}</small></span></label>{% endfor %}</div></fieldset>
+      <button class="button primary" type="submit">Create draft</button>
+    </form>
+  </section>
+
+  <section class="deploy-panel"><div class="panel-title"><div><h2>Drafts</h2><p>Review current and proposed assignments before publishing.</p></div><span class="count-badge">{{ drafts|length }}</span></div>
+    {% if drafts %}<div class="deployment-list">{% for draft in drafts %}<article class="deployment-card"><div class="deployment-top"><div><span class="status draft">Draft</span><h3>{{ draft.name }}</h3><p>Created {{ draft.created_at|replace('T',' ')|truncate(19, True, '') }} by {{ draft.actor }}</p></div><strong class="folder-pill">{{ draft.folder }}</strong></div><div class="impact-list">{% for display_id in draft.display_ids %}{% set display = display_map.get(display_id, {}) %}<div><strong>{{ display.get('name', display_id) }}</strong><span>{{ draft.before.get(display_id) or 'Unassigned' }} → <b>{{ draft.folder }}</b></span></div>{% endfor %}</div><div class="deployment-actions"><form method="post" action="/content-deployments/draft/{{ draft.id }}/publish"><button class="button primary">Publish</button></form><form method="post" action="/content-deployments/draft/{{ draft.id }}/delete"><button class="button subtle">Delete</button></form></div></article>{% endfor %}</div>{% else %}<div class="empty-state">No drafts. Create one above to stage a content change.</div>{% endif %}
+  </section>
+
+  <section class="deploy-panel"><div class="panel-title"><div><h2>Deployment history</h2><p>Every publish and rollback is recorded.</p></div></div>
+    {% if history %}<div class="timeline">{% for item in history %}<article class="timeline-item"><div class="timeline-dot {{ item.status }}"></div><div class="timeline-card"><div><span class="status {{ item.status }}">{{ item.status|replace('_',' ')|title }}</span><h3>{{ item.name }}</h3><p>{{ item.published_at|replace('T',' ')|truncate(19, True, '') }} · {{ item.actor }}</p></div><div class="timeline-meta"><span>{{ item.display_ids|length }} display(s)</span>{% if item.folder %}<strong>{{ item.folder }}</strong>{% endif %}</div>{% if item.status == 'published' %}<form method="post" action="/content-deployments/history/{{ item.id }}/rollback"><button class="button subtle">Rollback</button></form>{% endif %}</div></article>{% endfor %}</div>{% else %}<div class="empty-state">No deployments have been published yet.</div>{% endif %}
+  </section>
+</div>
+{% endblock %}

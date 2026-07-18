@@ -16,6 +16,7 @@ from routes.heartbeat import heartbeat_bp
 from routes.live import live_bp
 from routes.jobs import jobs_bp, jobs_api_bp
 from routes.deployments import deployments_bp
+from routes.content_deployments import content_deployments_bp
 from routes.setup import setup_bp
 from routes.system import system_bp
 
@@ -74,6 +75,7 @@ def create_app():
     app.register_blueprint(jobs_bp)
     app.register_blueprint(jobs_api_bp)
     app.register_blueprint(deployments_bp)
+    app.register_blueprint(content_deployments_bp)
     app.register_blueprint(media_bp)
     app.register_blueprint(content_bp)
     app.register_blueprint(content_api_bp)
