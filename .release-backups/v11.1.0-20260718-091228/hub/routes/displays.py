@@ -64,7 +64,7 @@ def display_rows(test_message=""):
             "display_app_running": fleet.get("display_app_running", False),
             "display_app_state": fleet.get("display_app_state", "unknown"),
             "presentation": presentation,
-            "sync_remote": "gdrive",
+            "sync_remote": display.get("sync_remote", "gdrive"),
             "sync_folder": (
                 display.get("assigned_folder")
                 or display.get("sync_folder")
@@ -112,8 +112,7 @@ def displays():
         active="displays",
         groups=groups,
         profiles=profiles_data.get("profiles", []),
-        drive_remote="gdrive",
-        folder_options=folders,
+        drive_remote=remote,
         media_index=media_index,
     )
 
@@ -257,7 +256,7 @@ def update_workspace(display_id):
         flash("Display not found.", "error")
         return redirect(url_for("displays.displays"))
 
-    remote = "gdrive"
+    remote = request.form.get("sync_remote", "gdrive").strip() or "gdrive"
     folder = request.form.get("sync_folder", "").strip().strip("/")
     profile_id = request.form.get("profile_id", "").strip()
     selected_groups = set(request.form.getlist("group_ids"))
@@ -306,70 +305,6 @@ def update_workspace(display_id):
 
     log_event(f"Updated management assignments for {display.get('name', display_id)}")
     flash(f"Updated {display.get('name', display_id)} assignments.", "success")
-    return redirect(url_for("displays.displays"))
-
-
-@displays_bp.route("/bulk-workspace", methods=["POST"])
-def bulk_workspace():
-    display_ids = [item for item in request.form.getlist("display_ids") if item]
-    if not display_ids:
-        flash("Select at least one display.", "error")
-        return redirect(url_for("displays.displays"))
-
-    cfg = load_config()
-    displays_by_id = {
-        item.get("id"): item
-        for item in cfg.get("displays", [])
-        if item.get("id") in display_ids
-    }
-    folder = request.form.get("sync_folder", "").strip().strip("/")
-    profile_id = request.form.get("profile_id", "").strip()
-    group_action = request.form.get("group_action", "keep")
-    selected_groups = set(request.form.getlist("group_ids"))
-    run_now = request.form.get("run_now") == "1"
-
-    for display_id, display in displays_by_id.items():
-        if folder:
-            previous = display.get("assigned_folder") or display.get("sync_folder") or ""
-            display["sync_remote"] = "gdrive"
-            display["sync_folder"] = folder
-            display["assigned_folder"] = folder
-            if folder != previous or run_now:
-                create_job(
-                    display_id,
-                    "set_sync_folder",
-                    {"remote": "gdrive", "folder": folder, "run_now": run_now},
-                )
-        if profile_id:
-            apply_profile(profile_id, display_ids=[display_id])
-            display["profile_id"] = profile_id
-
-    save_config(cfg)
-
-    if group_action in {"add", "replace", "remove"}:
-        for group in list_groups():
-            group_id = group.get("id")
-            members = set(group.get("display_ids", []))
-            targeted = set(display_ids)
-            if group_action == "add" and group_id in selected_groups:
-                members |= targeted
-            elif group_action == "remove" and group_id in selected_groups:
-                members -= targeted
-            elif group_action == "replace":
-                members -= targeted
-                if group_id in selected_groups:
-                    members |= targeted
-            else:
-                continue
-            update_group(
-                group_id,
-                group.get("name", "Group"),
-                group.get("description", ""),
-                sorted(members),
-            )
-
-    log_event(f"Updated assignments for {len(displays_by_id)} displays")
-    flash(f"Updated {len(displays_by_id)} displays.", "success")
     return redirect(url_for("displays.displays"))
 
 

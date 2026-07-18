@@ -4,15 +4,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-class DisplayFleetV1100Tests(unittest.TestCase):
-    def test_display_workspace_assets_and_controls(self):
+class DisplayFleetV1100CompatibilityTests(unittest.TestCase):
+    def test_display_workspace_controls_remain_available(self):
         template = (ROOT / "hub/templates/displays.html").read_text()
-        self.assertIn("display-fleet-v1100.css", template)
-        self.assertIn("Save assignments", template)
         self.assertIn('name="sync_folder"', template)
         self.assertIn('name="group_ids"', template)
         self.assertIn('name="profile_id"', template)
-        self.assertIn("Latest screenshot", template)
+        self.assertIn("display-preview", template)
 
     def test_workspace_route_queues_and_persists_assignments(self):
         route = (ROOT / "hub/routes/displays.py").read_text()

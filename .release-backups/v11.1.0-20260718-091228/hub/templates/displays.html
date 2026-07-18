@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Displays - Church Display Hub{% endblock %}
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" href="/static/display-fleet-v1100.css">
+{% endblock %}
+{% block content %}
+<header class="fleet-page-header">
+  <div>
+    <p class="eyebrow">Fleet management</p>
+    <h1>Displays</h1>
+    <p class="muted">Monitor health and manage content, groups, profiles, and recovery from one workspace.</p>
+  </div>
+  <button class="primary" type="button" data-toggle-add-display>Add display</button>
+</header>
+
+{% if test_message %}<div class="fleet-notice"><strong>{{ test_message }}</strong></div>{% endif %}
+
+<section class="fleet-summary" aria-label="Fleet summary">
+  <div><strong>{{ rows|length }}</strong><span>Displays</span></div>
+  <div><strong>{{ rows|selectattr('online')|list|length }}</strong><span>Online</span></div>
+  <div><strong>{{ rows|rejectattr('online')|list|length }}</strong><span>Offline</span></div>
+  <div><strong>{{ media_index.status|replace('_', ' ')|title }}</strong><span>Media index</span></div>
+</section>
+
+<section class="section add-display-panel" data-add-display hidden>
+  <div class="section-heading"><div><h2>Add display</h2><p class="muted">Register an existing display's local administrator endpoint.</p></div><button type="button" data-toggle-add-display aria-label="Close">×</button></div>
+  <form method="POST" action="/displays/add" class="compact-form-grid">
+    <label>Name<input name="name" placeholder="Lobby Display" required></label>
+    <label>Admin URL or IP<input name="host" placeholder="http://192.168.1.101:8080" required></label>
+    <label>Username<input name="username" placeholder="admin"></label>
+    <label>Password<input name="password" type="password"></label>
+    <div><button class="primary" type="submit">Add display</button></div>
+  </form>
+</section>
+
+<section class="display-card-grid">
+{% for row in rows %}
+  {% set p = row.presentation %}
+  <article class="display-fleet-card {{ 'is-online' if row.online else 'is-offline' }}">
+    <header class="display-card-header">
+      <div>
+        <div class="display-title-line"><span class="status-dot" aria-hidden="true"></span><h2>{{ row.name }}</h2></div>
+        <p class="muted">{{ row.id }} · {{ row.host or 'No host configured' }}</p>
+      </div>
+      <span class="status-badge">{{ 'Online' if row.online else 'Offline' }}</span>
+    </header>
+
+    <div class="display-preview">
+      {% if row.preview_url %}<img src="{{ row.preview_url }}" alt="Latest screenshot from {{ row.name }}" loading="lazy">{% else %}<div class="preview-placeholder"><span>Live preview unavailable</span></div>{% endif %}
+    </div>
+
+    <dl class="display-metrics">
+      <div><dt>Version</dt><dd>{{ row.version }}</dd></div>
+      <div><dt>Last seen</dt><dd>{{ row.heartbeat }}</dd></div>
+      <div><dt>Now playing</dt><dd title="{{ row.current_media }}">{{ row.current_media }}</dd></div>
+      <div><dt>Sync</dt><dd>{{ row.sync_state|replace('_', ' ')|title }}</dd></div>
+    </dl>
+
+    <form class="display-assignment-form" method="POST" action="/displays/{{ row.id }}/workspace">
+      <input type="hidden" name="profile_submitted" value="1">
+      <fieldset>
+        <legend>Content assignment</legend>
+        <div class="two-column-fields">
+          <label>Sync remote<input name="sync_remote" value="{{ row.sync_remote or drive_remote }}" autocomplete="off"></label>
+          <label>Folder / playlist
+            <input name="sync_folder" value="{{ row.sync_folder }}" list="folders-{{ row.id }}" placeholder="Weekly">
+            <datalist id="folders-{{ row.id }}">{% for folder in row.folder_options %}<option value="{{ folder }}">{% endfor %}</datalist>
+          </label>
+        </div>
+        <label class="checkbox-row"><input type="checkbox" name="run_now" value="1"> Sync immediately after saving</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Profile</legend>
+        <label>Presentation profile
+          <select name="profile_id">
+            <option value="">Custom / no profile</option>
+            {% for profile in profiles %}<option value="{{ profile.id }}" {% if row.profile_id == profile.id %}selected{% endif %}>{{ profile.name }}</option>{% endfor %}
+          </select>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Groups</legend>
+        <div class="group-choice-grid">
+          {% for group in groups %}<label class="group-choice"><input type="checkbox" name="group_ids" value="{{ group.id }}" {% if group.id in row.group_ids %}checked{% endif %}><span>{{ group.name }}</span></label>{% else %}<p class="muted">No groups exist yet. Create them from Groups.</p>{% endfor %}
+        </div>
+      </fieldset>
+
+      <button class="primary full-width" type="submit">Save assignments</button>
+    </form>
+
+    <details class="card-details">
+      <summary>Presentation and connection settings</summary>
+      <div class="card-details-body">
+        <form method="POST" action="/displays/presentation">
+          <input type="hidden" name="id" value="{{ row.id }}">
+          <label class="checkbox-row"><input type="checkbox" name="overlay_enabled" {% if p.overlay.enabled %}checked{% endif %}> Show overlay text</label>
+          <label>Overlay text<input name="overlay_text" maxlength="160" value="{{ p.overlay.text }}"></label>
+          <label class="checkbox-row"><input type="checkbox" name="clock_enabled" {% if p.clock.enabled %}checked{% endif %}> Show clock</label>
+          <label class="checkbox-row"><input type="checkbox" name="countdown_enabled" {% if p.countdown.enabled %}checked{% endif %}> Enable countdown</label>
+          <div class="two-column-fields"><label>Countdown window<input type="number" min="0" max="180" name="countdown_start_minutes" value="{{ p.countdown.start_minutes }}"></label><label>Image duration<input type="number" min="1" max="300" name="image_duration" value="{{ p.timings.image_duration }}"></label></div>
+          <button type="submit">Save presentation</button>
+        </form>
+        <form method="POST" action="/displays/update">
+          <input type="hidden" name="id" value="{{ row.id }}">
+          <label>Name<input name="name" value="{{ row.name }}"></label>
+          <label>Host<input name="host" value="{{ row.host }}"></label>
+          <div class="two-column-fields"><label>Username<input name="username" value="{{ row.username }}"></label><label>Password<input name="password" type="password" value="{{ row.password }}"></label></div>
+          <button type="submit">Save connection</button>
+        </form>
+      </div>
+    </details>
+
+    <footer class="display-card-actions">
+      <form method="POST" action="/fleet/{{ row.id }}/sync-now"><input type="hidden" name="next" value="/displays"><button type="submit">Sync now</button></form>
+      <form method="POST" action="/fleet/{{ row.id }}/restart"><input type="hidden" name="next" value="/displays"><button class="safe" type="submit">Restart player</button></form>
+      <form method="POST" action="/fleet/{{ row.id }}/reboot"><input type="hidden" name="next" value="/displays"><button type="submit">Reboot</button></form>
+      {% if row.host %}<a class="button-link" href="{{ row.host }}" target="_blank" rel="noopener">Local admin</a>{% endif %}
+    </footer>
+  </article>
+{% else %}
+  <div class="section empty-fleet"><h2>No displays configured</h2><p class="muted">Add your first display to begin managing the fleet.</p></div>
+{% endfor %}
+</section>
+<script src="/static/display-fleet-v1100.js" defer></script>
+{% endblock %}
