@@ -28,3 +28,12 @@ def test_store_lifecycle():
         rollback = svc.record_rollback(published, 'tester')
         assert rollback['status'] == 'rolled_back'
         del os.environ['CHURCH_DISPLAY_CONTENT_DEPLOYMENTS']
+
+
+def test_content_deployments_uses_shared_base_layout():
+    template = (ROOT / 'hub/templates/content_deployments.html').read_text()
+    assert template.lstrip().startswith('{% extends "base.html" %}')
+    assert '{% block head %}' in template
+    assert 'content-deployments-v1200.css' in template
+    assert '{% block content %}' in template
+    assert 'application_shell.html' not in template.splitlines()[0]

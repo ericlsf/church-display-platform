@@ -1,7 +1,7 @@
 {
   "remote": "gdrive",
   "status": "ready",
-  "updated_at": "2026-07-18T16:34:01+00:00",
+  "updated_at": "2026-07-18T17:41:40+00:00",
   "started_at": "",
   "error": "",
   "items": [
@@ -28,46 +28,6 @@
       "Size": -1,
       "ModTime": "2026-06-25T20:40:18.218Z",
       "MimeType": "inode/directory"
-    },
-    {
-      "Path": "Seasonal/Copy of GOD_S GIRLS slide (9).jpg",
-      "Name": "Copy of GOD_S GIRLS slide (9).jpg",
-      "IsDir": false,
-      "Size": 209246,
-      "ModTime": "2026-07-03T21:12:12.266Z",
-      "MimeType": "image/jpeg"
-    },
-    {
-      "Path": "Seasonal/Copy of Connect with us.jpg",
-      "Name": "Copy of Connect with us.jpg",
-      "IsDir": false,
-      "Size": 304363,
-      "ModTime": "2026-07-03T20:59:04.976Z",
-      "MimeType": "image/jpeg"
-    },
-    {
-      "Path": "Seasonal/Copy of Connect Card Slide.jpg",
-      "Name": "Copy of Connect Card Slide.jpg",
-      "IsDir": false,
-      "Size": 186885,
-      "ModTime": "2026-07-03T19:40:22.123Z",
-      "MimeType": "image/jpeg"
-    },
-    {
-      "Path": "Seasonal/Copy of Bible verse.png",
-      "Name": "Copy of Bible verse.png",
-      "IsDir": false,
-      "Size": 2641406,
-      "ModTime": "2026-07-03T19:40:22.123Z",
-      "MimeType": "image/png"
-    },
-    {
-      "Path": "Seasonal/Nativity Sweeps Hills - Slow - HD 1080.mp4",
-      "Name": "Nativity Sweeps Hills - Slow - HD 1080.mp4",
-      "IsDir": false,
-      "Size": 35646990,
-      "ModTime": "2026-06-30T21:09:51.000Z",
-      "MimeType": "video/mp4"
     },
     {
       "Path": "Weekly/02.jpg",
@@ -140,6 +100,54 @@
       "Size": 1890921,
       "ModTime": "2024-12-28T14:16:34.000Z",
       "MimeType": "image/png"
+    },
+    {
+      "Path": "Seasonal/Copy of GOD_S GIRLS slide (9).jpg",
+      "Name": "Copy of GOD_S GIRLS slide (9).jpg",
+      "IsDir": false,
+      "Size": 209246,
+      "ModTime": "2026-07-03T21:12:12.266Z",
+      "MimeType": "image/jpeg"
+    },
+    {
+      "Path": "Seasonal/Copy of Connect with us.jpg",
+      "Name": "Copy of Connect with us.jpg",
+      "IsDir": false,
+      "Size": 304363,
+      "ModTime": "2026-07-03T20:59:04.976Z",
+      "MimeType": "image/jpeg"
+    },
+    {
+      "Path": "Seasonal/Copy of Connect Card Slide.jpg",
+      "Name": "Copy of Connect Card Slide.jpg",
+      "IsDir": false,
+      "Size": 186885,
+      "ModTime": "2026-07-03T19:40:22.123Z",
+      "MimeType": "image/jpeg"
+    },
+    {
+      "Path": "Seasonal/Copy of Bible verse.png",
+      "Name": "Copy of Bible verse.png",
+      "IsDir": false,
+      "Size": 2641406,
+      "ModTime": "2026-07-03T19:40:22.123Z",
+      "MimeType": "image/png"
+    },
+    {
+      "Path": "Seasonal/Nativity Sweeps Hills - Slow - HD 1080.mp4",
+      "Name": "Nativity Sweeps Hills - Slow - HD 1080.mp4",
+      "IsDir": false,
+      "Size": 35646990,
+      "ModTime": "2026-06-30T21:09:51.000Z",
+      "MimeType": "video/mp4"
+    },
+    {
+      "Path": "Missions/church-display-platform-current.zip",
+      "Name": "church-display-platform-current.zip",
+      "IsDir": false,
+      "Size": 656083,
+      "ModTime": "2026-07-18T16:35:25.000Z",
+      "MimeType": "application/zip"
     },
     {
       "Path": "Missions/-.docx",
