@@ -1,0 +1,177 @@
+{
+  "remote": "gdrive",
+  "status": "ready",
+  "updated_at": "2026-07-18T13:38:39+00:00",
+  "started_at": "",
+  "error": "",
+  "items": [
+    {
+      "Path": "Seasonal",
+      "Name": "Seasonal",
+      "IsDir": true,
+      "Size": -1,
+      "ModTime": "2026-07-03T19:33:27.330Z",
+      "MimeType": "inode/directory"
+    },
+    {
+      "Path": "Missions",
+      "Name": "Missions",
+      "IsDir": true,
+      "Size": -1,
+      "ModTime": "2026-06-25T20:40:24.273Z",
+      "MimeType": "inode/directory"
+    },
+    {
+      "Path": "Weekly",
+      "Name": "Weekly",
+      "IsDir": true,
+      "Size": -1,
+      "ModTime": "2026-06-25T20:40:18.218Z",
+      "MimeType": "inode/directory"
+    },
+    {
+      "Path": "Weekly/02.jpg",
+      "Name": "02.jpg",
+      "IsDir": false,
+      "Size": 186885,
+      "ModTime": "2026-07-03T19:40:51.494Z",
+      "MimeType": "image/jpeg"
+    },
+    {
+      "Path": "Weekly/01.png",
+      "Name": "01.png",
+      "IsDir": false,
+      "Size": 2641406,
+      "ModTime": "2026-07-03T19:40:46.614Z",
+      "MimeType": "image/png"
+    },
+    {
+      "Path": "Weekly/Lifespring Kids Slide.jpg",
+      "Name": "Lifespring Kids Slide.jpg",
+      "IsDir": false,
+      "Size": 233555,
+      "ModTime": "2026-07-03T19:35:36.000Z",
+      "MimeType": "image/jpeg"
+    },
+    {
+      "Path": "Weekly/CY Welcome.mp4",
+      "Name": "CY Welcome.mp4",
+      "IsDir": false,
+      "Size": 57826374,
+      "ModTime": "2026-07-01T01:18:11.000Z",
+      "MimeType": "video/mp4"
+    },
+    {
+      "Path": "Weekly/Nativity Sweeps City - Slow - HD 1080.mp4",
+      "Name": "Nativity Sweeps City - Slow - HD 1080.mp4",
+      "IsDir": false,
+      "Size": 32411330,
+      "ModTime": "2026-07-01T01:16:25.000Z",
+      "MimeType": "video/mp4"
+    },
+    {
+      "Path": "Weekly/Connect with us.jpg",
+      "Name": "Connect with us.jpg",
+      "IsDir": false,
+      "Size": 304363,
+      "ModTime": "2026-06-30T20:26:03.000Z",
+      "MimeType": "image/jpeg"
+    },
+    {
+      "Path": "Weekly/GOD_S GIRLS slide (9).jpg",
+      "Name": "GOD_S GIRLS slide (9).jpg",
+      "IsDir": false,
+      "Size": 209246,
+      "ModTime": "2026-06-17T13:47:08.000Z",
+      "MimeType": "image/jpeg"
+    },
+    {
+      "Path": "Weekly/Hope Gospel Drivers.png",
+      "Name": "Hope Gospel Drivers.png",
+      "IsDir": false,
+      "Size": 151746,
+      "ModTime": "2024-12-28T14:17:26.000Z",
+      "MimeType": "image/png"
+    },
+    {
+      "Path": "Weekly/Contact Us.png",
+      "Name": "Contact Us.png",
+      "IsDir": false,
+      "Size": 1890921,
+      "ModTime": "2024-12-28T14:16:34.000Z",
+      "MimeType": "image/png"
+    },
+    {
+      "Path": "Seasonal/Copy of GOD_S GIRLS slide (9).jpg",
+      "Name": "Copy of GOD_S GIRLS slide (9).jpg",
+      "IsDir": false,
+      "Size": 209246,
+      "ModTime": "2026-07-03T21:12:12.266Z",
+      "MimeType": "image/jpeg"
+    },
+    {
+      "Path": "Seasonal/Copy of Connect with us.jpg",
+      "Name": "Copy of Connect with us.jpg",
+      "IsDir": false,
+      "Size": 304363,
+      "ModTime": "2026-07-03T20:59:04.976Z",
+      "MimeType": "image/jpeg"
+    },
+    {
+      "Path": "Seasonal/Copy of Connect Card Slide.jpg",
+      "Name": "Copy of Connect Card Slide.jpg",
+      "IsDir": false,
+      "Size": 186885,
+      "ModTime": "2026-07-03T19:40:22.123Z",
+      "MimeType": "image/jpeg"
+    },
+    {
+      "Path": "Seasonal/Copy of Bible verse.png",
+      "Name": "Copy of Bible verse.png",
+      "IsDir": false,
+      "Size": 2641406,
+      "ModTime": "2026-07-03T19:40:22.123Z",
+      "MimeType": "image/png"
+    },
+    {
+      "Path": "Seasonal/Nativity Sweeps Hills - Slow - HD 1080.mp4",
+      "Name": "Nativity Sweeps Hills - Slow - HD 1080.mp4",
+      "IsDir": false,
+      "Size": 35646990,
+      "ModTime": "2026-06-30T21:09:51.000Z",
+      "MimeType": "video/mp4"
+    },
+    {
+      "Path": "Missions/-.docx",
+      "Name": "-.docx",
+      "IsDir": false,
+      "Size": -1,
+      "ModTime": "2026-07-18T13:15:52.864Z",
+      "MimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    },
+    {
+      "Path": "Missions/Copy of GOD_S GIRLS slide (9).jpg",
+      "Name": "Copy of GOD_S GIRLS slide (9).jpg",
+      "IsDir": false,
+      "Size": 209246,
+      "ModTime": "2026-07-05T16:04:32.125Z",
+      "MimeType": "image/jpeg"
+    },
+    {
+      "Path": "Missions/Copy of Hope Gospel Drivers.png",
+      "Name": "Copy of Hope Gospel Drivers.png",
+      "IsDir": false,
+      "Size": 151746,
+      "ModTime": "2026-07-05T16:04:32.125Z",
+      "MimeType": "image/png"
+    },
+    {
+      "Path": "Missions/Copy of Lifespring Kids Slide.jpg",
+      "Name": "Copy of Lifespring Kids Slide.jpg",
+      "IsDir": false,
+      "Size": 233555,
+      "ModTime": "2026-07-05T16:04:32.125Z",
+      "MimeType": "image/jpeg"
+    }
+  ]
+}

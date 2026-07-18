@@ -317,3 +317,40 @@
   updatePicked();
   updateDisplayCount();
 })();
+
+// v10.1: Media pages render from the local index. Poll only lightweight local status.
+(() => {
+  const badge = document.querySelector('[data-media-cache-status]');
+  const detail = document.querySelector('[data-media-cache-detail]');
+  if (!badge || !badge.dataset.statusUrl) return;
+  const formatTime = value => {
+    if (!value) return 'No successful refresh yet.';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? value : `Last refreshed ${date.toLocaleString()}`;
+  };
+  const refreshStatus = async () => {
+    try {
+      const response = await fetch(badge.dataset.statusUrl, {headers: {'Accept': 'application/json'}, cache: 'no-store'});
+      if (!response.ok) return;
+      const data = await response.json();
+      badge.classList.remove('media-status-ok', 'media-status-error', 'media-status-syncing');
+      if (data.status === 'ready') {
+        badge.classList.add('media-status-ok');
+        badge.textContent = 'Using cached index';
+        if (detail) detail.textContent = formatTime(data.updated_at);
+      } else if (data.status === 'syncing') {
+        badge.classList.add('media-status-syncing');
+        badge.textContent = 'Refreshing in background…';
+        if (detail) detail.textContent = 'The page remains available while Drive refreshes.';
+      } else {
+        badge.classList.add('media-status-error');
+        badge.textContent = data.updated_at ? 'Using cached media' : 'Index not created';
+        if (detail) detail.textContent = data.error || formatTime(data.updated_at);
+      }
+    } catch (_) {
+      // The current page remains usable from its rendered cache.
+    }
+  };
+  refreshStatus();
+  window.setInterval(refreshStatus, 5000);
+})();

@@ -15,9 +15,15 @@
       <label class="media-check"><input type="checkbox" name="recursive" value="1" {% if recursive %}checked{% endif %}> Include subfolders</label>
       <label class="media-check"><input type="checkbox" name="supported_only" value="1" {% if supported_only %}checked{% endif %}> Supported only</label>
       <button class="media-button media-button-primary" type="submit">Open folder</button>
-      <span class="media-status {% if drive_error %}media-status-error{% else %}media-status-ok{% endif %}">{% if drive_error %}Drive unavailable{% else %}Drive connected{% endif %}</span>
+      <span class="media-status media-cache-status media-status-{% if media_index.status == 'ready' %}ok{% elif media_index.status == 'syncing' %}syncing{% else %}error{% endif %}" data-media-cache-status data-status-url="{{ url_for('media.media_cache_status') }}">
+        {% if media_index.status == 'ready' %}Using cached index{% elif media_index.status == 'syncing' %}Refreshing in background…{% elif media_index.status == 'never_synced' %}Index not created{% else %}Using cached media{% endif %}
+      </span>
     </form>
-    {% if drive_error %}<div class="media-alert media-alert-error">{{ drive_error }}</div>{% endif %}
+    <div class="media-cache-bar">
+      <div><strong>Google Drive index</strong><span data-media-cache-detail>{% if media_index.updated_at %}Last refreshed {{ media_index.updated_at }}{% elif media_index.status == 'syncing' %}Refresh is running in the background.{% else %}No cached index yet.{% endif %}</span></div>
+      <form method="POST" action="{{ url_for('media.refresh_media_cache') }}"><input type="hidden" name="folder" value="{{ selected_folder }}"><input type="hidden" name="supported_only" value="{{ '1' if supported_only else '' }}"><button class="media-button media-button-secondary" type="submit">Sync now</button></form>
+    </div>
+    {% if drive_error %}<div class="media-alert media-alert-warning">Drive refresh issue: {{ drive_error }} The Media Library continues using its last successful cache.</div>{% endif %}
   </section>
 
   {% if analysis %}

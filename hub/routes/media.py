@@ -1,14 +1,16 @@
 from io import BytesIO
 import mimetypes
 import subprocess
+import sys
+from pathlib import Path
 
 from flask import Blueprint, abort, redirect, render_template, request, send_file, url_for
 
 from services.config import load_config, load_hub_settings
-from services.drive import list_drive_folders
 from services.events import log_event
 from services.jobs import create_job
-from services.media import analyze_drive_folder, save_playlist_order
+from services.media import save_playlist_order
+from services.media_index import analyze_cached_folder, cached_drive_folders, load_media_index
 from services.content_cache import sync_playlist_from_drive
 
 media_bp = Blueprint("media", __name__, url_prefix="/media")
@@ -30,14 +32,15 @@ def media_page():
     cfg = load_config()
     hub_settings = load_hub_settings()
     remote = hub_settings.get("drive_remote", "gdrive")
-    folders, drive_error = list_drive_folders(remote)
+    folders, media_index = cached_drive_folders(remote)
+    drive_error = media_index.get("error", "") if media_index.get("status") == "error" else ""
     selected_folder = request.args.get("folder", "").strip().strip("/")
     recursive = bool_arg("recursive")
     supported_only = bool_arg("supported_only")
     analysis = None
 
     if selected_folder:
-        analysis = analyze_drive_folder(
+        analysis = analyze_cached_folder(
             remote,
             selected_folder,
             recursive=recursive,
@@ -55,7 +58,41 @@ def media_page():
         recursive=recursive,
         supported_only=supported_only,
         analysis=analysis,
+        media_index=media_index,
     )
+
+
+@media_bp.route("/refresh", methods=["POST"])
+def refresh_media_cache():
+    hub_settings = load_hub_settings()
+    remote = hub_settings.get("drive_remote", "gdrive")
+    script = Path(__file__).resolve().parent.parent / "scripts" / "refresh_media_index.py"
+    try:
+        subprocess.Popen(
+            [sys.executable, str(script), "--remote", remote],
+            cwd=str(script.parent.parent),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+        log_event(f"Started background media index refresh for {remote}")
+    except Exception as exc:
+        log_event(f"Could not start media index refresh for {remote}: {exc}")
+    folder = request.form.get("folder", "").strip().strip("/")
+    return redirect(url_for("media.media_page", folder=folder, supported_only=request.form.get("supported_only", "")))
+
+
+@media_bp.route("/status")
+def media_cache_status():
+    remote = load_hub_settings().get("drive_remote", "gdrive")
+    index = load_media_index(remote)
+    return {
+        "status": index.get("status", "never_synced"),
+        "updated_at": index.get("updated_at", ""),
+        "started_at": index.get("started_at", ""),
+        "error": index.get("error", ""),
+        "item_count": len(index.get("items", [])),
+    }
 
 
 @media_bp.route("/preview")

@@ -17,3 +17,9 @@
 .media-details-drawer dd.is-status-pill.is-pending{border-color:rgba(229,177,68,.35);background:rgba(229,177,68,.1);color:#e8c674}
 body.media-drawer-open{overflow:hidden}
 @media(max-width:480px){.media-details-drawer{width:100vw;padding:18px}.details-preview{height:180px}}
+
+/* v10.1 background media index */
+.media-cache-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:.8rem;padding:.8rem 1rem;border:1px solid var(--border-color,#d9e0ea);border-radius:12px;background:rgba(248,250,252,.8)}
+.media-cache-bar>div{display:flex;flex-direction:column;gap:.15rem}.media-cache-bar span{font-size:.82rem;color:var(--muted-text,#64748b)}
+.media-status-syncing{background:#fff7ed;color:#9a3412;border-color:#fed7aa}.media-alert-warning{background:#fff7ed;border-color:#fed7aa;color:#9a3412}
+@media(max-width:720px){.media-cache-bar{align-items:stretch;flex-direction:column}.media-cache-bar form,.media-cache-bar button{width:100%}}
