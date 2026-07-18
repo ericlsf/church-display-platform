@@ -14,10 +14,11 @@
     <nav class="app-navigation">
       {% set sections = [
         ("dashboard", "⌂", "Dashboard", [("/fleet-dashboard", "⌂", "Overview"), ("/fleet-map", "⌖", "Fleet Map")]),
-        ("fleet", "▣", "Fleet", [("/displays", "▣", "Displays"), ("/groups", "◫", "Groups"), ("/display-profiles", "◧", "Profiles")]),
-        ("media", "▤", "Media", [("/content", "▤", "Content Library"), ("/media", "▥", "Media")]),
-        ("operations", "⚙", "Operations", [("/bulk-operations/", "⇉", "Bulk Operations"), ("/fleet-operations", "⚙", "Fleet Operations"), ("/jobs", "☷", "Jobs"), ("/alerts/", "!", "Alert Center"), ("/history", "◷", "History")]),
-        ("administration", "♙", "Administration", [("/users", "♙", "Users"), ("/releases", "⬆", "Releases"), ("/system", "◉", "System"), ("/alerts/rules/", "≡", "Alert Rules"), ("/setup", "⚒", "Settings")])
+        ("command", "⚡", "Command Center", [("/command-center", "⚡", "Operator Cockpit"), ("/alerts/", "!", "Alert Center"), ("/jobs", "☷", "Jobs"), ("/fleet-operations", "⚙", "Fleet Operations"), ("/history", "◷", "History")]),
+        ("media", "▤", "Media Library", [("/media", "▥", "Media Library"), ("/content", "▤", "Playlists")]),
+        ("displays", "▣", "Displays", [("/displays", "▣", "All Displays"), ("/groups", "◫", "Groups"), ("/display-profiles", "◧", "Profiles")]),
+        ("schedules", "◷", "Schedules", [("/schedules", "◷", "Schedules"), ("/rollouts", "↻", "Scheduled Rollouts"), ("/deployments", "⇧", "Deployments"), ("/bulk-operations/", "⇉", "Bulk Operations")]),
+        ("settings", "⚒", "Settings", [("/setup", "⚒", "Platform Settings"), ("/system", "◉", "System"), ("/users", "♙", "Users"), ("/releases", "⬆", "Releases"), ("/alerts/rules/", "≡", "Alert Rules")])
       ] %}
       {% for section_id, section_icon, section_label, links in sections %}
       <section class="app-nav-section" data-shell-section="{{ section_id }}">

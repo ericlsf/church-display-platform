@@ -5,15 +5,28 @@
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
   const collapseKey = "church-display-shell-collapsed";
   const routes = [
-    ["/fleet-dashboard","dashboard",["Dashboard","Overview"]], ["/fleet-map","dashboard",["Dashboard","Fleet Map"]],
-    ["/display/","fleet",["Fleet","Displays","Display Details"]], ["/displays","fleet",["Fleet","Displays"]],
-    ["/groups","fleet",["Fleet","Groups"]], ["/display-profiles","fleet",["Fleet","Profiles"]],
-    ["/content","media",["Media","Content Library"]], ["/media","media",["Media","Media"]],
-    ["/bulk-operations","operations",["Operations","Bulk Operations"]], ["/fleet-operations","operations",["Operations","Fleet Operations"]],
-    ["/jobs","operations",["Operations","Jobs"]], ["/alerts/rules","administration",["Administration","Alert Rules"]],
-    ["/alerts","operations",["Operations","Alert Center"]], ["/history","operations",["Operations","History"]],
-    ["/users","administration",["Administration","Users"]], ["/releases","administration",["Administration","Releases"]],
-    ["/system","administration",["Administration","System"]], ["/setup","administration",["Administration","Settings"]]
+    ["/command-center","command",["Command Center","Operator Cockpit"]],
+    ["/alerts/rules","settings",["Settings","Alert Rules"]],
+    ["/alerts","command",["Command Center","Alert Center"]],
+    ["/fleet-operations","command",["Command Center","Fleet Operations"]],
+    ["/jobs","command",["Command Center","Jobs"]],
+    ["/history","command",["Command Center","History"]],
+    ["/media","media",["Media Library","Browse Media"]],
+    ["/content","media",["Media Library","Playlists"]],
+    ["/display/","displays",["Displays","Display Details"]],
+    ["/displays","displays",["Displays","All Displays"]],
+    ["/groups","displays",["Displays","Groups"]],
+    ["/display-profiles","displays",["Displays","Profiles"]],
+    ["/schedules","schedules",["Schedules"]],
+    ["/rollouts","schedules",["Schedules","Scheduled Rollouts"]],
+    ["/deployments","schedules",["Schedules","Deployments"]],
+    ["/bulk-operations","schedules",["Schedules","Bulk Operations"]],
+    ["/fleet-dashboard","dashboard",["Dashboard","Overview"]],
+    ["/fleet-map","dashboard",["Dashboard","Fleet Map"]],
+    ["/users","settings",["Settings","Users"]],
+    ["/releases","settings",["Settings","Releases"]],
+    ["/system","settings",["Settings","System"]],
+    ["/setup","settings",["Settings","Platform Settings"]]
   ];
   const route = routes.find(([prefix]) => path === prefix || path.startsWith(`${prefix}/`) || (prefix.endsWith("/") && path.startsWith(prefix))) || ["/fleet-dashboard","dashboard",["Dashboard"]];
 
