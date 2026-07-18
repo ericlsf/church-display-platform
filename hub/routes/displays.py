@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 
 from services.config import load_config, save_config, slugify, normalize_host
 from services.display_client import test_display
@@ -116,6 +116,29 @@ def displays():
         folder_options=folders,
         media_index=media_index,
     )
+
+
+@displays_bp.route("/api/status")
+def display_status_api():
+    """Return lightweight live fleet state without touching Google Drive."""
+    rows, _ = display_rows()
+    payload = []
+    for row in rows:
+        payload.append({
+            "id": row.get("id", ""),
+            "online": bool(row.get("online")),
+            "heartbeat": row.get("heartbeat", "Unknown"),
+            "version": row.get("version", "Unknown"),
+            "current_media": row.get("current_media", "Unknown"),
+            "sync_state": row.get("sync_state", "unknown"),
+            "preview_url": row.get("preview_url", ""),
+        })
+    return jsonify({
+        "ok": True,
+        "online": sum(1 for row in payload if row["online"]),
+        "offline": sum(1 for row in payload if not row["online"]),
+        "rows": payload,
+    })
 
 
 @displays_bp.route("/add", methods=["POST"])

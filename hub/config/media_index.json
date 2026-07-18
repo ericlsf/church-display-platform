@@ -1,8 +1,8 @@
 {
   "remote": "gdrive",
-  "status": "ready",
-  "updated_at": "2026-07-18T14:36:34+00:00",
-  "started_at": "",
+  "status": "syncing",
+  "updated_at": "2026-07-18T15:07:53+00:00",
+  "started_at": "2026-07-18T15:09:04+00:00",
   "error": "",
   "items": [
     {
@@ -102,6 +102,38 @@
       "MimeType": "image/png"
     },
     {
+      "Path": "Missions/-.docx",
+      "Name": "-.docx",
+      "IsDir": false,
+      "Size": -1,
+      "ModTime": "2026-07-18T13:15:52.864Z",
+      "MimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    },
+    {
+      "Path": "Missions/Copy of GOD_S GIRLS slide (9).jpg",
+      "Name": "Copy of GOD_S GIRLS slide (9).jpg",
+      "IsDir": false,
+      "Size": 209246,
+      "ModTime": "2026-07-05T16:04:32.125Z",
+      "MimeType": "image/jpeg"
+    },
+    {
+      "Path": "Missions/Copy of Hope Gospel Drivers.png",
+      "Name": "Copy of Hope Gospel Drivers.png",
+      "IsDir": false,
+      "Size": 151746,
+      "ModTime": "2026-07-05T16:04:32.125Z",
+      "MimeType": "image/png"
+    },
+    {
+      "Path": "Missions/Copy of Lifespring Kids Slide.jpg",
+      "Name": "Copy of Lifespring Kids Slide.jpg",
+      "IsDir": false,
+      "Size": 233555,
+      "ModTime": "2026-07-05T16:04:32.125Z",
+      "MimeType": "image/jpeg"
+    },
+    {
       "Path": "Seasonal/Copy of GOD_S GIRLS slide (9).jpg",
       "Name": "Copy of GOD_S GIRLS slide (9).jpg",
       "IsDir": false,
@@ -140,38 +172,6 @@
       "Size": 35646990,
       "ModTime": "2026-06-30T21:09:51.000Z",
       "MimeType": "video/mp4"
-    },
-    {
-      "Path": "Missions/-.docx",
-      "Name": "-.docx",
-      "IsDir": false,
-      "Size": -1,
-      "ModTime": "2026-07-18T13:15:52.864Z",
-      "MimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    },
-    {
-      "Path": "Missions/Copy of GOD_S GIRLS slide (9).jpg",
-      "Name": "Copy of GOD_S GIRLS slide (9).jpg",
-      "IsDir": false,
-      "Size": 209246,
-      "ModTime": "2026-07-05T16:04:32.125Z",
-      "MimeType": "image/jpeg"
-    },
-    {
-      "Path": "Missions/Copy of Hope Gospel Drivers.png",
-      "Name": "Copy of Hope Gospel Drivers.png",
-      "IsDir": false,
-      "Size": 151746,
-      "ModTime": "2026-07-05T16:04:32.125Z",
-      "MimeType": "image/png"
-    },
-    {
-      "Path": "Missions/Copy of Lifespring Kids Slide.jpg",
-      "Name": "Copy of Lifespring Kids Slide.jpg",
-      "IsDir": false,
-      "Size": 233555,
-      "ModTime": "2026-07-05T16:04:32.125Z",
-      "MimeType": "image/jpeg"
     }
   ]
 }

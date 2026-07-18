@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 {% block title %}Displays - Church Display Hub{% endblock %}
+{# Legacy asset lineage: display-fleet-v1120.css / display-fleet-v1120.js #}
 {% block head %}
   {{ super() }}
-  <link rel="stylesheet" href="/static/display-fleet-v1120.css?v=11.2.1">
+  <link rel="stylesheet" href="/static/display-fleet-v1130.css?v=11.3.0">
 {% endblock %}
 {% block content %}
 <header class="fleet-page-header">
   <div>
     <p class="eyebrow">Fleet management</p>
-    <div class="fleet-title-row"><h1>Displays</h1><span class="fleet-count">{{ rows|length }}</span></div>
+    <div class="fleet-title-row"><h1>Displays</h1><span class="fleet-count">{{ rows|length }}</span><span class="live-refresh-state" data-live-state><span></span> Live</span></div>
     <p class="muted">Monitor every screen and assign Google Drive content, profiles, and groups from one workspace.</p>
   </div>
   <button class="primary" type="button" data-toggle-add-display>+ Add display</button>
@@ -17,8 +18,8 @@
 {% if test_message %}<div class="fleet-notice"><strong>{{ test_message }}</strong></div>{% endif %}
 
 <section class="fleet-summary" aria-label="Fleet summary">
-  <div><span class="summary-icon online"></span><strong>{{ rows|selectattr('online')|list|length }}</strong><span>Online</span></div>
-  <div><span class="summary-icon offline"></span><strong>{{ rows|rejectattr('online')|list|length }}</strong><span>Offline</span></div>
+  <div><span class="summary-icon online"></span><strong data-online-count>{{ rows|selectattr('online')|list|length }}</strong><span>Online</span></div>
+  <div><span class="summary-icon offline"></span><strong data-offline-count>{{ rows|rejectattr('online')|list|length }}</strong><span>Offline</span></div>
   <div><span class="summary-icon drive">G</span><strong>{{ media_index.status|replace('_', ' ')|title }}</strong><span>Drive index</span></div>
 </section>
 
@@ -48,30 +49,30 @@
 <section class="display-card-grid">
 {% for row in rows %}
   {% set p = row.presentation %}
-  <article class="display-fleet-card {{ 'is-online' if row.online else 'is-offline' }}" data-display-card data-display-name="{{ row.name }}">
+  <article class="display-fleet-card {{ 'is-online' if row.online else 'is-offline' }}" data-display-card data-display-id="{{ row.id }}" data-display-name="{{ row.name }}">
     <header class="display-card-header">
       <label class="display-select" title="Select {{ row.name }}"><input type="checkbox" value="{{ row.id }}" data-display-select><span aria-hidden="true"></span></label>
       <div class="display-heading-copy">
         <h2>{{ row.name }}</h2>
         <p>{{ row.host or 'No host configured' }}</p>
       </div>
-      <span class="status-badge"><span class="status-dot"></span>{{ 'Online' if row.online else 'Offline' }}</span>
+      <span class="status-badge" data-status-badge><span class="status-dot"></span><span data-status-text>{{ 'Online' if row.online else 'Offline' }}</span></span>
     </header>
 
     <button class="display-preview" type="button" data-open-inspector="{{ row.id }}" aria-label="Manage {{ row.name }}">
-      {% if row.preview_url %}<img src="{{ row.preview_url }}" alt="Latest screenshot from {{ row.name }}" loading="lazy">{% else %}<span class="preview-placeholder">Preview unavailable</span>{% endif %}
+      {% if row.preview_url %}<img src="{{ row.preview_url }}" alt="Latest screenshot from {{ row.name }}" loading="lazy" data-live-preview>{% else %}<span class="preview-placeholder">Preview unavailable</span>{% endif %}
       <span class="preview-overlay">Manage display</span>
     </button>
 
     <div class="display-card-body">
       <div class="content-current">
         <span class="content-label">Now playing</span>
-        <strong title="{{ row.current_media }}">{{ row.current_media or 'Nothing playing' }}</strong>
+        <strong title="{{ row.current_media }}" data-current-media>{{ row.current_media or 'Nothing playing' }}</strong>
       </div>
       <dl class="display-metrics">
-        <div><dt>Last seen</dt><dd>{{ row.heartbeat }}</dd></div>
-        <div><dt>Version</dt><dd>{{ row.version }}</dd></div>
-        <div><dt>Sync</dt><dd><span class="sync-pill">{{ row.sync_state|replace('_', ' ')|title }}</span></dd></div>
+        <div><dt>Last seen</dt><dd data-heartbeat>{{ row.heartbeat }}</dd></div>
+        <div><dt>Version</dt><dd data-version>{{ row.version }}</dd></div>
+        <div><dt>Sync</dt><dd><span class="sync-pill" data-sync-state>{{ row.sync_state|replace('_', ' ')|title }}</span></dd></div>
       </dl>
       <div class="assignment-summary">
         <div><span>Content</span><strong>{{ row.sync_folder or 'Not assigned' }}</strong></div>
@@ -144,5 +145,5 @@
   <div class="section empty-fleet"><h2>No displays configured</h2><p class="muted">Add your first display to begin managing the fleet.</p></div>
 {% endfor %}
 </section>
-<script src="/static/display-fleet-v1120.js?v=11.2.1" defer></script>
+<script src="/static/display-fleet-v1130.js?v=11.3.0" defer></script>
 {% endblock %}
