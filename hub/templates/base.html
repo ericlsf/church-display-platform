@@ -1,127 +1,33 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-    <title>{% block title %}Church Display Hub{% endblock %}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>{% block title %}Church Display Hub{% endblock %}</title>
     <link rel="stylesheet" href="/static/style.css">
-<link rel="stylesheet" href="/static/operator-polish.css">
-
-<link rel="stylesheet" href="/static/application-shell.css">
-
-<link rel="stylesheet" href="/static/fleet-command-center.css">
-{% block head %}{% endblock %}
+    <link rel="stylesheet" href="/static/operator-polish.css">
+    <link rel="stylesheet" href="/static/application-shell.css">
+    <link rel="stylesheet" href="/static/ui-foundation.css">
+    <link rel="stylesheet" href="/static/fleet-command-center.css">
+    {% block head %}{% endblock %}
 </head>
 <body>
-{% include "application_shell.html" %}
-
-
+    {% include "application_shell.html" %}
 
     <a class="skip-link" href="#main-content">Skip to main content</a>
-    <header class="app-header">
-        <div class="header-title">
-            <a class="brand-link" href="/" aria-label="Church Display home">
-                <span class="brand-mark">CD</span>
-                <span>
-                    <strong>Church Display</strong>
-                    <small>Operations Hub</small>
-                </span>
-            </a>
-<a href="/fleet-dashboard">Dashboard</a>
-<a href="/bulk-operations/">Bulk Operations</a>
-<a href="/alerts/">Alert Center</a>
-<a href="/alerts/rules/">Alert Rules</a>
 
-            <form class="header-search" method="GET" action="/search">
-                <input name="q" placeholder="Search displays, content, sites…" aria-label="Global search">
-            </form>
-
-            <div class="header-actions">
-                <button class="command-button" type="button" data-command-open aria-label="Open command palette">
-                    Commands <kbd>Ctrl K</kbd>
-                </button>
-                <a class="notification-link" href="/notifications">
-                    Notifications
-                    {% if notification_summary.total %}
-                        <span class="notification-badge">{{ notification_summary.total }}</span>
-                    {% endif %}
-                </a>
-                {% if current_user %}
-                    <span class="header-user" title="Signed in as {{ current_user.username }}">
-                        {{ current_user.display_name or current_user.username }}
-                    </span>
-                    <form class="header-signout" method="POST" action="/logout">
-                        <button type="submit">Sign Out</button>
-                    </form>
-                {% endif %}
+    <main id="main-content" class="app-main" tabindex="-1">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-stack" role="status" aria-live="polite">
+              {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">{{ message }}</div>
+              {% endfor %}
             </div>
-        </div>
-
-        <nav class="primary-nav" aria-label="Primary navigation">
-            <a class="{{ 'active' if active == 'dashboard' else '' }}" href="/">Home</a>
-            <a class="{{ 'active' if active in ['content','media','schedules','simulation'] else '' }}" href="/content">Content</a>
-            <a class="{{ 'active' if active in ['displays','groups','sites','discovery','health'] else '' }}" href="/displays">Fleet</a>
-<a href="/fleet-operations">Fleet Operations</a>
-<a href="/fleet-map">Fleet Map</a>
-<a href="/fleet-config">Groups & Maintenance</a>
-<a href="/operations-center">Operations Center</a>
-<a href="/display-profiles">Display Profiles</a>
-            <a class="{{ 'active' if active in ['operations','deployments','jobs','history','management','resilience'] else '' }}" href="/operations">Operations</a>
-            {% if not current_user or current_user.role == 'admin' %}
-                <a class="{{ 'active' if active in ['releases','system','users','audit','setup'] else '' }}" href="/system">Administration</a>
-            {% endif %}
-        </nav>
-
-        {% if active in ['content','media','schedules','simulation'] %}
-        <nav class="section-nav" aria-label="Content navigation">
-            <a class="{{ 'active' if active == 'content' else '' }}" href="/content">Playlists</a>
-            <a class="{{ 'active' if active == 'media' else '' }}" href="/media">Media Browser</a>
-            <a class="{{ 'active' if active == 'schedules' else '' }}" href="/schedules">Schedules</a>
-            <a class="{{ 'active' if active == 'simulation' else '' }}" href="/simulation">Simulation</a>
-        </nav>
-        {% elif active in ['displays','groups','sites','discovery','health'] %}
-        <nav class="section-nav" aria-label="Fleet navigation">
-            <a class="{{ 'active' if active == 'displays' else '' }}" href="/displays">Displays</a>
-            <a class="{{ 'active' if active == 'groups' else '' }}" href="/groups">Groups</a>
-            <a class="{{ 'active' if active == 'sites' else '' }}" href="/sites">Sites</a>
-            <a class="{{ 'active' if active == 'discovery' else '' }}" href="/discovery">Enrollment</a>
-            <a class="{{ 'active' if active == 'health' else '' }}" href="/health">Health</a>
-        </nav>
-        {% elif active in ['operations','deployments','jobs','history','management','resilience'] %}
-        <nav class="section-nav" aria-label="Operations navigation">
-            <a class="{{ 'active' if active == 'operations' else '' }}" href="/operations">Live</a>
-            <a class="{{ 'active' if active == 'deployments' else '' }}" href="/deployments">Deployments</a>
-<a href="/rollouts">Scheduled Rollouts</a>
-            <a class="{{ 'active' if active == 'jobs' else '' }}" href="/jobs">Jobs</a>
-            <a class="{{ 'active' if active == 'management' else '' }}" href="/management">Remote Tools</a>
-            <a class="{{ 'active' if active == 'history' else '' }}" href="/history">History</a>
-            {% if not current_user or current_user.role == 'admin' %}
-                <a class="{{ 'active' if active == 'resilience' else '' }}" href="/resilience">Resilience</a>
-            {% endif %}
-        </nav>
-        {% elif active in ['releases','system','users','audit','setup'] and (not current_user or current_user.role == 'admin') %}
-        <nav class="section-nav" aria-label="Administration navigation">
-            <a class="{{ 'active' if active == 'system' else '' }}" href="/system">System</a>
-            <a class="{{ 'active' if active == 'releases' else '' }}" href="/releases">Releases</a>
-            <a class="{{ 'active' if active == 'users' else '' }}" href="/users">Users</a>
-            <a class="{{ 'active' if active == 'audit' else '' }}" href="/audit">Audit</a>
-<a class="notification-nav" data-notification-link href="/notifications" aria-label="Notifications">Notifications<span class="notification-badge" data-notification-badge hidden>0</span></a>
-            <a class="{{ 'active' if active == 'setup' else '' }}" href="/setup">Setup</a>
-        </nav>
-        {% endif %}
-    </header>
-
-    <main id="main-content" tabindex="-1">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="flash-stack" role="status" aria-live="polite">
-          {% for category, message in messages %}
-            <div class="flash-message flash-{{ category }}">{{ message }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
-    {% block content %}{% endblock %}
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
     </main>
 
     <dialog class="command-palette" data-command-dialog aria-label="Command palette">
@@ -133,97 +39,82 @@
             <div class="command-list" data-command-list>
                 <a data-command-item data-keywords="home dashboard overview status" href="/fleet-dashboard">Open Dashboard</a>
                 <a data-command-item data-keywords="command center operator cockpit attention actions fleet health" href="/command-center">Open Command Center</a>
-                <a data-command-item data-keywords="content playlist media draft publish" href="/content">Manage playlists</a>
-                <a data-command-item data-keywords="schedule calendar publish" href="/schedules">Open schedules</a>
-                <a data-command-item data-keywords="simulate preview future time" href="/simulation">Simulate display output</a>
-                <a data-command-item data-keywords="display fleet tv screen" href="/displays">Manage displays</a>
-                <a data-command-item data-keywords="group fleet collection" href="/groups">Manage groups</a>
-                <a data-command-item data-keywords="site campus location" href="/sites">Manage sites</a>
-                <a data-command-item data-keywords="enroll approve discovery" href="/discovery">Enroll a display</a>
-                <a data-command-item data-keywords="live operations current playing" href="/operations">Open Live Operations</a>
-                <a data-command-item data-keywords="deploy update version rollback" href="/deployments">Deploy an update</a>
-                <a data-command-item data-keywords="job queue retry resolve error" href="/jobs">Review jobs</a>
-                <a data-command-item data-keywords="logs screenshot remote restart files" href="/management">Remote management</a>
-                <a data-command-item data-keywords="history trends past event" href="/history">Review history</a>
-                <a data-command-item data-keywords="maintenance recovery backup resilience" href="/resilience">Open resilience controls</a>
-                <a data-command-item data-keywords="notification warning alert" href="/notifications">Review notifications</a>
-                {% if not current_user or current_user.role == 'admin' %}
-                <a data-command-item data-keywords="system diagnostics support backup" href="/system">Open system administration</a>
-                <a data-command-item data-keywords="users permissions accounts" href="/users">Manage users</a>
-                <a data-command-item data-keywords="release versions upgrade" href="/releases">Manage releases</a>
-                {% endif %}
+                <a data-command-item data-keywords="media library browse images videos" href="/media">Open Media Library</a>
+                <a data-command-item data-keywords="content playlist media draft publish" href="/content">Manage Playlists</a>
+                <a data-command-item data-keywords="content deployment publish rollback" href="/content-deployments">Open Content Deployments</a>
+                <a data-command-item data-keywords="schedule calendar publish" href="/schedules">Open Schedules</a>
+                <a data-command-item data-keywords="display fleet tv screen" href="/displays">Manage Displays</a>
+                <a data-command-item data-keywords="group fleet collection" href="/groups">Manage Groups</a>
+                <a data-command-item data-keywords="alert warning notification" href="/alerts/">Open Alert Center</a>
+                <a data-command-item data-keywords="job queue retry resolve error" href="/jobs">Review Jobs</a>
+                <a data-command-item data-keywords="history trends past event" href="/history">Review History</a>
+                <a data-command-item data-keywords="system diagnostics support backup" href="/system">Open System</a>
+                <a data-command-item data-keywords="users permissions accounts" href="/users">Manage Users</a>
+                <a data-command-item data-keywords="release versions upgrade" href="/releases">Manage Releases</a>
             </div>
             <p class="command-empty" data-command-empty hidden>No matching command. Press Enter to search globally.</p>
             <div class="command-footer"><span>↑↓ navigate</span><span>Enter open</span><span>Esc close</span></div>
         </form>
     </dialog>
 
-<script>
-(function () {
-    const dialog = document.querySelector("[data-command-dialog]");
-    const input = document.querySelector("[data-command-input]");
-    const items = Array.from(document.querySelectorAll("[data-command-item]"));
-    const empty = document.querySelector("[data-command-empty]");
-    let visible = items;
-    let selected = 0;
+    <script>
+    (() => {
+        const dialog = document.querySelector("[data-command-dialog]");
+        const input = document.querySelector("[data-command-input]");
+        const items = Array.from(document.querySelectorAll("[data-command-item]"));
+        const empty = document.querySelector("[data-command-empty]");
+        if (!dialog || !input) return;
+        let visible = items;
+        let selected = 0;
 
-    function renderSelection() {
-        items.forEach(item => item.classList.remove("selected"));
-        if (visible.length) {
+        const renderSelection = () => {
+            items.forEach(item => item.classList.remove("selected"));
+            if (!visible.length) return;
             selected = Math.max(0, Math.min(selected, visible.length - 1));
             visible[selected].classList.add("selected");
-            visible[selected].scrollIntoView({ block: "nearest" });
-        }
-    }
+            visible[selected].scrollIntoView({block: "nearest"});
+        };
+        const filterCommands = () => {
+            const query = input.value.trim().toLowerCase();
+            visible = items.filter(item => {
+                const text = `${item.textContent} ${item.dataset.keywords || ""}`.toLowerCase();
+                const match = !query || text.includes(query);
+                item.hidden = !match;
+                return match;
+            });
+            selected = 0;
+            empty.hidden = visible.length > 0;
+            renderSelection();
+        };
+        const openPalette = () => {
+            if (!dialog.open) dialog.showModal();
+            input.value = "";
+            filterCommands();
+            requestAnimationFrame(() => input.focus());
+        };
 
-    function filterCommands() {
-        const query = input.value.trim().toLowerCase();
-        visible = items.filter(item => {
-            const haystack = `${item.textContent} ${item.dataset.keywords || ""}`.toLowerCase();
-            const match = !query || haystack.includes(query);
-            item.hidden = !match;
-            return match;
+        document.querySelectorAll("[data-command-open]").forEach(button => button.addEventListener("click", openPalette));
+        document.addEventListener("keydown", event => {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+                event.preventDefault();
+                openPalette();
+                return;
+            }
+            if (!dialog.open) return;
+            if (event.key === "ArrowDown") { event.preventDefault(); selected += 1; renderSelection(); }
+            if (event.key === "ArrowUp") { event.preventDefault(); selected -= 1; renderSelection(); }
+            if (event.key === "Enter") {
+                event.preventDefault();
+                if (visible.length) window.location.href = visible[selected].href;
+                else if (input.value.trim()) window.location.href = `/search?q=${encodeURIComponent(input.value.trim())}`;
+            }
         });
-        selected = 0;
-        empty.hidden = visible.length > 0;
-        renderSelection();
-    }
-
-    function openPalette() {
-        if (!dialog.open) dialog.showModal();
-        input.value = "";
-        filterCommands();
-        setTimeout(() => input.focus(), 0);
-    }
-
-    document.querySelectorAll("[data-command-open]").forEach(button => button.addEventListener("click", openPalette));
-    document.addEventListener("keydown", event => {
-        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
-            event.preventDefault();
-            openPalette();
-            return;
-        }
-        if (!dialog.open) return;
-        if (event.key === "ArrowDown") { event.preventDefault(); selected++; renderSelection(); }
-        if (event.key === "ArrowUp") { event.preventDefault(); selected--; renderSelection(); }
-        if (event.key === "Enter") {
-            event.preventDefault();
-            if (visible.length) window.location.href = visible[selected].href;
-            else if (input.value.trim()) window.location.href = `/search?q=${encodeURIComponent(input.value.trim())}`;
-        }
-    });
-    input.addEventListener("input", filterCommands);
-    items.forEach(item => item.addEventListener("mouseenter", () => {
-        selected = visible.indexOf(item);
-        renderSelection();
-    }));
-    dialog.addEventListener("click", event => {
-        if (event.target === dialog) dialog.close();
-    });
-})();
-</script>
-<script src="/static/notifications.js"></script>
-
-<script src="/static/application-shell.js"></script>
+        input.addEventListener("input", filterCommands);
+        dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
+    })();
+    </script>
+    <script src="/static/notifications.js"></script>
+    <script src="/static/application-shell.js"></script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>
