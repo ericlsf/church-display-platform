@@ -9,8 +9,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.864488+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -22,8 +22,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.864599+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -35,8 +35,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.864635+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -48,8 +48,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.864667+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -61,8 +61,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.864716+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -74,8 +74,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.864747+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -87,8 +87,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.864778+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -100,8 +100,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.864809+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -113,8 +113,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.864845+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -126,8 +126,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.864875+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -139,8 +139,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.864905+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -152,8 +152,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.864935+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -165,8 +165,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.864965+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -178,8 +178,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.864994+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -191,8 +191,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865028+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -204,8 +204,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865057+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -217,8 +217,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865089+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -230,8 +230,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865119+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -243,7 +243,7 @@
       "target": "church-display-hub",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.865151+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -256,8 +256,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865181+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -269,8 +269,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865215+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -282,8 +282,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865245+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -295,7 +295,7 @@
       "target": "welcome-center",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.865277+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -308,7 +308,7 @@
       "target": "welcome-center",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.865305+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -321,7 +321,7 @@
       "target": "welcome-center",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.865338+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -334,8 +334,8 @@
       "target": "church-display-hub",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865369+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -347,8 +347,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865400+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -360,8 +360,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865431+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -373,8 +373,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865466+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -386,7 +386,7 @@
       "target": "welcome-center",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.865495+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -399,7 +399,7 @@
       "target": "welcome-center",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.865528+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -412,8 +412,8 @@
       "target": "all",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865559+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -425,7 +425,7 @@
       "target": "welcome-center",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.865589+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -438,7 +438,7 @@
       "target": "welcome-center",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.865619+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -451,7 +451,7 @@
       "target": "welcome-center",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.865653+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -464,8 +464,8 @@
       "target": "all",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865684+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -477,7 +477,7 @@
       "target": "welcome-center",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.865713+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -490,7 +490,7 @@
       "target": "church-display-hub-2",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.865744+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -503,7 +503,7 @@
       "target": "church-display-hub-2",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.865773+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -516,8 +516,8 @@
       "target": "church-display-hub",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865803+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -529,8 +529,8 @@
       "target": "church-display-hub",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865835+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -542,8 +542,8 @@
       "target": "church-display-hub",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865866+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -555,7 +555,7 @@
       "target": "church-display-hub",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.865895+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -568,8 +568,8 @@
       "target": "church-display-hub",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.865931+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -581,7 +581,7 @@
       "target": "church-display-hub",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.865967+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -594,7 +594,7 @@
       "target": "church-display-hub",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.865997+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -607,8 +607,8 @@
       "target": "church-display-hub",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.866030+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -620,7 +620,7 @@
       "target": "church-display-hub",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.866060+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -633,7 +633,7 @@
       "target": "church-display-hub",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.866090+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -646,8 +646,8 @@
       "target": "all",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.866121+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -659,8 +659,8 @@
       "target": "all",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.866151+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -672,8 +672,8 @@
       "target": "all",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.866182+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -685,8 +685,8 @@
       "target": "all",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.866213+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -698,8 +698,8 @@
       "target": "church-display-hub",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.866251+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -711,8 +711,8 @@
       "target": "all",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.866287+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -724,8 +724,8 @@
       "target": "church-display-hub",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.866317+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -737,7 +737,7 @@
       "target": "all",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.866348+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -750,8 +750,8 @@
       "target": "all",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.866380+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -763,7 +763,7 @@
       "target": "church-display-hub",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.866412+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -776,8 +776,8 @@
       "target": "all",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.866443+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -789,7 +789,7 @@
       "target": "all",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.866473+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -802,7 +802,7 @@
       "target": "all",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.866503+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -815,7 +815,7 @@
       "target": "all",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.866533+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -828,8 +828,8 @@
       "target": "all",
       "link": "/jobs",
       "created_at": "2026-07-15T14:09:09.866564+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -841,7 +841,7 @@
       "target": "all",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.866601+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -854,7 +854,7 @@
       "target": "all",
       "link": "/errors",
       "created_at": "2026-07-15T14:09:09.866637+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -867,8 +867,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T15:29:59.533130+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -880,8 +880,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T15:35:49.569994+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -893,8 +893,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T16:34:23.153431+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -906,8 +906,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T16:34:23.153544+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -919,8 +919,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T19:15:54.236487+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -932,8 +932,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T19:16:27.337805+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -945,8 +945,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T19:17:27.018676+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -958,8 +958,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T19:35:43.363281+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -971,8 +971,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T19:47:48.792757+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -984,8 +984,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T19:56:24.185921+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -997,8 +997,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T19:57:43.423421+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1010,8 +1010,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T19:57:43.423499+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1023,8 +1023,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T20:07:43.666256+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1036,8 +1036,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T20:08:43.328857+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1049,8 +1049,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T20:08:43.328951+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1062,8 +1062,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T20:08:43.328990+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1075,8 +1075,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T20:18:43.282488+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1088,8 +1088,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T20:23:20.001236+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1101,8 +1101,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T20:24:57.141787+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1114,8 +1114,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T20:43:45.032230+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1127,8 +1127,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T21:44:37.274429+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1140,8 +1140,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-15T21:47:30.995466+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1153,8 +1153,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-16T13:18:31.381850+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1166,8 +1166,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-16T13:19:16.738929+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1179,8 +1179,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-16T13:21:41.504192+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1192,8 +1192,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-16T13:49:27.996745+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1205,8 +1205,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-16T13:58:07.504345+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1218,8 +1218,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-16T14:46:32.466575+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1231,8 +1231,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-16T15:05:01.669372+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1244,8 +1244,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-16T15:06:22.859910+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     },
     {
@@ -1257,7 +1257,7 @@
       "target": "church-display-hub",
       "link": "/errors",
       "created_at": "2026-07-16T17:58:56.507180+00:00",
-      "read": false,
+      "read": true,
       "dismissed": false,
       "resolved": false
     },
@@ -1270,8 +1270,8 @@
       "target": "welcome-center",
       "link": "/jobs",
       "created_at": "2026-07-17T16:47:42.367305+00:00",
-      "read": false,
-      "dismissed": false,
+      "read": true,
+      "dismissed": true,
       "resolved": false
     }
   ],
