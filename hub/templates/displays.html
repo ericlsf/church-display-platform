@@ -3,7 +3,7 @@
 {# Legacy asset lineage: display-fleet-v1120.css / display-fleet-v1120.js #}
 {% block head %}
   {{ super() }}
-  <link rel="stylesheet" href="/static/display-fleet-v1130.css?v=11.3.0">
+  <link rel="stylesheet" href="/static/display-fleet-v1300.css?v=13.0.0">
 {% endblock %}
 {% block content %}
 <header class="fleet-page-header">
@@ -20,6 +20,8 @@
 <section class="fleet-summary" aria-label="Fleet summary">
   <div><span class="summary-icon online"></span><strong data-online-count>{{ rows|selectattr('online')|list|length }}</strong><span>Online</span></div>
   <div><span class="summary-icon offline"></span><strong data-offline-count>{{ rows|rejectattr('online')|list|length }}</strong><span>Offline</span></div>
+  <div><span class="summary-icon attention">!</span><strong data-attention-count>{{ rows|selectattr('attention')|list|length }}</strong><span>Need attention</span></div>
+  <div><span class="summary-icon jobs">↻</span><strong data-active-jobs>{{ rows|sum(attribute='job.active_count') }}</strong><span>Active jobs</span></div>
   <div><span class="summary-icon drive">G</span><strong>{{ media_index.status|replace('_', ' ')|title }}</strong><span>Drive index</span></div>
 </section>
 
@@ -49,7 +51,12 @@
 <section class="display-card-grid">
 {% for row in rows %}
   {% set p = row.presentation %}
-  <article class="display-fleet-card {{ 'is-online' if row.online else 'is-offline' }}" data-display-card data-display-id="{{ row.id }}" data-display-name="{{ row.name }}">
+  <article class="display-fleet-card {{ 'is-online' if row.online else 'is-offline' }} {{ 'needs-attention' if row.attention else '' }}" data-display-card data-display-id="{{ row.id }}" data-display-name="{{ row.name }}">
+    <div class="fleet-health-strip" data-health-strip>
+      <span data-app-health class="health-chip {{ 'healthy' if row.display_app_running else 'critical' }}">Player {{ 'running' if row.display_app_running else 'stopped' }}</span>
+      {% if row.update_available %}<span class="health-chip warning" data-update-health>Update {{ row.latest_tag }}</span>{% endif %}
+      {% if row.job.active_count %}<span class="health-chip working" data-job-health>{{ row.job.type|replace('_',' ')|title }} · {{ row.job.progress }}%</span>{% elif row.job.failed_count %}<span class="health-chip critical" data-job-health>{{ row.job.failed_count }} failed job{{ '' if row.job.failed_count == 1 else 's' }}</span>{% else %}<span class="health-chip muted-chip" data-job-health>No active jobs</span>{% endif %}
+    </div>
     <header class="display-card-header">
       <label class="display-select" title="Select {{ row.name }}"><input type="checkbox" value="{{ row.id }}" data-display-select><span aria-hidden="true"></span></label>
       <div class="display-heading-copy">
@@ -73,6 +80,12 @@
         <div><dt>Last seen</dt><dd data-heartbeat>{{ row.heartbeat }}</dd></div>
         <div><dt>Version</dt><dd data-version>{{ row.version }}</dd></div>
         <div><dt>Sync</dt><dd><span class="sync-pill" data-sync-state>{{ row.sync_state|replace('_', ' ')|title }}</span></dd></div>
+      </dl>
+      <dl class="system-metrics" aria-label="System health">
+        <div><dt>Media</dt><dd data-media-count>{{ row.media_count }}</dd></div>
+        <div><dt>CPU temp</dt><dd data-cpu-temp>{{ row.cpu_temp }}</dd></div>
+        <div><dt>Disk</dt><dd data-disk-usage>{{ row.disk_usage }}</dd></div>
+        <div><dt>Memory</dt><dd data-memory-usage>{{ row.memory_usage }}</dd></div>
       </dl>
       <div class="assignment-summary">
         <div><span>Content</span><strong>{{ row.sync_folder or 'Not assigned' }}</strong></div>
@@ -102,6 +115,17 @@
         <button class="inspector-close" type="button" data-close-inspector aria-label="Close">×</button>
       </header>
       <div class="inspector-scroll">
+        <section class="inspector-section fleet-inspector-health">
+          <div class="section-title"><h3>Live health</h3><span class="source-badge" data-inspector-status>{{ 'Online' if row.online else 'Offline' }}</span></div>
+          <dl class="inspector-health-grid">
+            <div><dt>Player</dt><dd data-inspector-player>{{ row.display_app_state|replace('_',' ')|title }}</dd></div>
+            <div><dt>Sync</dt><dd data-inspector-sync>{{ row.sync_state|replace('_',' ')|title }}</dd></div>
+            <div><dt>CPU</dt><dd data-inspector-cpu>{{ row.cpu_temp }}</dd></div>
+            <div><dt>Disk</dt><dd data-inspector-disk>{{ row.disk_usage }}</dd></div>
+          </dl>
+          <div class="job-progress" data-inspector-job {% if not row.job.active_count %}hidden{% endif %}><div><strong data-inspector-job-name>{{ row.job.type|replace('_',' ')|title }}</strong><span data-inspector-job-progress>{{ row.job.progress }}%</span></div><progress max="100" value="{{ row.job.progress }}" data-inspector-job-bar></progress></div>
+        </section>
+
         <section class="inspector-section">
           <div class="section-title"><h3>Assignment</h3><span class="source-badge">Google Drive</span></div>
           <form class="display-assignment-form" method="POST" action="/displays/{{ row.id }}/workspace">
@@ -145,5 +169,5 @@
   <div class="section empty-fleet"><h2>No displays configured</h2><p class="muted">Add your first display to begin managing the fleet.</p></div>
 {% endfor %}
 </section>
-<script src="/static/display-fleet-v1130.js?v=11.3.0" defer></script>
+<script src="/static/display-fleet-v1300.js?v=13.0.0" defer></script>
 {% endblock %}

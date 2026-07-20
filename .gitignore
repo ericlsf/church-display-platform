@@ -44,3 +44,6 @@ hub/config/notification_dismissals.json
 hub/config/resilience.json
 display/status/resilience.json
 display/status/resilience-policy.json
+
+# Local release backups
+.release-backups/

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Deployment Center - Church Display Hub{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='deployment-center-v1310.css') }}?v=13.1.0">{% endblock %}
+{% block content %}
+<div class="deployment-center" data-deployment-center>
+  <header class="deployment-hero">
+    <div><span class="eyebrow">OPERATIONS</span><h1>Deployment Center</h1><p>Monitor content and software delivery across the fleet from one workspace.</p></div>
+    <div class="deployment-hero-actions"><a class="button primary" href="/content-deployments">Deploy content</a><a class="button" href="/deployments">Deploy software</a></div>
+  </header>
+
+  <section class="deployment-summary" aria-label="Fleet deployment summary">
+    <a href="/displays"><strong data-summary="display_count">{{ state.summary.display_count }}</strong><span>Displays</span></a>
+    <a href="/displays"><strong data-summary="online_count">{{ state.summary.online_count }}</strong><span>Online</span></a>
+    <a href="/displays"><strong data-summary="offline_count">{{ state.summary.offline_count }}</strong><span>Offline</span></a>
+    <a href="/deployments"><strong data-summary="update_count">{{ state.summary.update_count }}</strong><span>Updates available</span></a>
+    <a href="/jobs"><strong data-summary="active_job_count">{{ state.summary.active_job_count }}</strong><span>Active jobs</span></a>
+    <a href="/jobs"><strong data-summary="failed_job_count">{{ state.summary.failed_job_count }}</strong><span>Failed jobs</span></a>
+  </section>
+
+  <section class="deployment-launch-grid">
+    <a class="deployment-launch-card" href="/content-deployments"><span class="launch-icon">⇧</span><div><h2>Content Deployments</h2><p>Stage, publish, and roll back playlist assignments.</p></div><span>Open →</span></a>
+    <a class="deployment-launch-card" href="/deployments"><span class="launch-icon">⬆</span><div><h2>Software Deployments</h2><p>Review versions and deliver player updates.</p></div><span>Open →</span></a>
+    <a class="deployment-launch-card" href="/bulk-operations/"><span class="launch-icon">⇉</span><div><h2>Bulk Operations</h2><p>Queue coordinated actions across multiple displays.</p></div><span>Open →</span></a>
+  </section>
+
+  <div class="deployment-columns">
+    <section class="deployment-panel"><div class="panel-heading"><div><h2>Needs attention</h2><p>Displays that may block a successful rollout.</p></div><a href="/displays">View fleet</a></div>
+      <div class="deployment-list" data-attention-list>{% for row in state.attention_rows %}<a href="/display/{{ row.id }}"><span class="status-dot {{ 'online' if row.online else 'offline' }}"></span><span><strong>{{ row.name }}</strong><small>{% if not row.online %}Offline{% elif row.update_available %}Software update available{% else %}Sync error{% endif %}</small></span><b>{{ row.current_tag or 'Unknown' }}</b></a>{% else %}<div class="deployment-empty">No deployment blockers detected.</div>{% endfor %}</div>
+    </section>
+    <section class="deployment-panel"><div class="panel-heading"><div><h2>Active deployment jobs</h2><p>Queued and running delivery work.</p></div><a href="/jobs">View jobs</a></div>
+      <div class="deployment-list" data-active-jobs>{% for job in state.active_jobs %}<a href="/jobs"><span class="job-state {{ job.status }}">{{ job.status|title }}</span><span><strong>{{ job.type|replace('_',' ')|title }}</strong><small>{{ job.display_id or 'Fleet' }} · {{ job.message or 'Waiting for progress' }}</small></span><b>{{ job.progress or 0 }}%</b></a>{% else %}<div class="deployment-empty">No deployments are currently running.</div>{% endfor %}</div>
+    </section>
+  </div>
+
+  <section class="deployment-panel"><div class="panel-heading"><div><h2>Recent deployment activity</h2><p>Latest content and software delivery jobs.</p></div><span>Latest release: <strong>{{ state.latest_tag }}</strong></span></div>
+    <div class="deployment-table-wrap"><table><thead><tr><th>Type</th><th>Target</th><th>Status</th><th>Progress</th><th>Updated</th></tr></thead><tbody>{% for job in state.recent_jobs %}<tr><td>{{ job.type|replace('_',' ')|title }}</td><td>{{ job.display_id or 'Fleet' }}</td><td><span class="job-state {{ job.status }}">{{ job.status|replace('_',' ')|title }}</span></td><td>{{ job.progress or 0 }}%</td><td>{{ (job.updated_at or job.created_at or '')|replace('T',' ') }}</td></tr>{% else %}<tr><td colspan="5" class="deployment-empty">No deployment activity has been recorded.</td></tr>{% endfor %}</tbody></table></div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='deployment-center-v1310.js') }}?v=13.1.0"></script>{% endblock %}
