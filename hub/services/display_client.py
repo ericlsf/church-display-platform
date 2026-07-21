@@ -53,7 +53,14 @@ def post(display, path, data=None, timeout=8):
 #
 
 def get_status(display, timeout=3):
-    return get_json(display, "/api/v1/status", timeout=timeout)
+    """Read display status across both current and legacy player APIs."""
+    status, online = get_json(display, "/api/v1/status", timeout=timeout)
+    if online:
+        return status, True
+    legacy_status, legacy_online = get_json(display, "/api/status", timeout=timeout)
+    if legacy_online:
+        return legacy_status, True
+    return status, False
 
 
 def get_sync_status(display, timeout=3):

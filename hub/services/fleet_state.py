@@ -7,6 +7,7 @@ from services.events import read_events
 from services.heartbeat_store import load_heartbeats, get_heartbeat_for_display
 from services.releases import latest_git_tag
 from services.timeutil import human_age, is_fresh, seconds_old
+from services.telemetry_normalization import normalize_media_count
 
 
 PREVIEW_DIR = Path(__file__).resolve().parent.parent / "static" / "previews"
@@ -81,6 +82,7 @@ def build_fleet_state():
 
         hb_player = hb.get("player", {})
         hb_sync = hb.get("sync", {})
+        hb_media = hb.get("media", {})
         hb_system = hb.get("system", {})
         hb_git = hb.get("git", {})
         hb_display_app = hb.get("display_app", {})
@@ -119,6 +121,12 @@ def build_fleet_state():
             "update_available": update_available,
             "config_version": hb.get("config_version", "Unknown"),
             "current_media": status.get("current_media") or hb_player.get("current_media") or "Unknown",
+            "media_count": normalize_media_count({
+                **hb,
+                **status,
+                "media": hb_media,
+                "player": hb_player,
+            }),
             "media_type": status.get("media_type") or hb_player.get("media_type") or "Unknown",
             "overlay": status.get("overlay") or hb_player.get("overlay") or "",
             "countdown": status.get("countdown") or hb_player.get("countdown") or "",
