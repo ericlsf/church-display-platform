@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ display.name }} - Church Display Hub{% endblock %}
+{% block head %}<link rel="stylesheet" href="/static/display-screenshots-v1330.css">{% endblock %}
 
 {% block content %}
 <div class="section">
@@ -312,16 +313,39 @@
   </div>
 
   <div class="display-details-grid">
-    <div class="card preview-card">
+    <div class="card screenshot-workspace" data-screenshot-workspace data-display-id="{{ display.id }}">
       {% set preview_url = fleet.get("preview_url") or fleet.get("screenshot_url") %}
-      <img
-        data-live-preview
-        src="{{ preview_url or '' }}"
-        alt="Current screenshot from {{ display.name }}"
-        {% if not preview_url %}hidden{% endif %}
-      >
-      <div class="preview-empty" {% if preview_url %}hidden{% endif %}>
-        No screenshot available
+      <div class="screenshot-heading">
+        <div>
+          <span class="eyebrow">Live Screenshot</span>
+          <strong data-screenshot-state>{% if preview_url %}Latest player capture{% else %}No capture received{% endif %}</strong>
+        </div>
+        <span class="screenshot-freshness" data-screenshot-freshness>
+          {% if fleet.get("preview_age_seconds") is not none %}
+            {{ fleet.get("preview_age_seconds") }}s old
+          {% else %}
+            Unavailable
+          {% endif %}
+        </span>
+      </div>
+
+      <button class="screenshot-frame" type="button" data-screenshot-open aria-label="Open current screenshot">
+        <img
+          data-live-preview
+          data-screenshot-image
+          src="{{ preview_url or '' }}"
+          alt="Current screenshot from {{ display.name }}"
+          {% if not preview_url %}hidden{% endif %}
+        >
+        <span class="preview-empty" data-screenshot-empty {% if preview_url %}hidden{% endif %}>
+          No screenshot available yet
+        </span>
+      </button>
+
+      <div class="screenshot-actions">
+        <button class="primary" type="button" data-screenshot-request>Take Screenshot</button>
+        <a href="{{ preview_url or '#' }}" target="_blank" rel="noopener" data-screenshot-full {% if not preview_url %}hidden{% endif %}>Open Full Size</a>
+        <span class="muted" data-screenshot-message>Player captures also refresh automatically.</span>
       </div>
     </div>
 
@@ -679,6 +703,7 @@
 
 
 <script src="/static/live-display-health.js"></script>
+<script src="/static/display-screenshots-v1330.js"></script>
 
 
 

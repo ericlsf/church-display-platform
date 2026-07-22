@@ -19,6 +19,7 @@ from routes.deployments import deployments_bp
 from routes.content_deployments import content_deployments_bp
 from routes.deployment_center import deployment_center_bp
 from routes.remote_access import remote_access_bp
+from routes.screenshots import screenshots_bp
 from routes.setup import setup_bp
 from routes.system import system_bp
 
@@ -80,6 +81,7 @@ def create_app():
     app.register_blueprint(content_deployments_bp)
     app.register_blueprint(deployment_center_bp)
     app.register_blueprint(remote_access_bp)
+    app.register_blueprint(screenshots_bp)
     app.register_blueprint(media_bp)
     app.register_blueprint(content_bp)
     app.register_blueprint(content_api_bp)

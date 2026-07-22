@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from pathlib import Path
 
 from services.config import load_config, load_hub_settings, load_pending
@@ -13,11 +14,31 @@ from services.telemetry_normalization import normalize_media_count
 PREVIEW_DIR = Path(__file__).resolve().parent.parent / "static" / "previews"
 
 
-def preview_url_for(display_id):
+def preview_metadata_for(display_id):
     path = PREVIEW_DIR / f"{display_id}.jpg"
-    if path.exists():
-        return f"/static/previews/{display_id}.jpg?ts={int(path.stat().st_mtime)}"
-    return ""
+    if not path.exists():
+        return {
+            "preview_url": "",
+            "preview_updated_at": "",
+            "preview_age_seconds": None,
+            "preview_size_bytes": 0,
+            "preview_available": False,
+        }
+
+    stat = path.stat()
+    modified = datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
+    age = max(0, int((datetime.now(timezone.utc) - modified).total_seconds()))
+    return {
+        "preview_url": f"/static/previews/{display_id}.jpg?ts={int(stat.st_mtime)}",
+        "preview_updated_at": modified.isoformat(timespec="seconds"),
+        "preview_age_seconds": age,
+        "preview_size_bytes": stat.st_size,
+        "preview_available": True,
+    }
+
+
+def preview_url_for(display_id):
+    return preview_metadata_for(display_id)["preview_url"]
 
 
 def build_alerts(rows, drive_error=""):
@@ -101,6 +122,8 @@ def build_fleet_state():
         current_tag = hb_git.get("tag") or "Unknown"
         update_available = bool(latest_tag and current_tag not in [latest_tag, "Unknown", "untagged", ""])
 
+        preview = preview_metadata_for(display_id)
+
         rows.append({
             "id": display_id,
             "name": display.get("name", "Unnamed Display"),
@@ -140,7 +163,7 @@ def build_fleet_state():
             "display_app": hb_display_app,
             "display_app_running": bool(hb_display_app.get("running")),
             "display_app_state": hb_display_app.get("active_state", "unknown"),
-            "preview_url": preview_url_for(display_id),
+            **preview,
         })
 
     outdated_rows = [row for row in rows if row.get("update_available")]
