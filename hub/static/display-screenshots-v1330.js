@@ -7,6 +7,7 @@
   const empty = root.querySelector("[data-screenshot-empty]");
   const requestButton = root.querySelector("[data-screenshot-request]");
   const freshness = root.querySelector("[data-screenshot-freshness]");
+  const ageDetail = root.querySelector("[data-screenshot-age]");
   const state = root.querySelector("[data-screenshot-state]");
   const message = root.querySelector("[data-screenshot-message]");
   const fullLink = root.querySelector("[data-screenshot-full]");
@@ -26,6 +27,7 @@
     const url = data.preview_url || "";
     const age = data.preview_age_seconds;
     freshness.textContent = humanAge(age);
+    if (ageDetail) ageDetail.textContent = age == null ? "Unavailable" : `${humanAge(age)} ago`;
     freshness.classList.toggle("fresh", age != null && age <= 90);
     freshness.classList.toggle("stale", age != null && age > 90);
 

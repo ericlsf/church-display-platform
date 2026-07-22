@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ display.name }} - Church Display Hub{% endblock %}
-{% block head %}<link rel="stylesheet" href="/static/display-screenshots-v1330.css">{% endblock %}
+{% block head %}<link rel="stylesheet" href="/static/display-screenshots-v1330.css"><link rel="stylesheet" href="/static/display-health-v1331.css">{% endblock %}
 
 {% block content %}
 <div class="section">
@@ -304,15 +304,60 @@
 </div>
 </div>
 
-<div class="section" data-live-display="{{ display.id }}">
-  <div class="section-heading-row">
+<div class="section live-health-workspace" data-live-display="{{ display.id }}">
+  <div class="live-health-header">
     <div>
-      <h2>Live Device Health</h2>
-      <span class="live-indicator">Updates every 15 seconds</span>
+      <span class="eyebrow">Live Device Health</span>
+      <div class="live-health-title-row">
+        <h2>{{ display.name }}</h2>
+        <span class="health-status-badge" data-live-status-badge data-state="{{ fleet.get('readiness', 'unknown')|replace('_', '-') }}">
+          {{ fleet.get("readiness", "unknown")|replace("_", " ")|title }}
+        </span>
+      </div>
+      <p class="muted">Authoritative player telemetry refreshes every 15 seconds.</p>
+    </div>
+
+    <div class="health-quick-actions" aria-label="Display quick actions">
+      <button class="primary" type="button" data-screenshot-request>Take Screenshot</button>
+      <form method="POST" action="/display/{{ display.id }}/action">
+        <input type="hidden" name="action" value="sync">
+        <button type="submit">Sync Media</button>
+      </form>
+      <form method="POST" action="/display/{{ display.id }}/action">
+        <input type="hidden" name="action" value="restart">
+        <button type="submit">Restart Player</button>
+      </form>
+      <form method="POST" action="/display/{{ display.id }}/action">
+        <input type="hidden" name="action" value="collect_logs">
+        <button type="submit">Collect Logs</button>
+      </form>
+      <form method="POST" action="/display/{{ display.id }}/action">
+        <input type="hidden" name="action" value="reboot">
+        <button class="danger" type="submit">Reboot Device</button>
+      </form>
     </div>
   </div>
 
-  <div class="display-details-grid">
+  <div class="health-metric-strip">
+    <div class="health-metric">
+      <span>CPU Temperature</span>
+      <strong data-live-temp>{{ fleet.get("cpu_temperature") or "Unknown" }}</strong>
+    </div>
+    <div class="health-metric">
+      <span>Memory</span>
+      <strong data-live-memory>{{ fleet.get("memory_percent") or "Unknown" }}</strong>
+    </div>
+    <div class="health-metric">
+      <span>Storage</span>
+      <strong data-live-storage>{{ fleet.get("storage_percent") or "Unknown" }}</strong>
+    </div>
+    <div class="health-metric">
+      <span>Media Files</span>
+      <strong data-live-media>{{ fleet.get("media_count", 0) }}</strong>
+    </div>
+  </div>
+
+  <div class="live-health-layout">
     <div class="card screenshot-workspace" data-screenshot-workspace data-display-id="{{ display.id }}">
       {% set preview_url = fleet.get("preview_url") or fleet.get("screenshot_url") %}
       <div class="screenshot-heading">
@@ -330,72 +375,47 @@
       </div>
 
       <button class="screenshot-frame" type="button" data-screenshot-open aria-label="Open current screenshot">
-        <img
-          data-live-preview
-          data-screenshot-image
-          src="{{ preview_url or '' }}"
-          alt="Current screenshot from {{ display.name }}"
-          {% if not preview_url %}hidden{% endif %}
-        >
-        <span class="preview-empty" data-screenshot-empty {% if preview_url %}hidden{% endif %}>
-          No screenshot available yet
-        </span>
+        <img data-live-preview data-screenshot-image src="{{ preview_url or '' }}" alt="Current screenshot from {{ display.name }}" {% if not preview_url %}hidden{% endif %}>
+        <span class="preview-empty" data-screenshot-empty {% if preview_url %}hidden{% endif %}>No screenshot available yet</span>
       </button>
 
+      <div class="screenshot-meta">
+        <span><b>Captured:</b> <span data-screenshot-age>{% if fleet.get("preview_age_seconds") is not none %}{{ fleet.get("preview_age_seconds") }}s ago{% else %}Unavailable{% endif %}</span></span>
+        <span><b>Current media:</b> <span data-live-current-media>{{ fleet.get("current_media") or "Nothing reported" }}</span></span>
+      </div>
+
       <div class="screenshot-actions">
-        <button class="primary" type="button" data-screenshot-request>Take Screenshot</button>
         <a href="{{ preview_url or '#' }}" target="_blank" rel="noopener" data-screenshot-full {% if not preview_url %}hidden{% endif %}>Open Full Size</a>
         <span class="muted" data-screenshot-message>Player captures also refresh automatically.</span>
       </div>
     </div>
 
-    <div class="metric-grid">
-      <div class="metric-card">
-        <span>Status</span>
-        <strong data-live-status>
-          {{ fleet.get("readiness", "unknown")|replace("_", " ")|title }}
-        </strong>
+    <div class="health-side-column">
+      <div class="card health-summary-card">
+        <div class="card-heading-row">
+          <div>
+            <span class="eyebrow">Runtime</span>
+            <h3>Player Summary</h3>
+          </div>
+          <strong data-live-status>{{ fleet.get("readiness", "unknown")|replace("_", " ")|title }}</strong>
+        </div>
+        <dl class="health-definition-list">
+          <div><dt>Version</dt><dd data-live-version>{{ fleet.get("version", "Unknown") }}</dd></div>
+          <div><dt>Player state</dt><dd data-live-player>{{ fleet.get("player_state", "Unknown") }}</dd></div>
+          <div><dt>Last heartbeat</dt><dd data-live-heartbeat>{{ fleet.get("last_heartbeat", "Unknown") }}</dd></div>
+          <div><dt>Uptime</dt><dd data-live-uptime>{{ fleet.get("uptime", "Unknown") }}</dd></div>
+          <div><dt>Sync state</dt><dd data-live-sync>{{ fleet.get("sync_state", "Unknown") }}</dd></div>
+        </dl>
       </div>
 
-      <div class="metric-card">
-        <span>Version</span>
-        <strong data-live-version>{{ fleet.get("version", "unknown") }}</strong>
-      </div>
-
-      <div class="metric-card">
-        <span>Media Files</span>
-        <strong data-live-media>{{ fleet.get("media_count", 0) }}</strong>
-      </div>
-
-      <div class="metric-card">
-        <span>CPU Temperature</span>
-        <strong data-live-temp>
-          {% if fleet.get("cpu_temperature") is not none %}
-            {{ fleet.get("cpu_temperature") }}°C
-          {% else %}
-            Unknown
-          {% endif %}
-        </strong>
-      </div>
-
-      <div class="metric-card">
-        <span>Storage</span>
-        <strong data-live-storage>
-          {% if fleet.get("storage_percent") is not none %}
-            {{ fleet.get("storage_percent") }}% used
-          {% elif fleet.get("disk_percent") is not none %}
-            {{ fleet.get("disk_percent") }}% used
-          {% else %}
-            Unknown
-          {% endif %}
-        </strong>
-      </div>
-
-      <div class="metric-card">
-        <span>Last Heartbeat</span>
-        <strong data-live-heartbeat>
-          {{ fleet.get("last_heartbeat") or fleet.get("last_seen") or "Unknown" }}
-        </strong>
+      <div class="card health-summary-card">
+        <span class="eyebrow">Network</span>
+        <h3>Connection Details</h3>
+        <dl class="health-definition-list">
+          <div><dt>IP address</dt><dd data-live-ip>{{ fleet.get("ip_address") or display.get("host") or "Not reported" }}</dd></div>
+          <div><dt>Hostname</dt><dd data-live-hostname>{{ fleet.get("hostname") or display.get("name") or display.id }}</dd></div>
+          <div><dt>Display ID</dt><dd>{{ display.id }}</dd></div>
+        </dl>
       </div>
     </div>
   </div>
@@ -702,7 +722,7 @@
 
 
 
-<script src="/static/live-display-health.js"></script>
+<script src="/static/live-display-health-v1331.js"></script>
 <script src="/static/display-screenshots-v1330.js"></script>
 
 
