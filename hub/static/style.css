@@ -3486,6 +3486,7 @@ body.v8-sidebar-collapsed .v8-main-content{
 .button-link{display:inline-block;padding:9px 12px;border-radius:8px;background:#181818;border:1px solid #3b424d;color:#e8edf3;text-decoration:none}.button-link:hover{background:#232832;border-color:#566171}
 .notification-count{display:inline-grid;place-items:center;min-width:22px;height:22px;margin-left:6px;padding:0 6px;border-radius:999px;background:#b3261e;color:white;font-size:12px;font-weight:800}
 .fleet-operations-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}.fleet-operations-layout:has(.notification-center:not([hidden])){grid-template-columns:minmax(280px,.75fr) minmax(380px,1.25fr)}
+.fleet-notification-panel{border-color:#624b20;box-shadow:0 10px 30px rgba(0,0,0,.2)}
 .fleet-secondary-panels{margin-top:18px}.fleet-secondary-panels .activity-list{max-height:220px}
 .notification-center,.activity-feed{margin-bottom:18px}.notification-center[hidden]{display:none}.notification-item{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--border)}
 .notification-dot,.live-dot{width:9px;height:9px;margin-top:5px;border-radius:50%;background:#54d17a;box-shadow:0 0 0 4px rgba(84,209,122,.12)}.notification-item.is-danger .notification-dot{background:#f0645c}.notification-item.is-warning .notification-dot{background:#ffcf33}.live-dot{display:inline-block;margin:0 6px 0 0}
