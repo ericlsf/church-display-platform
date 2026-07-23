@@ -33,6 +33,13 @@ class FleetDashboardTests(unittest.TestCase):
                 "sync_state": "failed",
                 "sync_folder": "Weekly",
                 "update_available": True,
+                "checks": {
+                    "online": False,
+                    "player": True,
+                    "playlist": True,
+                    "media": True,
+                    "sync": False,
+                },
             },
         ],
     )
@@ -54,6 +61,14 @@ class FleetDashboardTests(unittest.TestCase):
         self.assertEqual(
             len(result["attention"]),
             1,
+        )
+        self.assertIn(
+            "Hub connection",
+            result["attention"][0]["reasons"],
+        )
+        self.assertIn(
+            "Sync incomplete",
+            result["attention"][0]["reasons"],
         )
 
 

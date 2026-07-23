@@ -27,7 +27,7 @@
     </a>
 
     <a class="fleet-metric-card" href="#health">
-      <span>Fleet Health</span>
+      <span>Healthy Displays</span>
       <strong>{{ dashboard.metrics.healthy }}</strong>
       <small>
         {{ dashboard.metrics.warning }} warning,
@@ -36,7 +36,7 @@
     </a>
 
     <a class="fleet-metric-card" href="/deployments">
-      <span>Updates</span>
+      <span>Display Updates</span>
       <strong>{{ dashboard.metrics.updates }}</strong>
       <small>{{ dashboard.metrics.active_jobs }} active deployment jobs</small>
     </a>
@@ -54,7 +54,7 @@
         <div>
           <h2>Needs Attention</h2>
           <p class="muted">
-            Displays with health, connectivity, sync, or software issues.
+            Each badge identifies the check that needs attention.
           </p>
         </div>
         <span class="status-pill">
@@ -90,7 +90,7 @@
         </div>
       {% else %}
         <div class="empty-state">
-          All managed displays are healthy.
+          All managed displays are passing every health check.
         </div>
       {% endif %}
     </section>

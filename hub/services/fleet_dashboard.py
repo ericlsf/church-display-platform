@@ -67,6 +67,7 @@ def build_fleet_dashboard():
         for job in jobs
         if str(job.get("status", "")).lower()
         in FAILED_JOB_STATES
+        and not job.get("resolved")
     ]
     active_jobs = [
         job
@@ -87,12 +88,24 @@ def build_fleet_dashboard():
             reasons.append("Offline")
 
         if int(row.get("health_score", 0) or 0) < 100:
-            reasons.append(
-                f'Health {int(row.get("health_score", 0) or 0)}%'
+            failed_checks = [
+                label
+                for key, label in (
+                    ("online", "Hub connection"),
+                    ("player", "Player stopped"),
+                    ("playlist", "No content assigned"),
+                    ("media", "No local media"),
+                    ("sync", "Sync incomplete"),
+                )
+                if not (row.get("checks", {}) or {}).get(key, False)
+            ]
+            reasons.extend(
+                failed_checks
+                or [f'Health {int(row.get("health_score", 0) or 0)}%']
             )
 
         if row.get("update_available"):
-            reasons.append("Update available")
+            reasons.append("Display software update")
 
         sync_state = str(
             row.get("sync_state", "")
