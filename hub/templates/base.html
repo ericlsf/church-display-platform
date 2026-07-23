@@ -7,21 +7,24 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <header>
-        <h1>Church Display Hub</h1>
-        <nav>
+    <aside class="app-sidebar">
+        <a class="app-brand" href="/"><span class="app-brand-mark">CD</span><span>Church Display</span></a>
+        <nav aria-label="Main navigation">
+            <span class="nav-label">Operations</span>
             <a class="{{ 'active' if active == 'dashboard' else '' }}" href="/">Dashboard</a>
-            <a class="{{ 'active' if active == 'displays' else '' }}" href="/displays">Displays</a>
-            <a class="{{ 'active' if active == 'discovery' else '' }}" href="/discovery">Discovery</a>
+            <a class="{{ 'active' if active == 'displays' else '' }}" href="/displays">Fleet</a>
             <a class="{{ 'active' if active == 'health' else '' }}" href="/health">Health</a>
-            <a class="{{ 'active' if active == 'content' else '' }}" href="/content">Content</a>
-            <a class="{{ 'active' if active == 'media' else '' }}" href="/media">Media</a>
-            <a class="{{ 'active' if active == 'schedules' else '' }}" href="/schedules">Schedules</a>
             <a class="{{ 'active' if active == 'jobs' else '' }}" href="/jobs">Jobs</a>
             <a class="{{ 'active' if active == 'deployments' else '' }}" href="/deployments">Deployments</a>
+            <span class="nav-label">Content</span>
+            <a class="{{ 'active' if active == 'content' else '' }}" href="/content">Playlists</a>
+            <a class="{{ 'active' if active == 'media' else '' }}" href="/media">Media</a>
+            <a class="{{ 'active' if active == 'schedules' else '' }}" href="/schedules">Schedules</a>
+            <span class="nav-label">System</span>
+            <a class="{{ 'active' if active == 'discovery' else '' }}" href="/discovery">Discovery</a>
             <a class="{{ 'active' if active == 'releases' else '' }}" href="/releases">Releases</a>
         </nav>
-    </header>
-    <main>{% block content %}{% endblock %}</main>
+    </aside>
+    <main class="app-main">{% block content %}{% endblock %}</main>
 </body>
 </html>

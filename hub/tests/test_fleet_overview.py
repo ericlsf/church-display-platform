@@ -49,9 +49,15 @@ class FleetOverviewTests(unittest.TestCase):
         self.assertIn("Search displays", body)
         self.assertIn("Select all visible", body)
         self.assertIn("12", body)
+        self.assertIn("Screenshot", body)
+        self.assertIn("View logs", body)
+        self.assertIn("Live activity", body)
+        self.assertIn("Notifications", body)
 
+    @patch("routes.fleet.load_config")
     @patch("routes.fleet.create_job")
-    def test_bulk_restart_returns_to_fleet(self, create_job):
+    def test_bulk_restart_returns_to_fleet(self, create_job, load_config):
+        load_config.return_value = {"displays": [{"id": "lobby"}]}
         response = self.client.post(
             "/fleet/bulk/restart",
             data={"display_ids": ["lobby"], "next": "/displays"},
@@ -97,6 +103,28 @@ class FleetOverviewTests(unittest.TestCase):
             "disk": "28%",
             "uptime": "6 hours",
         })
+
+    @patch("routes.fleet.create_job")
+    def test_screenshot_action_queues_preview_upload(self, create_job):
+        response = self.client.post(
+            "/fleet/lobby/screenshot",
+            data={"next": "/displays"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        create_job.assert_called_once_with("lobby", "upload_preview", {})
+
+    @patch("routes.fleet.load_config")
+    @patch("routes.fleet.create_job")
+    def test_bulk_reboot_only_queues_configured_displays(self, create_job, load_config):
+        load_config.return_value = {"displays": [{"id": "lobby"}]}
+        response = self.client.post(
+            "/fleet/bulk/reboot",
+            data={"display_ids": ["lobby", "not-configured"], "next": "/displays"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        create_job.assert_called_once_with("lobby", "reboot", {})
 
 
 if __name__ == "__main__":

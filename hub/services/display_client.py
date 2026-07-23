@@ -60,6 +60,10 @@ def get_sync_status(display, timeout=3):
     return get_json(display, "/api/v1/sync", timeout=timeout)
 
 
+def get_logs(display, timeout=4):
+    return get_json(display, "/api/v1/logs", timeout=timeout)
+
+
 def test_display(host, username="", password="", timeout=3):
     host = normalize_host(host)
 

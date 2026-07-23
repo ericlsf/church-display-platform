@@ -22,6 +22,11 @@ def render_fleet_overview(test_message=""):
     return render_template(
         "displays.html",
         rows=rows,
+        groups=sorted({row.get("group") for row in rows if row.get("group")}),
+        alerts=state.get("alerts", []),
+        notifications=state.get("notifications", []),
+        event_records=state.get("event_records", []),
+        latest_tag=state.get("latest_tag", ""),
         test_message=test_message,
         active="displays",
     )
@@ -39,6 +44,7 @@ def add_display():
     host = normalize_host(request.form.get("host", ""))
     username = request.form.get("username", "").strip()
     password = request.form.get("password", "").strip()
+    group = request.form.get("group", "").strip()
     if not name or not host:
         return redirect(url_for("displays.displays"))
     existing_ids = {d.get("id") for d in cfg.get("displays", [])}
@@ -48,7 +54,7 @@ def add_display():
     while display_id in existing_ids:
         display_id = f"{base_id}-{counter}"
         counter += 1
-    cfg["displays"].append({"id": display_id, "name": name, "host": host, "username": username, "password": password})
+    cfg["displays"].append({"id": display_id, "name": name, "host": host, "username": username, "password": password, "group": group})
     save_config(cfg)
     log_event(f"Added display {name} at {host}")
     return redirect(url_for("displays.displays"))
@@ -62,6 +68,7 @@ def update_display():
     host = normalize_host(request.form.get("host", ""))
     username = request.form.get("username", "").strip()
     password = request.form.get("password", "").strip()
+    group = request.form.get("group", "").strip()
     for display in cfg.get("displays", []):
         if display.get("id") == display_id:
             if name:
@@ -70,6 +77,7 @@ def update_display():
                 display["host"] = host
             display["username"] = username
             display["password"] = password
+            display["group"] = group
             log_event(f"Updated display {display.get('name', display_id)}")
             break
     save_config(cfg)

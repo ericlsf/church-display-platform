@@ -7,10 +7,30 @@
     <h2>Fleet Overview</h2>
     <p class="muted">Monitor every display and take action without leaving the fleet.</p>
   </div>
-  <button class="primary" type="button" data-toggle-add>+ Add display</button>
+  <div class="fleet-hero-actions">
+    <button class="button-link notification-toggle" type="button" data-toggle-notifications>Notifications <span class="notification-count" id="notification-count">{{ notifications|length }}</span></button>
+    <button class="primary" type="button" data-toggle-add>+ Add display</button>
+  </div>
 </section>
 
 {% if test_message %}<div class="section fleet-notice"><strong>{{ test_message }}</strong></div>{% endif %}
+
+<section class="fleet-operations-layout">
+  <aside class="section notification-center" id="notification-center" hidden>
+    <div class="fleet-section-heading"><div><h2>Notifications</h2><p class="muted">Current conditions requiring attention.</p></div><button class="button-link" type="button" data-toggle-notifications>Close</button></div>
+    <div id="notification-list">
+      {% for alert in notifications %}<div class="notification-item is-{{ alert.level }}"><span class="notification-dot"></span><span>{{ alert.message }}</span></div>
+      {% else %}<p class="muted">No active alerts.</p>{% endfor %}
+    </div>
+  </aside>
+  <aside class="section activity-feed">
+    <div class="fleet-section-heading"><div><h2>Live activity</h2><p class="muted"><span class="live-dot"></span> Connected</p></div></div>
+    <ol id="activity-list" class="activity-list">
+      {% for event in event_records[:8] %}<li><time>{{ event.created_at }}</time><span>{{ event.message }}</span></li>
+      {% else %}<li class="muted">Waiting for fleet activity…</li>{% endfor %}
+    </ol>
+  </aside>
+</section>
 
 <section class="section add-display-panel" id="add-display-panel" hidden>
   <div class="fleet-section-heading">
@@ -22,6 +42,7 @@
     <div><label>Admin URL or IP</label><input name="host" placeholder="http://192.168.1.101:8080" required></div>
     <div><label>Username, optional</label><input name="username" placeholder="admin"></div>
     <div><label>Password, optional</label><input name="password" type="password"></div>
+    <div><label>Group, optional</label><input name="group" placeholder="Main campus"></div>
     <div class="fleet-form-submit"><button class="primary" type="submit">Add display</button></div>
   </form>
 </section>
@@ -48,6 +69,13 @@
       <option value="unknown">Unknown</option>
     </select>
   </div>
+  <div>
+    <label for="group-filter">Group</label>
+    <select id="group-filter">
+      <option value="all">All groups</option>
+      {% for group in groups %}<option value="{{ group|lower }}">{{ group }}</option>{% endfor %}
+    </select>
+  </div>
   <div class="fleet-results" aria-live="polite"><strong id="fleet-visible-count">{{ rows|length }}</strong> of {{ rows|length }} displays</div>
 </section>
 
@@ -58,9 +86,26 @@
       <input type="hidden" name="next" value="/displays">
       <button class="safe" type="submit">Sync now</button>
     </form>
+    <form method="POST" action="/fleet/bulk/screenshot" data-bulk-form>
+      <input type="hidden" name="next" value="/displays">
+      <button class="button-link" type="submit">Screenshot all</button>
+    </form>
+    <form method="POST" action="/fleet/bulk/deploy" data-bulk-form onsubmit="return confirm('Deploy the latest release to selected displays?');">
+      <input type="hidden" name="next" value="/displays">
+      <input type="hidden" name="target" value="{{ latest_tag }}">
+      <button class="primary" type="submit">Deploy latest</button>
+    </form>
+    <form method="POST" action="/fleet/bulk/update" data-bulk-form>
+      <input type="hidden" name="next" value="/displays">
+      <button class="button-link" type="submit">Check updates</button>
+    </form>
     <form method="POST" action="/fleet/bulk/restart" data-bulk-form onsubmit="return confirm('Restart the selected display apps?');">
       <input type="hidden" name="next" value="/displays">
       <button class="danger" type="submit">Restart apps</button>
+    </form>
+    <form method="POST" action="/fleet/bulk/reboot" data-bulk-form onsubmit="return confirm('Reboot the selected devices?');">
+      <input type="hidden" name="next" value="/displays">
+      <button class="danger" type="submit">Reboot devices</button>
     </form>
   </div>
 </section>
@@ -74,6 +119,7 @@
   <article class="fleet-card" id="display-{{ row.id }}"
     data-search="{{ row.name }} {{ row.host }} {{ row.group }} {{ row.version }} {{ row.current_tag }}"
     data-status="{{ 'online' if row.online else 'offline' }}"
+    data-group="{{ row.group|lower }}"
     data-version="{{ 'unknown' if row.current_tag in ['Unknown', 'untagged', ''] else ('outdated' if row.update_available else 'current') }}">
     <div class="fleet-card-select">
       <label aria-label="Select {{ row.name }}"><input class="display-selector" type="checkbox" value="{{ row.id }}"></label>
@@ -84,7 +130,7 @@
       {% else %}
         <div class="fleet-thumbnail-empty"><span>▣</span>No screenshot yet</div>
       {% endif %}
-      <span class="fleet-status {{ 'is-online' if row.online else 'is-offline' }}">{{ '● Online' if row.online else '○ Offline' }}</span>
+      <span class="fleet-status is-{{ row.health_state }}" data-field="health_state">{{ row.health_state|capitalize }}</span>
     </div>
 
     <div class="fleet-card-body">
@@ -106,8 +152,10 @@
       </dl>
 
       <div class="fleet-quick-actions">
-        <a class="button-link" href="{{ row.host }}" target="_blank" rel="noopener">Open admin</a>
-        <a class="button-link" href="{{ row.host }}/diagnostics" target="_blank" rel="noopener">Diagnostics</a>
+        <form method="POST" action="/fleet/{{ row.id }}/screenshot">
+          <input type="hidden" name="next" value="/displays">
+          <button class="button-link" type="submit">Screenshot</button>
+        </form>
         <form method="POST" action="/fleet/{{ row.id }}/sync-now">
           <input type="hidden" name="next" value="/displays">
           <button class="safe" type="submit">Sync</button>
@@ -116,6 +164,12 @@
           <input type="hidden" name="next" value="/displays">
           <button class="danger" type="submit">Restart</button>
         </form>
+        <form method="POST" action="/fleet/{{ row.id }}/reboot" onsubmit="return confirm('Reboot {{ row.name }}?');">
+          <input type="hidden" name="next" value="/displays">
+          <button class="danger" type="submit">Reboot</button>
+        </form>
+        <button class="button-link" type="button" data-show-logs="{{ row.id }}" data-display-name="{{ row.name }}">View logs</button>
+        <button class="button-link" type="button" data-show-diagnostics="{{ row.host }}" data-display-name="{{ row.name }}">Diagnostics</button>
       </div>
 
       <details class="fleet-manage">
@@ -126,6 +180,7 @@
           <div><label>Host</label><input name="host" value="{{ row.host }}"></div>
           <div><label>Username</label><input name="username" value="{{ row.username }}"></div>
           <div><label>Password</label><input name="password" type="password" value="{{ row.password }}"></div>
+          <div><label>Group</label><input name="group" value="{{ row.group }}"></div>
           <div class="fleet-form-submit"><button class="primary" type="submit">Save changes</button></div>
         </form>
         <div class="fleet-manage-actions">
@@ -146,6 +201,11 @@
 {% endfor %}
 </div>
 
+<dialog class="fleet-dialog" id="fleet-dialog">
+  <div class="fleet-dialog-heading"><h2 id="fleet-dialog-title">Display details</h2><button class="button-link" type="button" data-close-dialog>Close</button></div>
+  <div id="fleet-dialog-content"></div>
+</dialog>
+
 <div class="section fleet-empty" id="fleet-empty" {% if rows %}hidden{% endif %}>
   <h2>No displays found</h2>
   <p class="muted">{% if rows %}Try adjusting your search or filters.{% else %}Add your first display to start monitoring the fleet.{% endif %}</p>
@@ -157,6 +217,7 @@
   const search = document.getElementById("fleet-search");
   const statusFilter = document.getElementById("status-filter");
   const versionFilter = document.getElementById("version-filter");
+  const groupFilter = document.getElementById("group-filter");
   const selectedCount = document.getElementById("fleet-selected-count");
   const visibleCount = document.getElementById("fleet-visible-count");
   const bulkBar = document.getElementById("fleet-bulk-bar");
@@ -181,7 +242,8 @@
       const matchesSearch = !query || card.dataset.search.toLowerCase().includes(query);
       const matchesStatus = statusFilter.value === "all" || card.dataset.status === statusFilter.value;
       const matchesVersion = versionFilter.value === "all" || card.dataset.version === versionFilter.value;
-      card.hidden = !(matchesSearch && matchesStatus && matchesVersion);
+      const matchesGroup = groupFilter.value === "all" || card.dataset.group === groupFilter.value;
+      card.hidden = !(matchesSearch && matchesStatus && matchesVersion && matchesGroup);
     });
     const count = visibleCards().length;
     visibleCount.textContent = count;
@@ -189,7 +251,7 @@
     updateSelection();
   }
 
-  [search, statusFilter, versionFilter].forEach(control => control.addEventListener("input", applyFilters));
+  [search, statusFilter, versionFilter, groupFilter].forEach(control => control.addEventListener("input", applyFilters));
   selectors().forEach(box => box.addEventListener("change", updateSelection));
   selectVisible.addEventListener("change", () => {
     visibleCards().forEach(card => card.querySelector(".display-selector").checked = selectVisible.checked);
@@ -216,6 +278,83 @@
     panel.hidden = !panel.hidden;
     if (!panel.hidden) panel.querySelector("input").focus();
   }));
+
+  document.querySelectorAll("[data-toggle-notifications]").forEach(button => button.addEventListener("click", () => {
+    const panel = document.getElementById("notification-center");
+    panel.hidden = !panel.hidden;
+  }));
+
+  const dialog = document.getElementById("fleet-dialog");
+  const dialogTitle = document.getElementById("fleet-dialog-title");
+  const dialogContent = document.getElementById("fleet-dialog-content");
+  document.querySelector("[data-close-dialog]").addEventListener("click", () => dialog.close());
+
+  function escapeHtml(value) {
+    const element = document.createElement("div");
+    element.textContent = value == null ? "" : String(value);
+    return element.innerHTML;
+  }
+
+  document.querySelectorAll("[data-show-logs]").forEach(button => button.addEventListener("click", async () => {
+    dialogTitle.textContent = `${button.dataset.displayName} logs`;
+    dialogContent.innerHTML = '<p class="muted">Loading recent logs…</p>';
+    dialog.showModal();
+    try {
+      const response = await fetch(`/fleet/${encodeURIComponent(button.dataset.showLogs)}/logs`, {cache: "no-store"});
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Logs are unavailable");
+      dialogContent.innerHTML = (data.logs || []).map(log =>
+        `<section class="log-panel"><h3>${escapeHtml(log.name)}</h3><pre>${escapeHtml(log.content)}</pre></section>`
+      ).join("") || '<p class="muted">No log files were found.</p>';
+    } catch (error) {
+      dialogContent.innerHTML = `<p class="status-warn">${escapeHtml(error.message)}. The display may need the latest agent update.</p>`;
+    }
+  }));
+
+  document.querySelectorAll("[data-show-diagnostics]").forEach(button => button.addEventListener("click", () => {
+    dialogTitle.textContent = `${button.dataset.displayName} diagnostics`;
+    dialogContent.innerHTML = `<iframe class="diagnostics-frame" src="${encodeURI(button.dataset.showDiagnostics + '/diagnostics')}" title="${escapeHtml(button.dataset.displayName)} diagnostics"></iframe>`;
+    dialog.showModal();
+  }));
+
+  function renderNotifications(notifications) {
+    document.getElementById("notification-count").textContent = notifications.length;
+    document.getElementById("notification-list").innerHTML = notifications.length
+      ? notifications.map(item => `<div class="notification-item is-${escapeHtml(item.level)}"><span class="notification-dot"></span><span>${escapeHtml(item.message)}</span></div>`).join("")
+      : '<p class="muted">No active alerts.</p>';
+  }
+
+  function renderActivity(events) {
+    document.getElementById("activity-list").innerHTML = events.length
+      ? events.slice(0, 8).map(item => `<li><time>${escapeHtml(item.created_at)}</time><span>${escapeHtml(item.message)}</span></li>`).join("")
+      : '<li class="muted">Waiting for fleet activity…</li>';
+  }
+
+  function updateLiveCard(row) {
+    const card = document.getElementById(`display-${CSS.escape(row.id)}`);
+    if (!card) return;
+    card.dataset.status = row.online ? "online" : "offline";
+    const health = card.querySelector('[data-field="health_state"]');
+    health.className = `fleet-status is-${row.health_state}`;
+    health.textContent = row.health_state.charAt(0).toUpperCase() + row.health_state.slice(1);
+    const metrics = card.querySelectorAll(".fleet-metric strong");
+    [row.system.cpu_temp, row.system.memory, row.system.disk, row.media_count].forEach((value, index) => {
+      if (metrics[index]) metrics[index].textContent = value == null ? "Unknown" : value;
+    });
+  }
+
+  const eventSource = new EventSource("/api/v1/events/fleet");
+  eventSource.addEventListener("fleet", event => {
+    const state = JSON.parse(event.data);
+    (state.rows || []).forEach(updateLiveCard);
+    renderNotifications(state.notifications || []);
+    renderActivity(state.event_records || []);
+    applyFilters();
+  });
+  eventSource.onerror = () => {
+    const dot = document.querySelector(".live-dot");
+    if (dot) dot.classList.add("is-disconnected");
+  };
   applyFilters();
 })();
 </script>

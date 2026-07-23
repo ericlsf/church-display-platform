@@ -295,6 +295,7 @@ class ConfigAdminHandler(BaseHTTPRequestHandler):
         # These preserve the old endpoints while giving the Hub a stable API contract.
         if path == "/api/v1/status": return self.handle_api_status()
         if path == "/api/v1/sync": return self.handle_api_sync_status()
+        if path == "/api/v1/logs": return self.handle_api_logs()
 
         if path == "/download-backup": return self.handle_download_backup()
         self.send_error(404)
@@ -408,6 +409,37 @@ class ConfigAdminHandler(BaseHTTPRequestHandler):
         }
 
         body = json.dumps(payload).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def handle_api_logs(self):
+        log_dir = os.path.join(self.base_dir(), "logs")
+        entries = []
+        try:
+            paths = sorted(
+                (
+                    os.path.join(log_dir, name)
+                    for name in os.listdir(log_dir)
+                    if name.endswith(".log")
+                ),
+                key=os.path.getmtime,
+                reverse=True,
+            )[:5]
+            for path in paths:
+                with open(path, "r", errors="replace") as log_file:
+                    lines = log_file.readlines()[-120:]
+                entries.append({
+                    "name": os.path.basename(path),
+                    "content": "".join(lines),
+                })
+        except Exception as exc:
+            body = json.dumps({"logs": [], "error": str(exc)}).encode("utf-8")
+        else:
+            body = json.dumps({"logs": entries}).encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Cache-Control", "no-store")

@@ -15,10 +15,14 @@ def log_event(message, category="general", level="info", metadata=None):
 
 
 def read_events(limit=100):
+    return [f"{row['created_at']}  {row['message']}" for row in read_event_records(limit)]
+
+
+def read_event_records(limit=100):
     try:
         rows = recent_events(limit)
         if rows:
-            return [f"{row['created_at']}  {row['message']}" for row in rows]
+            return rows
     except Exception:
         pass
     if not EVENT_LOG_FILE.exists():
@@ -27,4 +31,7 @@ def read_events(limit=100):
         lines = EVENT_LOG_FILE.read_text().splitlines()
     except Exception:
         return []
-    return list(reversed(lines[-limit:]))
+    return [
+        {"created_at": "", "category": "general", "level": "info", "message": line, "metadata_json": "{}"}
+        for line in reversed(lines[-limit:])
+    ]

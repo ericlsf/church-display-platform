@@ -3,8 +3,9 @@ from pathlib import Path
 from services.config import load_config, load_hub_settings, load_pending
 from services.display_client import get_status, get_sync_status
 from services.drive import list_drive_folders
-from services.events import read_events
+from services.events import read_event_records, read_events
 from services.heartbeat_store import load_heartbeats, get_heartbeat_for_display
+from services.jobs import list_jobs
 from services.releases import latest_git_tag
 from services.timeutil import human_age, is_fresh, seconds_old
 
@@ -126,6 +127,21 @@ def build_alerts(rows, drive_error=""):
     return alerts
 
 
+def health_state_for(online, system, active_job=None):
+    if active_job and active_job.get("type") == "deploy_update":
+        return "updating"
+    if not online:
+        return "offline"
+    for key in ("memory", "disk"):
+        value = str(system.get(key, "")).replace("%", "").strip()
+        try:
+            if float(value) >= 90:
+                return "warning"
+        except ValueError:
+            pass
+    return "online"
+
+
 def build_fleet_state():
     cfg = load_config()
     hub_settings = load_hub_settings()
@@ -135,6 +151,11 @@ def build_fleet_state():
     drive_remote = hub_settings.get("drive_remote", "gdrive")
     drive_folders, drive_error = list_drive_folders(drive_remote)
     latest_tag = latest_git_tag()
+    active_jobs = {}
+    for job in list_jobs(500):
+        if job.get("status") not in {"queued", "running"}:
+            continue
+        active_jobs.setdefault(job.get("display_id"), job)
 
     rows = []
 
@@ -160,13 +181,18 @@ def build_fleet_state():
         display_id = display.get("id", "")
         current_tag = hb_git.get("tag") or "Unknown"
         update_available = bool(latest_tag and current_tag not in [latest_tag, "Unknown", "untagged", ""])
+        system = system_health_for(status, hb)
+        online = bool(status_online or heartbeat_fresh)
+        active_job = active_jobs.get(display_id)
 
         rows.append({
             "id": display_id,
             "name": display.get("name", "Unnamed Display"),
             "host": display.get("host", ""),
             "group": display.get("group", ""),
-            "online": bool(status_online or heartbeat_fresh),
+            "online": online,
+            "health_state": health_state_for(online, system, active_job),
+            "active_job": active_job or {},
             "status_online": status_online,
             "sync_online": sync_online,
             "heartbeat_fresh": heartbeat_fresh,
@@ -191,12 +217,22 @@ def build_fleet_state():
             "sync_state": sync_status.get("state") or hb_sync.get("state") or "unknown",
             "sync_last_success": sync_status.get("last_success") or hb_sync.get("last_success") or "Unknown",
             "folder_options": folder_options,
-            "system": system_health_for(status, hb),
+            "system": system,
             "preview_url": preview_url_for(display_id),
         })
 
     outdated_rows = [row for row in rows if row.get("update_available")]
 
+    alerts = build_alerts(rows, drive_error)
+    event_records = read_event_records(30)
+    recent_outcomes = [
+        {
+            "level": event.get("level", "info"),
+            "message": event.get("message", ""),
+        }
+        for event in event_records
+        if event.get("level") in {"success", "danger"}
+    ][:5]
     return {
         "rows": rows,
         "outdated_rows": outdated_rows,
@@ -207,5 +243,13 @@ def build_fleet_state():
         "latest_tag": latest_tag or "",
         "pending_count": len(pending.get("pending", [])),
         "events": read_events(12),
-        "alerts": build_alerts(rows, drive_error),
+        "event_records": event_records,
+        "alerts": alerts,
+        "notifications": [
+            {
+                "level": alert.get("level", "warning"),
+                "message": alert.get("message", ""),
+            }
+            for alert in alerts
+        ] + recent_outcomes,
     }
