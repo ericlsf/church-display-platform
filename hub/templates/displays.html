@@ -44,6 +44,8 @@
       <option value="all">All statuses</option>
       <option value="online">Online</option>
       <option value="offline">Offline</option>
+      <option value="warning">Warning</option>
+      <option value="updating">Updating</option>
     </select>
   </div>
   <div>
@@ -104,7 +106,7 @@
 {% for row in rows %}
   <article class="fleet-card" id="display-{{ row.id }}"
     data-search="{{ row.name }} {{ row.host }} {{ row.group }} {{ row.version }} {{ row.current_tag }}"
-    data-status="{{ 'online' if row.online else 'offline' }}"
+    data-status="{{ row.health_state }}"
     data-group="{{ row.group|lower }}"
     data-version="{{ 'unknown' if row.current_tag in ['Unknown', 'untagged', ''] else ('outdated' if row.update_available else 'current') }}">
     <div class="fleet-card-select">
@@ -367,7 +369,7 @@
   function updateLiveCard(row) {
     const card = document.getElementById(`display-${CSS.escape(row.id)}`);
     if (!card) return;
-    card.dataset.status = row.online ? "online" : "offline";
+    card.dataset.status = row.health_state;
     const health = card.querySelector('[data-field="health_state"]');
     health.className = `fleet-status is-${row.health_state}`;
     health.textContent = row.health_state.charAt(0).toUpperCase() + row.health_state.slice(1);

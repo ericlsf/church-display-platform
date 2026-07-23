@@ -52,6 +52,8 @@ class FleetOverviewTests(unittest.TestCase):
         self.assertIn("Fleet Overview", body)
         self.assertIn("fleet-card", body)
         self.assertIn("Search displays", body)
+        self.assertIn('<option value="warning">Warning</option>', body)
+        self.assertIn('<option value="updating">Updating</option>', body)
         self.assertIn("Select all visible", body)
         self.assertIn("12", body)
         self.assertIn("Screenshot", body)
