@@ -30,7 +30,9 @@ def command_center_data():
     failed_jobs = [j for j in jobs if str(j.get("status", "")).lower() in FAILED and not j.get("resolved")]
     attention = [r for r in rows if r.get("readiness") in {"offline", "needs_attention", "needs_playlist", "provisioning"}]
     maintenance = [r for r in rows if r.get("readiness") == "maintenance"]
-    outdated = [r for r in rows if latest and r.get("version") and str(r.get("version")) != str(latest)]
+    # Hub release tags and display-player versions are separate products.
+    # Fleet truth resolves whether a compatible display update exists.
+    outdated = [r for r in rows if r.get("update_available")]
     pending = _pending_displays()
     healthy = sum(1 for r in rows if r.get("readiness") == "ready")
     total = len(rows)

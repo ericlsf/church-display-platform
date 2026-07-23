@@ -39,7 +39,7 @@
     </a>
     <a class="command-metric-card metric-attention" href="#action-required"><span class="command-metric-icon">!</span><span class="command-metric-copy"><span>Attention</span><strong data-summary="attention">{{ summary.attention }}</strong><small>{{ summary.offline }} offline</small></span></a>
     <button class="command-metric-card metric-active_jobs" type="button" data-open-jobs><span class="command-metric-icon">↻</span><span class="command-metric-copy"><span>Jobs</span><strong data-summary="active_jobs">{{ summary.active_jobs }}</strong><small>{{ summary.failed_jobs }} unresolved</small></span></button>
-    <a class="command-metric-card metric-outdated" href="/deployments"><span class="command-metric-icon">↑</span><span class="command-metric-copy"><span>Updates</span><strong data-summary="outdated">{{ summary.outdated }}</strong><small>Latest {{ latest_tag or "unknown" }}</small></span></a>
+    <a class="command-metric-card metric-outdated" href="/deployments"><span class="command-metric-icon">↑</span><span class="command-metric-copy"><span>Display Updates</span><strong data-summary="outdated">{{ summary.outdated }}</strong><small>Latest Hub release {{ latest_tag or "unknown" }}</small></span></a>
   </section>
 
   <section class="command-quick-actions" aria-label="Quick actions">
