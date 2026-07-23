@@ -3474,7 +3474,7 @@ body.v8-sidebar-collapsed .v8-main-content{
 .fleet-thumbnail{position:relative;aspect-ratio:16/9;background:#080808;overflow:hidden}.fleet-thumbnail img{width:100%;height:100%;object-fit:cover;display:block}
 .fleet-thumbnail-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#777}.fleet-thumbnail-empty span{font-size:30px}
 .fleet-status{position:absolute;right:12px;bottom:12px;padding:6px 9px;border:1px solid;border-radius:999px;background:rgba(5,5,5,.86);font-size:13px;font-weight:800;backdrop-filter:blur(6px)}
-.fleet-status.is-online{color:#66e18c;border-color:#276c41}.fleet-status.is-offline,.fleet-status.is-warning{color:#ffd666;border-color:#755f25}.fleet-status.is-updating{color:#8cc3ff;border-color:#2d6ba8}
+.fleet-status.is-online{color:#66e18c;border-color:#276c41}.fleet-status.is-offline{color:#ff7b72;border-color:#8d302b}.fleet-status.is-warning{color:#ffd666;border-color:#755f25}.fleet-status.is-updating{color:#8cc3ff;border-color:#2d6ba8}
 .fleet-card-body{padding:16px}.fleet-card-heading{align-items:flex-start}.fleet-card-heading h2{margin:0 0 4px;font-size:20px}.fleet-host{margin:0;word-break:break-all;font-size:13px}
 .fleet-update-badge{color:#ffd666;border-color:#7b652a;background:#241f11}
 .fleet-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0}.fleet-metric{min-width:0;padding:10px 8px;border:1px solid #303030;border-radius:10px;background:#121212}

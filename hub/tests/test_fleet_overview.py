@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from app import create_app
@@ -6,6 +7,11 @@ from services.fleet_state import media_count_for, system_health_for
 
 
 class FleetOverviewTests(unittest.TestCase):
+    def test_offline_and_warning_badges_have_distinct_colors(self):
+        stylesheet = (Path(__file__).parents[1] / "static" / "style.css").read_text()
+        self.assertIn(".fleet-status.is-offline{color:#ff7b72", stylesheet)
+        self.assertIn(".fleet-status.is-warning{color:#ffd666", stylesheet)
+
     def setUp(self):
         self.app = create_app()
         self.app.config["TESTING"] = True
