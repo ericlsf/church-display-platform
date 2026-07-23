@@ -8,6 +8,12 @@ from services.jobs import create_job
 fleet_bp = Blueprint("fleet", __name__, url_prefix="/fleet")
 
 
+def action_redirect():
+    if request.form.get("next") == "/displays":
+        return redirect(url_for("displays.displays"))
+    return redirect(url_for("dashboard.dashboard"))
+
+
 def queue_job(display_id, job_type, payload=None):
     job = create_job(display_id, job_type, payload or {})
     log_event(f"Queued job {job_type} for {display_id}")
@@ -26,25 +32,25 @@ def fleet_set_sync(display_id):
         "run_now": run_now,
     })
 
-    return redirect(url_for("dashboard.dashboard"))
+    return action_redirect()
 
 
 @fleet_bp.route("/<display_id>/sync-now", methods=["POST"])
 def fleet_sync_now(display_id):
     queue_job(display_id, "sync_now")
-    return redirect(url_for("dashboard.dashboard"))
+    return action_redirect()
 
 
 @fleet_bp.route("/<display_id>/restart", methods=["POST"])
 def fleet_restart(display_id):
     queue_job(display_id, "restart_display")
-    return redirect(url_for("dashboard.dashboard"))
+    return action_redirect()
 
 
 @fleet_bp.route("/<display_id>/reboot", methods=["POST"])
 def fleet_reboot(display_id):
     queue_job(display_id, "reboot")
-    return redirect(url_for("dashboard.dashboard"))
+    return action_redirect()
 
 
 @fleet_bp.route("/bulk/set-sync", methods=["POST"])
@@ -61,7 +67,7 @@ def bulk_set_sync():
             "run_now": run_now,
         })
 
-    return redirect(url_for("dashboard.dashboard"))
+    return action_redirect()
 
 
 @fleet_bp.route("/bulk/sync-now", methods=["POST"])
@@ -71,7 +77,7 @@ def bulk_sync_now():
     for display_id in ids:
         queue_job(display_id, "sync_now")
 
-    return redirect(url_for("dashboard.dashboard"))
+    return action_redirect()
 
 
 @fleet_bp.route("/bulk/restart", methods=["POST"])
@@ -81,4 +87,4 @@ def bulk_restart():
     for display_id in ids:
         queue_job(display_id, "restart_display")
 
-    return redirect(url_for("dashboard.dashboard"))
+    return action_redirect()

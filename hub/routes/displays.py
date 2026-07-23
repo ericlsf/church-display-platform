@@ -2,18 +2,34 @@ from flask import Blueprint, redirect, render_template, request, url_for
 from services.config import load_config, save_config, slugify, normalize_host
 from services.display_client import test_display
 from services.events import log_event
+from services.fleet_state import build_fleet_state
 
 displays_bp = Blueprint("displays", __name__, url_prefix="/displays")
 
 
+def render_fleet_overview(test_message=""):
+    cfg = load_config()
+    configured = {display.get("id", ""): display for display in cfg.get("displays", [])}
+    state = build_fleet_state()
+    rows = []
+    for row in state.get("rows", []):
+        display = configured.get(row.get("id", ""), {})
+        rows.append({
+            **row,
+            "username": display.get("username", ""),
+            "password": display.get("password", ""),
+        })
+    return render_template(
+        "displays.html",
+        rows=rows,
+        test_message=test_message,
+        active="displays",
+    )
+
+
 @displays_bp.route("")
 def displays():
-    cfg = load_config()
-    rows = []
-    for display in cfg.get("displays", []):
-        ok, result = test_display(display.get("host", ""), display.get("username", ""), display.get("password", ""))
-        rows.append({"id": display.get("id", ""), "name": display.get("name", ""), "host": display.get("host", ""), "username": display.get("username", ""), "password": display.get("password", ""), "online": ok, "message": "Online" if ok else result})
-    return render_template("displays.html", rows=rows, test_message="", active="displays")
+    return render_fleet_overview()
 
 
 @displays_bp.route("/add", methods=["POST"])
@@ -77,9 +93,4 @@ def test_display_route():
     password = request.form.get("password", "")
     ok, result = test_display(host, username, password)
     message = "Display is online and responding." if ok else f"Display test failed: {result}"
-    cfg = load_config()
-    rows = []
-    for display in cfg.get("displays", []):
-        row_ok, row_result = test_display(display.get("host", ""), display.get("username", ""), display.get("password", ""))
-        rows.append({"id": display.get("id", ""), "name": display.get("name", ""), "host": display.get("host", ""), "username": display.get("username", ""), "password": display.get("password", ""), "online": row_ok, "message": "Online" if row_ok else row_result})
-    return render_template("displays.html", rows=rows, test_message=message, active="displays")
+    return render_fleet_overview(message)

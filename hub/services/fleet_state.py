@@ -72,6 +72,7 @@ def build_fleet_state():
         hb = get_heartbeat_for_display(display, heartbeats)
 
         hb_player = hb.get("player", {})
+        hb_media = hb.get("media", {})
         hb_sync = hb.get("sync", {})
         hb_system = hb.get("system", {})
         hb_git = hb.get("git", {})
@@ -111,6 +112,7 @@ def build_fleet_state():
             "config_version": hb.get("config_version", "Unknown"),
             "current_media": status.get("current_media") or hb_player.get("current_media") or "Unknown",
             "media_type": status.get("media_type") or hb_player.get("media_type") or "Unknown",
+            "media_count": hb_media.get("total", hb_player.get("media_count", 0)),
             "overlay": status.get("overlay") or hb_player.get("overlay") or "",
             "countdown": status.get("countdown") or hb_player.get("countdown") or "",
             "last_update": status.get("last_update") or hb_player.get("last_update") or "Unknown",
