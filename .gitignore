@@ -13,6 +13,8 @@ hub/config/displays.json
 hub/config/pending_displays.json
 hub/config/heartbeats.json
 hub/config/jobs.json
+hub/config/media_index.json
+hub/config/notifications.json
 hub/static/previews/
 
 

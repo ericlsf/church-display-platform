@@ -1,149 +1,401 @@
 {% extends "base.html" %}
-{% block title %}Displays - Church Display Hub{% endblock %}
-{# Legacy asset lineage: display-fleet-v1120.css / display-fleet-v1120.js #}
+{% block title %}Fleet Overview - Church Display Hub{% endblock %}
 {% block head %}
-  {{ super() }}
-  <link rel="stylesheet" href="/static/display-fleet-v1130.css?v=11.3.0">
+<link rel="stylesheet" href="/static/display-fleet-v1120.css?v=11.2.1">
 {% endblock %}
 {% block content %}
-<header class="fleet-page-header">
+<section class="section fleet-hero">
   <div>
-    <p class="eyebrow">Fleet management</p>
-    <div class="fleet-title-row"><h1>Displays</h1><span class="fleet-count">{{ rows|length }}</span><span class="live-refresh-state" data-live-state><span></span> Live</span></div>
-    <p class="muted">Monitor every screen and assign Google Drive content, profiles, and groups from one workspace.</p>
+    <p class="eyebrow">v13.4.0</p>
+    <h2>Fleet Overview</h2>
+    <p class="muted">Monitor every display and take action without leaving the fleet.</p>
   </div>
-  <button class="primary" type="button" data-toggle-add-display>+ Add display</button>
-</header>
-
-{% if test_message %}<div class="fleet-notice"><strong>{{ test_message }}</strong></div>{% endif %}
-
-<section class="fleet-summary" aria-label="Fleet summary">
-  <div><span class="summary-icon online"></span><strong data-online-count>{{ rows|selectattr('online')|list|length }}</strong><span>Online</span></div>
-  <div><span class="summary-icon offline"></span><strong data-offline-count>{{ rows|rejectattr('online')|list|length }}</strong><span>Offline</span></div>
-  <div><span class="summary-icon drive">G</span><strong>{{ media_index.status|replace('_', ' ')|title }}</strong><span>Drive index</span></div>
+  <div class="fleet-hero-actions">
+    <button class="button-link notification-toggle" type="button" data-toggle-notifications>Notifications <span class="notification-count" id="notification-count">{{ notifications|length }}</span></button>
+    <button class="primary" type="button" data-toggle-add>+ Add display</button>
+  </div>
 </section>
 
-<section class="section add-display-panel" data-add-display hidden>
-  <div class="section-heading"><div><h2>Add display</h2><p class="muted">Register an existing display's local administrator endpoint.</p></div><button type="button" data-toggle-add-display aria-label="Close">×</button></div>
-  <form method="POST" action="/displays/add" class="compact-form-grid">
-    <label>Name<input name="name" placeholder="Lobby Display" required></label>
-    <label>Admin URL or IP<input name="host" placeholder="http://192.168.1.101:8080" required></label>
-    <label>Username<input name="username" placeholder="admin"></label>
-    <label>Password<input name="password" type="password"></label>
-    <div><button class="primary" type="submit">Add display</button></div>
+{% if test_message %}<div class="section fleet-notice"><strong>{{ test_message }}</strong></div>{% endif %}
+
+<aside class="section notification-center fleet-notification-panel" id="notification-center" hidden>
+  <div class="fleet-section-heading"><div><h2>Notifications</h2><p class="muted">Current conditions requiring attention.</p></div><button class="button-link" type="button" data-toggle-notifications>Close</button></div>
+  <div id="notification-list">
+    {% for alert in notifications %}<div class="notification-item is-{{ alert.level }}"><span class="notification-dot"></span><span>{{ alert.message }}</span></div>
+    {% else %}<p class="muted">No active alerts.</p>{% endfor %}
+  </div>
+</aside>
+
+<section class="section add-display-panel" id="add-display-panel" hidden>
+  <div class="fleet-section-heading">
+    <div><h2>Add display</h2><p class="muted">Connect a display board to the Hub.</p></div>
+    <button class="button-link" type="button" data-toggle-add>Close</button>
+  </div>
+  <form method="POST" action="/displays/add" class="fleet-form-grid">
+    <div><label>Name</label><input name="name" placeholder="Lobby Display" required></div>
+    <div><label>Admin URL or IP</label><input name="host" placeholder="http://192.168.1.101:8080" required></div>
+    <div><label>Username, optional</label><input name="username" placeholder="admin"></div>
+    <div><label>Password, optional</label><input name="password" type="password"></div>
+    <div><label>Group, optional</label><input name="group" placeholder="Main campus"></div>
+    <div class="fleet-form-submit"><button class="primary" type="submit">Add display</button></div>
   </form>
 </section>
 
-{% if rows %}
-<form class="bulk-assignment-bar" method="POST" action="/displays/bulk-workspace" data-bulk-form hidden>
-  <div class="bulk-selection"><strong><span data-selected-count>0</span> selected</strong><button type="button" data-clear-selection>Clear</button></div>
-  <label>Content<select name="sync_folder"><option value="">Keep current</option>{% for folder in folder_options %}<option value="{{ folder }}">{{ folder }}</option>{% endfor %}</select></label>
-  <label>Profile<select name="profile_id"><option value="">Keep current</option>{% for profile in profiles %}<option value="{{ profile.id }}">{{ profile.name }}</option>{% endfor %}</select></label>
-  <label>Groups<select name="group_action"><option value="keep">Keep groups</option><option value="add">Add selected</option><option value="replace">Replace</option><option value="remove">Remove selected</option></select></label>
-  <div class="bulk-groups">{% for group in groups %}<label class="group-choice"><input type="checkbox" name="group_ids" value="{{ group.id }}"><span>{{ group.name }}</span></label>{% endfor %}</div>
-  <label class="checkbox-row"><input type="checkbox" name="run_now" value="1"> Sync now</label>
-  <button class="primary" type="submit">Apply</button>
-</form>
-{% endif %}
-
-<section class="display-card-grid">
-{% for row in rows %}
-  {% set p = row.presentation %}
-  <article class="display-fleet-card {{ 'is-online' if row.online else 'is-offline' }}" data-display-card data-display-id="{{ row.id }}" data-display-name="{{ row.name }}">
-    <header class="display-card-header">
-      <label class="display-select" title="Select {{ row.name }}"><input type="checkbox" value="{{ row.id }}" data-display-select><span aria-hidden="true"></span></label>
-      <div class="display-heading-copy">
-        <h2>{{ row.name }}</h2>
-        <p>{{ row.host or 'No host configured' }}</p>
-      </div>
-      <span class="status-badge" data-status-badge><span class="status-dot"></span><span data-status-text>{{ 'Online' if row.online else 'Offline' }}</span></span>
-    </header>
-
-    <button class="display-preview" type="button" data-open-inspector="{{ row.id }}" aria-label="Manage {{ row.name }}">
-      {% if row.preview_url %}<img src="{{ row.preview_url }}" alt="Latest screenshot from {{ row.name }}" loading="lazy" data-live-preview>{% else %}<span class="preview-placeholder">Preview unavailable</span>{% endif %}
-      <span class="preview-overlay">Manage display</span>
-    </button>
-
-    <div class="display-card-body">
-      <div class="content-current">
-        <span class="content-label">Now playing</span>
-        <strong title="{{ row.current_media }}" data-current-media>{{ row.current_media or 'Nothing playing' }}</strong>
-      </div>
-      <dl class="display-metrics">
-        <div><dt>Last seen</dt><dd data-heartbeat>{{ row.heartbeat }}</dd></div>
-        <div><dt>Version</dt><dd data-version>{{ row.version }}</dd></div>
-        <div><dt>Sync</dt><dd><span class="sync-pill" data-sync-state>{{ row.sync_state|replace('_', ' ')|title }}</span></dd></div>
-      </dl>
-      <div class="assignment-summary">
-        <div><span>Content</span><strong>{{ row.sync_folder or 'Not assigned' }}</strong></div>
-        <div><span>Profile</span><strong>{% set profile_name = namespace(value='Custom / no profile') %}{% for profile in profiles %}{% if row.profile_id == profile.id %}{% set profile_name.value = profile.name %}{% endif %}{% endfor %}{{ profile_name.value }}</strong></div>
-      </div>
-      <div class="group-chip-row" aria-label="Assigned groups">
-        {% for group in groups %}{% if group.id in row.group_ids %}<span class="group-chip">{{ group.name }}</span>{% endif %}{% else %}<span class="muted">No groups</span>{% endfor %}
-      </div>
-    </div>
-
-    <footer class="display-card-actions">
-      <button class="primary manage-button" type="button" data-open-inspector="{{ row.id }}">Manage</button>
-      <form method="POST" action="/fleet/{{ row.id }}/sync-now"><input type="hidden" name="next" value="/displays"><button type="submit">Sync now</button></form>
-      <details class="action-menu"><summary aria-label="More actions">•••</summary><div>
-        <form method="POST" action="/fleet/{{ row.id }}/restart"><input type="hidden" name="next" value="/displays"><button type="submit">Restart player</button></form>
-        <form method="POST" action="/fleet/{{ row.id }}/reboot"><input type="hidden" name="next" value="/displays"><button class="danger-text" type="submit">Reboot display</button></form>
-        {% if row.host %}<a href="{{ row.host }}" target="_blank" rel="noopener">Open local admin</a>{% endif %}
-      </div></details>
-    </footer>
-  </article>
-
-  <aside class="display-inspector" id="display-inspector-{{ row.id }}" data-inspector aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="inspector-title-{{ row.id }}">
-    <button class="inspector-backdrop" type="button" data-close-inspector aria-label="Close"></button>
-    <div class="inspector-panel">
-      <header class="inspector-header">
-        <div><p class="eyebrow">Display settings</p><h2 id="inspector-title-{{ row.id }}">{{ row.name }}</h2><p>{{ row.host }}</p></div>
-        <button class="inspector-close" type="button" data-close-inspector aria-label="Close">×</button>
-      </header>
-      <div class="inspector-scroll">
-        <section class="inspector-section">
-          <div class="section-title"><h3>Assignment</h3><span class="source-badge">Google Drive</span></div>
-          <form class="display-assignment-form" method="POST" action="/displays/{{ row.id }}/workspace">
-            <input type="hidden" name="profile_submitted" value="1">
-            <label>Folder / playlist<select name="sync_folder" required><option value="" {% if not row.sync_folder %}selected{% endif %} disabled>Select a Google Drive folder</option>{% for folder in row.folder_options %}<option value="{{ folder }}" {% if row.sync_folder == folder %}selected{% endif %}>{{ folder }}</option>{% endfor %}</select></label>
-            <label>Presentation profile<select name="profile_id"><option value="">Custom / no profile</option>{% for profile in profiles %}<option value="{{ profile.id }}" {% if row.profile_id == profile.id %}selected{% endif %}>{{ profile.name }}</option>{% endfor %}</select></label>
-            <div><span class="field-label">Groups</span><div class="group-choice-grid">{% for group in groups %}<label class="group-choice"><input type="checkbox" name="group_ids" value="{{ group.id }}" {% if group.id in row.group_ids %}checked{% endif %}><span>{{ group.name }}</span></label>{% else %}<span class="muted">No groups configured</span>{% endfor %}</div></div>
-            <label class="checkbox-row"><input type="checkbox" name="run_now" value="1"> Sync immediately after saving</label>
-            <button class="primary wide" type="submit">Save assignment</button>
-          </form>
-        </section>
-
-        <details class="inspector-section advanced-section">
-          <summary><span><strong>Presentation options</strong><small>Overlay, clock, countdown, timing</small></span></summary>
-          <form method="POST" action="/displays/presentation">
-            <input type="hidden" name="id" value="{{ row.id }}">
-            <label class="checkbox-row"><input type="checkbox" name="overlay_enabled" {% if p.overlay.enabled %}checked{% endif %}> Show overlay</label>
-            <label>Overlay text<input name="overlay_text" maxlength="160" value="{{ p.overlay.text }}"></label>
-            <label class="checkbox-row"><input type="checkbox" name="clock_enabled" {% if p.clock.enabled %}checked{% endif %}> Show clock</label>
-            <label class="checkbox-row"><input type="checkbox" name="countdown_enabled" {% if p.countdown.enabled %}checked{% endif %}> Enable countdown</label>
-            <div class="two-column-fields"><label>Countdown window<input type="number" min="0" max="180" name="countdown_start_minutes" value="{{ p.countdown.start_minutes }}"></label><label>Image duration<input type="number" min="1" max="300" name="image_duration" value="{{ p.timings.image_duration }}"></label></div>
-            <button type="submit">Save presentation</button>
-          </form>
-        </details>
-
-        <details class="inspector-section advanced-section">
-          <summary><span><strong>Connection settings</strong><small>Name, host, credentials</small></span></summary>
-          <form method="POST" action="/displays/update">
-            <input type="hidden" name="id" value="{{ row.id }}">
-            <label>Name<input name="name" value="{{ row.name }}"></label><label>Host<input name="host" value="{{ row.host }}"></label>
-            <div class="two-column-fields"><label>Username<input name="username" value="{{ row.username }}"></label><label>Password<input name="password" type="password" value="{{ row.password }}"></label></div>
-            <button type="submit">Save connection</button>
-          </form>
-        </details>
-
-        <form class="remove-display-form" method="POST" action="/displays/remove" onsubmit="return confirm('Remove this display?')"><input type="hidden" name="id" value="{{ row.id }}"><button class="danger" type="submit">Remove display</button></form>
-      </div>
-    </div>
-  </aside>
-{% else %}
-  <div class="section empty-fleet"><h2>No displays configured</h2><p class="muted">Add your first display to begin managing the fleet.</p></div>
-{% endfor %}
+<section class="section fleet-toolbar" aria-label="Fleet controls">
+  <div class="fleet-search">
+    <label for="fleet-search">Search displays</label>
+    <input id="fleet-search" type="search" placeholder="Name, host, group, or version">
+  </div>
+  <div>
+    <label for="status-filter">Status</label>
+    <select id="status-filter">
+      <option value="all">All statuses</option>
+      <option value="online">Online</option>
+      <option value="offline">Offline</option>
+      <option value="warning">Warning</option>
+      <option value="updating">Updating</option>
+    </select>
+  </div>
+  <div>
+    <label for="version-filter">Version</label>
+    <select id="version-filter">
+      <option value="all">All versions</option>
+      <option value="current">Up to date</option>
+      <option value="outdated">Update available</option>
+      <option value="unknown">Unknown</option>
+    </select>
+  </div>
+  <div>
+    <label for="group-filter">Group</label>
+    <select id="group-filter">
+      <option value="all">All groups</option>
+      {% for group in groups %}<option value="{{ group|lower }}">{{ group }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="fleet-results" aria-live="polite"><strong id="fleet-visible-count">{{ rows|length }}</strong> of {{ rows|length }} displays</div>
 </section>
-<script src="/static/display-fleet-v1130.js?v=11.3.0" defer></script>
+
+<section class="section fleet-bulk-bar" id="fleet-bulk-bar" hidden>
+  <div><strong><span id="fleet-selected-count">0</span> selected</strong><button class="button-link" type="button" id="clear-selection">Clear</button></div>
+  <div class="fleet-bulk-actions">
+    <form method="POST" action="/fleet/bulk/sync-now" data-bulk-form>
+      <input type="hidden" name="next" value="/displays">
+      <button class="safe" type="submit">Sync now</button>
+    </form>
+    <form method="POST" action="/fleet/bulk/screenshot" data-bulk-form>
+      <input type="hidden" name="next" value="/displays">
+      <button class="button-link" type="submit">Screenshot all</button>
+    </form>
+    <form method="POST" action="/fleet/bulk/deploy" data-bulk-form onsubmit="return confirm('Deploy the latest release to selected displays?');">
+      <input type="hidden" name="next" value="/displays">
+      <input type="hidden" name="target" value="{{ latest_tag }}">
+      <button class="primary" type="submit">Deploy latest</button>
+    </form>
+    <form method="POST" action="/fleet/bulk/update" data-bulk-form>
+      <input type="hidden" name="next" value="/displays">
+      <button class="button-link" type="submit">Check updates</button>
+    </form>
+    <form method="POST" action="/fleet/bulk/restart" data-bulk-form onsubmit="return confirm('Restart the selected display apps?');">
+      <input type="hidden" name="next" value="/displays">
+      <button class="danger" type="submit">Restart apps</button>
+    </form>
+    <form method="POST" action="/fleet/bulk/reboot" data-bulk-form onsubmit="return confirm('Reboot the selected devices?');">
+      <input type="hidden" name="next" value="/displays">
+      <button class="danger" type="submit">Reboot devices</button>
+    </form>
+  </div>
+</section>
+
+<div class="fleet-select-all">
+  <label><input type="checkbox" id="select-visible"> Select all visible</label>
+</div>
+
+<div class="fleet-card-grid" id="fleet-card-grid">
+{% for row in rows %}
+  <article class="fleet-card" id="display-{{ row.id }}"
+    data-search="{{ row.name }} {{ row.host }} {{ row.group }} {{ row.version }} {{ row.current_tag }}"
+    data-status="{{ row.health_state }}"
+    data-group="{{ row.group|lower }}"
+    data-version="{{ 'unknown' if row.current_tag in ['Unknown', 'untagged', ''] else ('outdated' if row.update_available else 'current') }}">
+    <div class="fleet-card-select">
+      <label aria-label="Select {{ row.name }}"><input class="display-selector" type="checkbox" value="{{ row.id }}"></label>
+    </div>
+    <div class="fleet-thumbnail display-preview">
+      {% if row.preview_url %}
+        <img src="{{ row.preview_url }}" alt="Latest screenshot from {{ row.name }}" loading="lazy">
+      {% else %}
+        <div class="fleet-thumbnail-empty"><span>▣</span>No screenshot yet</div>
+      {% endif %}
+      <span class="fleet-status is-{{ row.health_state }}" data-field="health_state">{{ row.health_state|capitalize }}</span>
+    </div>
+
+    <div class="fleet-card-body">
+      <div class="fleet-card-heading">
+        <div><h2>{{ row.name }}</h2><p class="muted fleet-host">{{ row.host }}</p></div>
+        {% if row.update_available %}<span class="badge fleet-update-badge">Update</span>{% endif %}
+      </div>
+
+      <div class="fleet-metrics">
+        <div class="fleet-metric"><span>CPU</span><strong>{{ row.system.cpu_temp if row.system else 'Unknown' }}</strong></div>
+        <div class="fleet-metric"><span>RAM</span><strong>{{ row.system.memory if row.system else 'Unknown' }}</strong></div>
+        <div class="fleet-metric"><span>Disk</span><strong>{{ row.system.disk if row.system else 'Unknown' }}</strong></div>
+        <div class="fleet-metric"><span>Media</span><strong>{{ row.media_count }}</strong></div>
+      </div>
+
+      <dl class="fleet-details">
+        <div><dt>Version</dt><dd>{{ row.current_tag if row.current_tag not in ['Unknown', 'untagged', ''] else row.version }}</dd></div>
+        <div><dt>Heartbeat</dt><dd>{{ row.heartbeat }}</dd></div>
+      </dl>
+
+      <div class="fleet-quick-actions">
+        <form method="POST" action="/fleet/{{ row.id }}/screenshot">
+          <input type="hidden" name="next" value="/displays">
+          <button class="button-link" type="submit">Screenshot</button>
+        </form>
+        <form method="POST" action="/fleet/{{ row.id }}/sync-now">
+          <input type="hidden" name="next" value="/displays">
+          <button class="safe" type="submit">Sync</button>
+        </form>
+        <form method="POST" action="/fleet/{{ row.id }}/restart" onsubmit="return confirm('Restart {{ row.name }}?');">
+          <input type="hidden" name="next" value="/displays">
+          <button class="danger" type="submit">Restart</button>
+        </form>
+        <form method="POST" action="/fleet/{{ row.id }}/reboot" onsubmit="return confirm('Reboot {{ row.name }}?');">
+          <input type="hidden" name="next" value="/displays">
+          <button class="danger" type="submit">Reboot</button>
+        </form>
+        <button class="button-link" type="button" data-show-logs="{{ row.id }}" data-display-name="{{ row.name }}">View logs</button>
+        <button class="button-link" type="button" data-show-diagnostics="{{ row.host }}" data-display-name="{{ row.name }}">Diagnostics</button>
+      </div>
+
+      <details class="fleet-manage">
+        <summary>Manage display</summary>
+        <div class="advanced-menu">
+        <form method="POST" action="/displays/update" class="fleet-form-grid">
+          <input type="hidden" name="id" value="{{ row.id }}">
+          <div><label>Name</label><input name="name" value="{{ row.name }}"></div>
+          <div><label>Host</label><input name="host" value="{{ row.host }}"></div>
+          <div><label>Username</label><input name="username" value="{{ row.username }}"></div>
+          <div><label>Password</label><input name="password" type="password" value="{{ row.password }}"></div>
+          <div><label>Group</label><input name="group" value="{{ row.group }}"></div>
+          <div>
+            <label>Google Drive folder <span class="source-badge">Google Drive</span></label>
+            <select name="sync_folder" required>
+              {% for folder in row.folder_options %}<option value="{{ folder }}" {{ 'selected' if folder == row.sync_folder else '' }}>{{ folder }}</option>{% endfor %}
+            </select>
+          </div>
+          <div>
+            <label>Profile</label>
+            <select name="profile_id">
+              <option value="">No profile</option>
+              {% for profile in profiles %}<option value="{{ profile.id }}" {{ 'selected' if profile.id == row.profile_id else '' }}>{{ profile.name }}</option>{% endfor %}
+            </select>
+          </div>
+          <fieldset>
+            <legend>Groups</legend>
+            {% for group in group_records %}
+              <label><input type="checkbox" name="group_ids" value="{{ group.id }}" {{ 'checked' if group.id in row.group_ids else '' }}> {{ group.name }}</label>
+            {% else %}<span class="muted">No groups configured.</span>{% endfor %}
+          </fieldset>
+          <div class="fleet-form-submit"><button class="primary" type="submit">Save changes</button></div>
+        </form>
+        </div>
+        <div class="fleet-manage-actions">
+          <form method="POST" action="/displays/test">
+            <input type="hidden" name="host" value="{{ row.host }}">
+            <input type="hidden" name="username" value="{{ row.username }}">
+            <input type="hidden" name="password" value="{{ row.password }}">
+            <button class="safe" type="submit">Test connection</button>
+          </form>
+          <form method="POST" action="/displays/remove" onsubmit="return confirm('Remove {{ row.name }} from the fleet?');">
+            <input type="hidden" name="id" value="{{ row.id }}">
+            <button class="danger" type="submit">Remove</button>
+          </form>
+        </div>
+        <button class="button-link" type="button" data-open-inspector="{{ row.id }}">Open inspector</button>
+      </details>
+    </div>
+  </article>
+{% endfor %}
+</div>
+
+<dialog class="fleet-dialog" id="fleet-dialog">
+  <div class="fleet-dialog-heading"><h2 id="fleet-dialog-title">Display details</h2><button class="button-link" type="button" data-close-dialog>Close</button></div>
+  <div id="fleet-dialog-content"></div>
+</dialog>
+
+<aside class="display-inspector" data-display-inspector hidden aria-label="Display inspector">
+  <button type="button" data-close-inspector>Close inspector</button>
+  <div data-inspector-content></div>
+</aside>
+
+<form method="POST" action="/displays/bulk-workspace" id="fleet-workspace-form" hidden>
+  <input type="checkbox" name="display_ids" data-display-select>
+</form>
+
+<div class="section fleet-empty" id="fleet-empty" {% if rows %}hidden{% endif %}>
+  <h2>No displays found</h2>
+  <p class="muted">{% if rows %}Try adjusting your search or filters.{% else %}Add your first display to start monitoring the fleet.{% endif %}</p>
+</div>
+
+<section class="fleet-operations-layout fleet-secondary-panels">
+  <aside class="section activity-feed">
+    <div class="fleet-section-heading"><div><h2>Live activity</h2><p class="muted"><span class="live-dot"></span> Connected</p></div></div>
+    <ol id="activity-list" class="activity-list">
+      {% for event in event_records[:8] %}<li><time>{{ event.created_at }}</time><span>{{ event.message }}</span></li>
+      {% else %}<li class="muted">Waiting for fleet activity…</li>{% endfor %}
+    </ol>
+  </aside>
+</section>
+
+<script>
+(() => {
+  const cards = [...document.querySelectorAll(".fleet-card")];
+  const search = document.getElementById("fleet-search");
+  const statusFilter = document.getElementById("status-filter");
+  const versionFilter = document.getElementById("version-filter");
+  const groupFilter = document.getElementById("group-filter");
+  const selectedCount = document.getElementById("fleet-selected-count");
+  const visibleCount = document.getElementById("fleet-visible-count");
+  const bulkBar = document.getElementById("fleet-bulk-bar");
+  const selectVisible = document.getElementById("select-visible");
+  const empty = document.getElementById("fleet-empty");
+
+  function visibleCards() { return cards.filter(card => !card.hidden); }
+  function selectors() { return cards.map(card => card.querySelector(".display-selector")); }
+
+  function updateSelection() {
+    const selected = selectors().filter(box => box.checked);
+    selectedCount.textContent = selected.length;
+    bulkBar.hidden = selected.length === 0;
+    const visible = visibleCards().map(card => card.querySelector(".display-selector"));
+    selectVisible.checked = visible.length > 0 && visible.every(box => box.checked);
+    selectVisible.indeterminate = visible.some(box => box.checked) && !selectVisible.checked;
+  }
+
+  function applyFilters() {
+    const query = search.value.trim().toLowerCase();
+    cards.forEach(card => {
+      const matchesSearch = !query || card.dataset.search.toLowerCase().includes(query);
+      const matchesStatus = statusFilter.value === "all" || card.dataset.status === statusFilter.value;
+      const matchesVersion = versionFilter.value === "all" || card.dataset.version === versionFilter.value;
+      const matchesGroup = groupFilter.value === "all" || card.dataset.group === groupFilter.value;
+      card.hidden = !(matchesSearch && matchesStatus && matchesVersion && matchesGroup);
+    });
+    const count = visibleCards().length;
+    visibleCount.textContent = count;
+    empty.hidden = count !== 0;
+    updateSelection();
+  }
+
+  [search, statusFilter, versionFilter, groupFilter].forEach(control => control.addEventListener("input", applyFilters));
+  selectors().forEach(box => box.addEventListener("change", updateSelection));
+  selectVisible.addEventListener("change", () => {
+    visibleCards().forEach(card => card.querySelector(".display-selector").checked = selectVisible.checked);
+    updateSelection();
+  });
+  document.getElementById("clear-selection").addEventListener("click", () => {
+    selectors().forEach(box => box.checked = false);
+    updateSelection();
+  });
+  document.querySelectorAll("[data-bulk-form]").forEach(form => form.addEventListener("submit", event => {
+    form.querySelectorAll('input[name="display_ids"]').forEach(input => input.remove());
+    const selected = selectors().filter(box => box.checked);
+    if (!selected.length) { event.preventDefault(); return; }
+    selected.forEach(box => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "display_ids";
+      input.value = box.value;
+      form.appendChild(input);
+    });
+  }));
+  document.querySelectorAll("[data-toggle-add]").forEach(button => button.addEventListener("click", () => {
+    const panel = document.getElementById("add-display-panel");
+    panel.hidden = !panel.hidden;
+    if (!panel.hidden) panel.querySelector("input").focus();
+  }));
+
+  document.querySelectorAll("[data-toggle-notifications]").forEach(button => button.addEventListener("click", () => {
+    const panel = document.getElementById("notification-center");
+    panel.hidden = !panel.hidden;
+  }));
+
+  const dialog = document.getElementById("fleet-dialog");
+  const dialogTitle = document.getElementById("fleet-dialog-title");
+  const dialogContent = document.getElementById("fleet-dialog-content");
+  document.querySelector("[data-close-dialog]").addEventListener("click", () => dialog.close());
+
+  function escapeHtml(value) {
+    const element = document.createElement("div");
+    element.textContent = value == null ? "" : String(value);
+    return element.innerHTML;
+  }
+
+  document.querySelectorAll("[data-show-logs]").forEach(button => button.addEventListener("click", async () => {
+    dialogTitle.textContent = `${button.dataset.displayName} logs`;
+    dialogContent.innerHTML = '<p class="muted">Loading recent logs…</p>';
+    dialog.showModal();
+    try {
+      const response = await fetch(`/fleet/${encodeURIComponent(button.dataset.showLogs)}/logs`, {cache: "no-store"});
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Logs are unavailable");
+      dialogContent.innerHTML = (data.logs || []).map(log =>
+        `<section class="log-panel"><h3>${escapeHtml(log.name)}</h3><pre>${escapeHtml(log.content)}</pre></section>`
+      ).join("") || '<p class="muted">No log files were found.</p>';
+    } catch (error) {
+      dialogContent.innerHTML = `<p class="status-warn">${escapeHtml(error.message)}. The display may need the latest agent update.</p>`;
+    }
+  }));
+
+  document.querySelectorAll("[data-show-diagnostics]").forEach(button => button.addEventListener("click", () => {
+    dialogTitle.textContent = `${button.dataset.displayName} diagnostics`;
+    dialogContent.innerHTML = `<iframe class="diagnostics-frame" src="${encodeURI(button.dataset.showDiagnostics + '/diagnostics')}" title="${escapeHtml(button.dataset.displayName)} diagnostics"></iframe>`;
+    dialog.showModal();
+  }));
+
+  function renderNotifications(notifications) {
+    document.getElementById("notification-count").textContent = notifications.length;
+    document.getElementById("notification-list").innerHTML = notifications.length
+      ? notifications.map(item => `<div class="notification-item is-${escapeHtml(item.level)}"><span class="notification-dot"></span><span>${escapeHtml(item.message)}</span></div>`).join("")
+      : '<p class="muted">No active alerts.</p>';
+  }
+
+  function renderActivity(events) {
+    document.getElementById("activity-list").innerHTML = events.length
+      ? events.slice(0, 8).map(item => `<li><time>${escapeHtml(item.created_at)}</time><span>${escapeHtml(item.message)}</span></li>`).join("")
+      : '<li class="muted">Waiting for fleet activity…</li>';
+  }
+
+  function updateLiveCard(row) {
+    const card = document.getElementById(`display-${CSS.escape(row.id)}`);
+    if (!card) return;
+    card.dataset.status = row.health_state;
+    const health = card.querySelector('[data-field="health_state"]');
+    health.className = `fleet-status is-${row.health_state}`;
+    health.textContent = row.health_state.charAt(0).toUpperCase() + row.health_state.slice(1);
+    const metrics = card.querySelectorAll(".fleet-metric strong");
+    [row.system.cpu_temp, row.system.memory, row.system.disk, row.media_count].forEach((value, index) => {
+      if (metrics[index]) metrics[index].textContent = value == null ? "Unknown" : value;
+    });
+  }
+
+  const eventSource = new EventSource("/api/v1/events/fleet");
+  eventSource.addEventListener("fleet", event => {
+    const state = JSON.parse(event.data);
+    (state.rows || []).forEach(updateLiveCard);
+    renderNotifications(state.notifications || []);
+    renderActivity(state.event_records || []);
+    applyFilters();
+  });
+  eventSource.onerror = () => {
+    const dot = document.querySelector(".live-dot");
+    if (dot) dot.classList.add("is-disconnected");
+  };
+  applyFilters();
+})();
+</script>
+{% endblock %}
+{% block scripts %}
+<script src="/static/display-fleet-v1120.js?v=11.2.1"></script>
 {% endblock %}

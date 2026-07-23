@@ -139,7 +139,15 @@ def api_update_job(job_id):
 
     if job.get("status") in ["success", "failed", "cancelled"]:
         log_event(
-            f"Job {job.get('type')} for {job.get('display_id')} finished: {job.get('status')}"
+            f"{job.get('display_id')} {job.get('type', 'job').replace('_', ' ')} {job.get('status')}",
+            category="fleet",
+            level="danger" if job.get("status") == "failed" else "success",
+            metadata={
+                "display_id": job.get("display_id"),
+                "job_type": job.get("type"),
+                "job_id": job.get("id"),
+                "status": job.get("status"),
+            },
         )
 
     return jsonify({"ok": True, "job": job})

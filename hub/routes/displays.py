@@ -56,7 +56,11 @@ def display_rows(test_message=""):
             "host": display.get("host", ""),
             "username": display.get("username", ""),
             "password": display.get("password", ""),
+            "group": display.get("group", ""),
             "online": fleet.get("online", False),
+            "health_state": fleet.get("health_state", "online" if fleet.get("online") else "offline"),
+            "system": fleet.get("system", {}),
+            "active_job": fleet.get("active_job", {}),
             "message": fleet.get("error", "") or (
                 "Online" if fleet.get("online") else "No recent heartbeat"
             ),
@@ -73,6 +77,8 @@ def display_rows(test_message=""):
             ),
             "profile_id": display.get("profile_id", ""),
             "version": fleet.get("current_tag") or fleet.get("version", "Unknown"),
+            "current_tag": fleet.get("current_tag", "Unknown"),
+            "update_available": fleet.get("update_available", False),
             "heartbeat": fleet.get("heartbeat_age") or fleet.get("heartbeat", "Unknown"),
             "current_media": fleet.get("current_media", "Unknown"),
             "media_count": fleet.get("media_count", 0),
@@ -87,6 +93,7 @@ def display_rows(test_message=""):
 @displays_bp.route("")
 def displays():
     rows, message = display_rows()
+    state = build_fleet_state()
     settings = load_hub_settings()
     remote = settings.get("drive_remote", "gdrive")
     folders, media_index = cached_drive_folders(remote)
@@ -94,12 +101,18 @@ def displays():
     profiles_data = load_profiles()
 
     memberships = {}
+    group_names = {}
     for group in groups:
+        group_names[group.get("id")] = group.get("name") or group.get("id")
         for display_id in group.get("display_ids", []):
             memberships.setdefault(display_id, []).append(group.get("id"))
 
     for row in rows:
         row["group_ids"] = memberships.get(row.get("id"), [])
+        assigned_names = [group_names.get(group_id, group_id) for group_id in row["group_ids"]]
+        if row.get("group") and row["group"] not in assigned_names:
+            assigned_names.insert(0, row["group"])
+        row["group"] = ", ".join(assigned_names)
         current = row.get("sync_folder", "")
         row["folder_options"] = list(folders)
         if current and current not in row["folder_options"]:
@@ -110,11 +123,19 @@ def displays():
         rows=rows,
         test_message=message,
         active="displays",
-        groups=groups,
+        groups=sorted(
+            {name for name in group_names.values() if name}
+            | {row.get("group") for row in rows if row.get("group")}
+        ),
+        group_records=groups,
         profiles=profiles_data.get("profiles", []),
         drive_remote="gdrive",
         folder_options=folders,
         media_index=media_index,
+        alerts=state.get("alerts", []),
+        notifications=state.get("notifications", []),
+        event_records=state.get("event_records", []),
+        latest_tag=state.get("latest_tag", ""),
     )
 
 
@@ -148,6 +169,7 @@ def add_display():
     host = normalize_host(request.form.get("host", ""))
     username = request.form.get("username", "").strip()
     password = request.form.get("password", "").strip()
+    group = request.form.get("group", "").strip()
 
     if not name or not host:
         return redirect(url_for("displays.displays"))
@@ -167,6 +189,7 @@ def add_display():
         "host": host,
         "username": username,
         "password": password,
+        "group": group,
         "presentation": {
             "overlay": {"enabled": True, "text": "Welcome"},
             "clock": {"enabled": True},
@@ -187,6 +210,7 @@ def update_display():
     host = normalize_host(request.form.get("host", ""))
     username = request.form.get("username", "").strip()
     password = request.form.get("password", "").strip()
+    group = request.form.get("group", "").strip()
 
     for display in cfg.get("displays", []):
         if display.get("id") == display_id:
@@ -196,6 +220,7 @@ def update_display():
                 display["host"] = host
             display["username"] = username
             display["password"] = password
+            display["group"] = group
             log_event(f"Updated display {display.get('name', display_id)}")
             break
 
