@@ -8,7 +8,7 @@ from services.groups import list_groups, update_group
 from services.display_profiles import apply_profile, load_profiles
 from services.media_index import cached_drive_folders
 from services.config import load_hub_settings
-from services.jobs import create_job
+from services.jobs import create_job, list_jobs
 
 
 displays_bp = Blueprint("displays", __name__, url_prefix="/displays")
@@ -37,6 +37,36 @@ def _presentation_defaults(display):
     return settings
 
 
+def _display_job_summary(display_id, jobs):
+    active = [
+        job for job in jobs
+        if job.get("display_id") in {display_id, "all"}
+        and job.get("status") in {"queued", "running"}
+    ]
+    failed = [
+        job for job in jobs
+        if job.get("display_id") in {display_id, "all"}
+        and job.get("status") in {"failed", "timed_out"}
+        and not job.get("acknowledged")
+    ]
+    current = active[0] if active else None
+    return {
+        "active_count": len(active),
+        "failed_count": len(failed),
+        "status": current.get("status", "idle") if current else "idle",
+        "type": current.get("type", "") if current else "",
+        "progress": current.get("progress", 0) if current else 0,
+        "message": current.get("message", "") if current else "",
+    }
+
+
+def _system_value(system, *keys, default="Unknown"):
+    for key in keys:
+        value = system.get(key)
+        if value not in (None, ""):
+            return value
+    return default
+
 def display_rows(test_message=""):
     cfg = load_config()
     fleet_rows = {
@@ -44,11 +74,21 @@ def display_rows(test_message=""):
         for row in build_fleet_state().get("rows", [])
     }
     rows = []
+    jobs = list_jobs(limit=500)
 
     for display in cfg.get("displays", []):
         display_id = display.get("id", "")
         fleet = fleet_rows.get(display_id, {})
         presentation = _presentation_defaults(display)
+        system = fleet.get("system", {}) or {}
+        job_summary = _display_job_summary(display_id, jobs)
+        attention = (
+            not fleet.get("online", False)
+            or not fleet.get("display_app_running", False)
+            or str(fleet.get("sync_state", "")).lower() == "error"
+            or bool(fleet.get("update_available"))
+            or job_summary["failed_count"] > 0
+        )
 
         rows.append({
             "id": display_id,
@@ -78,12 +118,23 @@ def display_rows(test_message=""):
             "profile_id": display.get("profile_id", ""),
             "version": fleet.get("current_tag") or fleet.get("version", "Unknown"),
             "current_tag": fleet.get("current_tag", "Unknown"),
-            "update_available": fleet.get("update_available", False),
             "heartbeat": fleet.get("heartbeat_age") or fleet.get("heartbeat", "Unknown"),
             "current_media": fleet.get("current_media", "Unknown"),
             "media_count": fleet.get("media_count", 0),
             "sync_state": fleet.get("sync_state", "unknown"),
             "preview_url": fleet.get("preview_url", ""),
+            "update_available": bool(fleet.get("update_available")),
+            "latest_tag": fleet.get("latest_tag", "Unknown"),
+            "cpu_temp": _system_value(system, "cpu_temp", "temperature"),
+            "disk_usage": _system_value(system, "disk_usage", "disk_percent", "storage_usage", "disk"),
+            "memory_usage": _system_value(system, "memory_usage", "memory_percent", "ram_usage", "memory"),
+            "ip_address": _system_value(system, "ip_address", "ip", "address", default=display.get("host", "")),
+            "uptime": _system_value(system, "uptime", "system_uptime"),
+            "hostname": _system_value(system, "hostname", default=display.get("name") or display_id),
+            "readiness": fleet.get("readiness") or ("ready" if fleet.get("online") else "offline"),
+            "player_state": fleet.get("display_app_state", "unknown"),
+            "job": job_summary,
+            "attention": attention,
         })
 
     save_config(cfg)
@@ -151,13 +202,30 @@ def display_status_api():
             "heartbeat": row.get("heartbeat", "Unknown"),
             "version": row.get("version", "Unknown"),
             "current_media": row.get("current_media", "Unknown"),
+            "media_count": row.get("media_count", 0),
             "sync_state": row.get("sync_state", "unknown"),
+            "display_app_running": bool(row.get("display_app_running")),
+            "display_app_state": row.get("display_app_state", "unknown"),
+            "update_available": bool(row.get("update_available")),
+            "latest_tag": row.get("latest_tag", "Unknown"),
+            "cpu_temp": row.get("cpu_temp", "Unknown"),
+            "disk_usage": row.get("disk_usage", "Unknown"),
+            "memory_usage": row.get("memory_usage", "Unknown"),
+            "ip_address": row.get("ip_address", ""),
+            "uptime": row.get("uptime", "Unknown"),
+            "hostname": row.get("hostname", ""),
+            "readiness": row.get("readiness", "unknown"),
+            "player_state": row.get("player_state", "unknown"),
+            "job": row.get("job", {}),
+            "attention": bool(row.get("attention")),
             "preview_url": row.get("preview_url", ""),
         })
     return jsonify({
         "ok": True,
         "online": sum(1 for row in payload if row["online"]),
         "offline": sum(1 for row in payload if not row["online"]),
+        "attention": sum(1 for row in payload if row["attention"]),
+        "active_jobs": sum(row.get("job", {}).get("active_count", 0) for row in payload),
         "rows": payload,
     })
 

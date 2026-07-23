@@ -45,8 +45,9 @@ def _collection_count(value):
 
 def normalize_media_count(health):
     numeric = _first(health, [
-        ("media_count",), ("local_media_count",), ("playlist_count",),
-        ("media_files",), ("media","total"), ("media","count"),
+        ("media_count",), ("total_media",), ("player_media_count",),
+        ("local_media_count",), ("playlist_count",),
+        ("media_files",), ("media","total"), ("media","total_media"), ("media","count"),
         ("media","local_count"), ("player","media_count"),
         ("playback","media_count"), ("playlist","count"),
         ("storage","media_count"), ("manifest","count"),

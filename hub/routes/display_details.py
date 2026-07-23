@@ -67,6 +67,7 @@ def action(display_id):
         "reboot": "reboot",
         "update_check": "update_check",
         "collect_logs": "collect_logs",
+        "screenshot": "upload_preview",
     }
 
     try:

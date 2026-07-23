@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from pathlib import Path
 
 from services.config import load_config, load_hub_settings, load_pending
@@ -8,6 +9,7 @@ from services.heartbeat_store import load_heartbeats, get_heartbeat_for_display
 from services.jobs import list_jobs
 from services.releases import latest_git_tag
 from services.timeutil import human_age, is_fresh, seconds_old
+from services.telemetry_normalization import normalize_media_count
 
 
 PREVIEW_DIR = Path(__file__).resolve().parent.parent / "static" / "previews"
@@ -91,11 +93,31 @@ def health_state_for(online, system, active_job=None, update_available=False):
     return "online"
 
 
-def preview_url_for(display_id):
+def preview_metadata_for(display_id):
     path = PREVIEW_DIR / f"{display_id}.jpg"
-    if path.exists():
-        return f"/static/previews/{display_id}.jpg?ts={int(path.stat().st_mtime)}"
-    return ""
+    if not path.exists():
+        return {
+            "preview_url": "",
+            "preview_updated_at": "",
+            "preview_age_seconds": None,
+            "preview_size_bytes": 0,
+            "preview_available": False,
+        }
+
+    stat = path.stat()
+    modified = datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
+    age = max(0, int((datetime.now(timezone.utc) - modified).total_seconds()))
+    return {
+        "preview_url": f"/static/previews/{display_id}.jpg?ts={int(stat.st_mtime)}",
+        "preview_updated_at": modified.isoformat(timespec="seconds"),
+        "preview_age_seconds": age,
+        "preview_size_bytes": stat.st_size,
+        "preview_available": True,
+    }
+
+
+def preview_url_for(display_id):
+    return preview_metadata_for(display_id)["preview_url"]
 
 
 def build_alerts(rows, drive_error=""):
@@ -164,6 +186,8 @@ def build_fleet_state():
 
         hb_player = hb.get("player", {})
         hb_sync = hb.get("sync", {})
+        hb_media = hb.get("media", {})
+        hb_system = hb.get("system", {})
         hb_git = hb.get("git", {})
         hb_display_app = hb.get("display_app", {})
 
@@ -183,6 +207,8 @@ def build_fleet_state():
         system = system_health_for(status, hb)
         online = bool(status_online or heartbeat_fresh)
         active_job = active_jobs.get(display_id)
+
+        preview = preview_metadata_for(display_id)
 
         rows.append({
             "id": display_id,
@@ -206,6 +232,12 @@ def build_fleet_state():
             "update_available": update_available,
             "config_version": hb.get("config_version", "Unknown"),
             "current_media": status.get("current_media") or hb_player.get("current_media") or "Unknown",
+            "media_count": normalize_media_count({
+                **hb,
+                **status,
+                "media": hb_media,
+                "player": hb_player,
+            }),
             "media_type": status.get("media_type") or hb_player.get("media_type") or "Unknown",
             "media_count": media_count_for(status, hb),
             "overlay": status.get("overlay") or hb_player.get("overlay") or "",
@@ -220,7 +252,7 @@ def build_fleet_state():
             "display_app": hb_display_app,
             "display_app_running": bool(hb_display_app.get("running")),
             "display_app_state": hb_display_app.get("active_state", "unknown"),
-            "preview_url": preview_url_for(display_id),
+            **preview,
         })
 
     outdated_rows = [row for row in rows if row.get("update_available")]
