@@ -58,6 +58,7 @@ class FleetOverviewTests(unittest.TestCase):
         self.assertIn("View logs", body)
         self.assertIn("Live activity", body)
         self.assertIn("Notifications", body)
+        self.assertLess(body.index("fleet-card-grid"), body.index("Live activity"))
 
     @patch("routes.fleet.load_config")
     @patch("routes.fleet.create_job")

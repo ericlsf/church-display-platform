@@ -18,23 +18,6 @@
 
 {% if test_message %}<div class="section fleet-notice"><strong>{{ test_message }}</strong></div>{% endif %}
 
-<section class="fleet-operations-layout">
-  <aside class="section notification-center" id="notification-center" hidden>
-    <div class="fleet-section-heading"><div><h2>Notifications</h2><p class="muted">Current conditions requiring attention.</p></div><button class="button-link" type="button" data-toggle-notifications>Close</button></div>
-    <div id="notification-list">
-      {% for alert in notifications %}<div class="notification-item is-{{ alert.level }}"><span class="notification-dot"></span><span>{{ alert.message }}</span></div>
-      {% else %}<p class="muted">No active alerts.</p>{% endfor %}
-    </div>
-  </aside>
-  <aside class="section activity-feed">
-    <div class="fleet-section-heading"><div><h2>Live activity</h2><p class="muted"><span class="live-dot"></span> Connected</p></div></div>
-    <ol id="activity-list" class="activity-list">
-      {% for event in event_records[:8] %}<li><time>{{ event.created_at }}</time><span>{{ event.message }}</span></li>
-      {% else %}<li class="muted">Waiting for fleet activity…</li>{% endfor %}
-    </ol>
-  </aside>
-</section>
-
 <section class="section add-display-panel" id="add-display-panel" hidden>
   <div class="fleet-section-heading">
     <div><h2>Add display</h2><p class="muted">Connect a display board to the Hub.</p></div>
@@ -244,6 +227,23 @@
   <h2>No displays found</h2>
   <p class="muted">{% if rows %}Try adjusting your search or filters.{% else %}Add your first display to start monitoring the fleet.{% endif %}</p>
 </div>
+
+<section class="fleet-operations-layout fleet-secondary-panels">
+  <aside class="section notification-center" id="notification-center" hidden>
+    <div class="fleet-section-heading"><div><h2>Notifications</h2><p class="muted">Current conditions requiring attention.</p></div><button class="button-link" type="button" data-toggle-notifications>Close</button></div>
+    <div id="notification-list">
+      {% for alert in notifications %}<div class="notification-item is-{{ alert.level }}"><span class="notification-dot"></span><span>{{ alert.message }}</span></div>
+      {% else %}<p class="muted">No active alerts.</p>{% endfor %}
+    </div>
+  </aside>
+  <aside class="section activity-feed">
+    <div class="fleet-section-heading"><div><h2>Live activity</h2><p class="muted"><span class="live-dot"></span> Connected</p></div></div>
+    <ol id="activity-list" class="activity-list">
+      {% for event in event_records[:8] %}<li><time>{{ event.created_at }}</time><span>{{ event.message }}</span></li>
+      {% else %}<li class="muted">Waiting for fleet activity…</li>{% endfor %}
+    </ol>
+  </aside>
+</section>
 
 <script>
 (() => {
