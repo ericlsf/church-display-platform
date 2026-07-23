@@ -7,8 +7,8 @@ def test_live_fleet_assets_and_api_are_wired():
     route = (ROOT / 'hub/routes/displays.py').read_text()
     script = (ROOT / 'hub/static/display-fleet-v1130.js').read_text()
     style = (ROOT / 'hub/static/display-fleet-v1130.css').read_text()
-    assert 'display-fleet-v1130.css?v=11.3.0' in template
-    assert 'display-fleet-v1130.js?v=11.3.0' in template
+    assert 'display-fleet-v1300.css?v=13.0.0' in template
+    assert 'display-fleet-v1300.js?v=13.0.0' in template
     assert 'data-display-id="{{ row.id }}"' in template
     assert 'data-live-state' in template
     assert '@displays_bp.route("/api/status")' in route

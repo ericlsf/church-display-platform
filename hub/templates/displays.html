@@ -2,6 +2,7 @@
 {% block title %}Fleet Overview - Church Display Hub{% endblock %}
 {% block head %}
 <link rel="stylesheet" href="/static/display-fleet-v1120.css?v=11.2.1">
+<link rel="stylesheet" href="/static/display-fleet-v1300.css?v=13.0.0">
 {% endblock %}
 {% block content %}
 <section class="section fleet-hero">
@@ -17,6 +18,13 @@
 </section>
 
 {% if test_message %}<div class="section fleet-notice"><strong>{{ test_message }}</strong></div>{% endif %}
+
+<section class="fleet-summary" aria-label="Fleet summary">
+  <div><span class="summary-icon online"></span><strong data-online-count>{{ rows|selectattr('online')|list|length }}</strong><span>Online</span></div>
+  <div><span class="summary-icon offline"></span><strong data-offline-count>{{ rows|rejectattr('online')|list|length }}</strong><span>Offline</span></div>
+  <div><span class="summary-icon attention">!</span><strong data-attention-count>{{ rows|selectattr('attention')|list|length }}</strong><span>Need attention</span></div>
+  <div><span class="summary-icon jobs">↻</span><strong data-active-jobs>{{ rows|sum(attribute='job.active_count') }}</strong><span>Active jobs</span></div>
+</section>
 
 <aside class="section notification-center fleet-notification-panel" id="notification-center" hidden>
   <div class="fleet-section-heading"><div><h2>Notifications</h2><p class="muted">Current conditions requiring attention.</p></div><button class="button-link" type="button" data-toggle-notifications>Close</button></div>
@@ -112,13 +120,13 @@
 
 <div class="fleet-card-grid" id="fleet-card-grid">
 {% for row in rows %}
-  <article class="fleet-card" id="display-{{ row.id }}"
+  <article class="fleet-card" id="display-{{ row.id }}" data-display-card data-display-id="{{ row.id }}" data-display-name="{{ row.name }}"
     data-search="{{ row.name }} {{ row.host }} {{ row.group }} {{ row.version }} {{ row.current_tag }}"
     data-status="{{ row.health_state }}"
     data-group="{{ row.group|lower }}"
     data-version="{{ 'unknown' if row.current_tag in ['Unknown', 'untagged', ''] else ('outdated' if row.update_available else 'current') }}">
     <div class="fleet-card-select">
-      <label aria-label="Select {{ row.name }}"><input class="display-selector" type="checkbox" value="{{ row.id }}"></label>
+      <label aria-label="Select {{ row.name }}"><input class="display-selector" data-display-select type="checkbox" value="{{ row.id }}"></label>
     </div>
     <div class="fleet-thumbnail display-preview">
       {% if row.preview_url %}
@@ -130,16 +138,23 @@
     </div>
 
     <div class="fleet-card-body">
+      <div class="fleet-health-strip">
+        <span data-app-health class="health-chip {{ 'healthy' if row.display_app_running else 'critical' }}">Player {{ 'running' if row.display_app_running else 'stopped' }}</span>
+        {% if row.update_available %}<span class="health-chip warning" data-update-health>Update {{ row.latest_tag }}</span>{% endif %}
+        {% if row.job.active_count %}<span class="health-chip working" data-job-health>{{ row.job.type|replace('_', ' ')|title }} · {{ row.job.progress }}%</span>
+        {% elif row.job.failed_count %}<span class="health-chip critical" data-job-health>{{ row.job.failed_count }} failed job{{ '' if row.job.failed_count == 1 else 's' }}</span>
+        {% else %}<span class="health-chip muted-chip" data-job-health>No active jobs</span>{% endif %}
+      </div>
       <div class="fleet-card-heading">
         <div><h2>{{ row.name }}</h2><p class="muted fleet-host">{{ row.host }}</p></div>
         {% if row.update_available %}<span class="badge fleet-update-badge">Update</span>{% endif %}
       </div>
 
       <div class="fleet-metrics">
-        <div class="fleet-metric"><span>CPU</span><strong>{{ row.system.cpu_temp if row.system else 'Unknown' }}</strong></div>
-        <div class="fleet-metric"><span>RAM</span><strong>{{ row.system.memory if row.system else 'Unknown' }}</strong></div>
-        <div class="fleet-metric"><span>Disk</span><strong>{{ row.system.disk if row.system else 'Unknown' }}</strong></div>
-        <div class="fleet-metric"><span>Media</span><strong>{{ row.media_count }}</strong></div>
+        <div class="fleet-metric"><span>CPU</span><strong data-cpu-temp>{{ row.system.cpu_temp if row.system else 'Unknown' }}</strong></div>
+        <div class="fleet-metric"><span>RAM</span><strong data-memory-usage>{{ row.system.memory if row.system else 'Unknown' }}</strong></div>
+        <div class="fleet-metric"><span>Disk</span><strong data-disk-usage>{{ row.system.disk if row.system else 'Unknown' }}</strong></div>
+        <div class="fleet-metric"><span>Media</span><strong data-media-count>{{ row.media_count }}</strong></div>
       </div>
 
       <dl class="fleet-details">
@@ -226,6 +241,7 @@
 
 <aside class="display-inspector" data-display-inspector hidden aria-label="Display inspector">
   <button type="button" data-close-inspector>Close inspector</button>
+  <div data-inspector-job hidden><span data-inspector-job-name></span><span data-inspector-job-progress></span><progress data-inspector-job-bar max="100"></progress></div>
   <div data-inspector-content></div>
 </aside>
 
@@ -398,4 +414,5 @@
 {% endblock %}
 {% block scripts %}
 <script src="/static/display-fleet-v1120.js?v=11.2.1"></script>
+<script src="/static/display-fleet-v1300.js?v=13.0.0"></script>
 {% endblock %}

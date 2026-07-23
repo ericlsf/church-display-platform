@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Remote Access - Church Display{% endblock %}
+{% block head %}<link rel="stylesheet" href="/static/remote-access-v1320.css">{% endblock %}
+{% block content %}
+<section class="remote-hero">
+  <div><span class="eyebrow">Secure off-site administration</span><h1>Remote Access</h1><p>Publish this Hub through a Cloudflare Tunnel without opening inbound firewall ports.</p></div>
+  <div class="remote-state {{ 'is-ready' if status.configured else 'is-pending' }}"><strong>{{ 'Remote access online' if status.configured else 'Setup required' }}</strong><span>{{ status.public_url or 'No public hostname configured' }}</span></div>
+</section>
+
+<div class="remote-grid">
+  <section class="remote-card"><h2>Connection status</h2>
+    <dl class="status-list">
+      <div><dt>cloudflared</dt><dd>{{ status.version }}</dd></div>
+      <div><dt>Service</dt><dd>{{ status.service_state }}</dd></div>
+      <div><dt>Start at boot</dt><dd>{{ 'Enabled' if status.service_enabled else 'Not enabled' }}</dd></div>
+      <div><dt>Hub origin</dt><dd><code>{{ status.origin }}</code></dd></div>
+      <div><dt>Public address</dt><dd>{% if status.public_url %}<a href="{{ status.public_url }}" target="_blank" rel="noopener">{{ status.public_url }}</a>{% else %}Not configured{% endif %}</dd></div>
+    </dl>
+  </section>
+
+  <section class="remote-card"><h2>Secure setup</h2>
+    <ol class="setup-steps">
+      <li>Create a Cloudflare Zero Trust self-hosted application and an Allow policy for approved accounts.</li>
+      <li>Create a remotely managed Tunnel with a public hostname pointing to <code>http://localhost:8090</code>.</li>
+      <li>Copy only the <code>eyJ…</code> tunnel token, then run the helper command on the Hub.</li>
+    </ol>
+    <pre><code>sudo /home/lsfservice/church-display-platform/scripts/configure-remote-access.sh \
+  --token 'PASTE_TUNNEL_TOKEN' \
+  --hostname 'hub.example.org'</code></pre>
+    <p class="warning"><strong>Important:</strong> create the Cloudflare Access application before enabling the public hostname. The Hub also retains its own login, providing a second authentication layer.</p>
+  </section>
+</div>
+
+<section class="remote-card"><h2>Management commands</h2>
+<pre><code>sudo systemctl status cloudflared --no-pager
+sudo systemctl restart cloudflared
+sudo journalctl -u cloudflared -n 100 --no-pager
+sudo /home/lsfservice/church-display-platform/scripts/disable-remote-access.sh</code></pre>
+</section>
+{% endblock %}
