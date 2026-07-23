@@ -1,10 +1,12 @@
-from flask import Blueprint, redirect, render_template, request, url_for
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from services.config import load_config
+from services.config import load_config, load_hub_settings
+from services.display_artifacts import create_artifact
 from services.events import log_event
 from services.fleet_state import build_fleet_state
 from services.jobs import create_job, list_jobs
 from services.releases import latest_git_tag, list_git_tags
+from services.deployment_guard import existing_deployment, unique_display_ids
 
 
 deployments_bp = Blueprint("deployments", __name__, url_prefix="/deployments")
@@ -12,18 +14,53 @@ deployments_bp = Blueprint("deployments", __name__, url_prefix="/deployments")
 
 def deploy_jobs(limit=100):
     return [
-        job for job in list_jobs(limit)
+        job
+        for job in list_jobs(limit)
         if job.get("type") == "deploy_update"
     ]
 
 
+def package_base_url():
+    settings = load_hub_settings()
+    return (
+        settings.get("hub_url")
+        or "http://church-display-hub.local:8090"
+    ).rstrip("/")
+
+
 def queue_deploy_job(display_id, target, dry_run):
-    create_job(display_id, "deploy_update", {
-        "target": target,
-        "dry_run": dry_run,
-    })
-    mode = "dry run" if dry_run != "false" else "real deploy"
-    log_event(f"Queued {mode} deployment of {target} for {display_id}")
+    existing = existing_deployment(display_id, target, dry_run)
+    if existing:
+        return existing
+    # Build and persist once. The job's checksum and URL both reference this
+    # exact immutable file.
+    artifact = create_artifact(target)
+    sha256 = artifact["sha256"]
+    package_url = (
+        f"{package_base_url()}/api/v1/display-releases/"
+        f"artifacts/{sha256}.tar.gz"
+    )
+
+    job = create_job(
+        display_id,
+        "deploy_update",
+        {
+            "target": target,
+            "dry_run": dry_run,
+            "package_url": package_url,
+            "sha256": sha256,
+            "commit": artifact.get("commit", ""),
+            "package_size": artifact["size"],
+            "deployment_mode": "immutable_hub_artifact",
+        },
+    )
+
+    mode = "dry run" if str(dry_run).lower() != "false" else "real deploy"
+    log_event(
+        f"Queued {mode} immutable display deployment of "
+        f"{target} for {display_id} ({sha256[:12]})"
+    )
+    return job
 
 
 @deployments_bp.route("")
@@ -41,20 +78,29 @@ def deployments_page():
         outdated_rows=state.get("outdated_rows", []),
         outdated_count=state.get("outdated_count", 0),
         deploy_jobs=deploy_jobs(100),
+        deployment_mode="Immutable Hub artifact",
     )
 
 
 @deployments_bp.route("/queue", methods=["POST"])
 def queue_deployment():
-    display_ids = request.form.getlist("display_ids")
+    display_ids = unique_display_ids(request.form.getlist("display_ids"))
     target = request.form.get("target", "").strip()
     dry_run = request.form.get("dry_run", "true").strip()
 
     if not target or not display_ids:
+        flash("Select a version and at least one display.", "error")
         return redirect(url_for("deployments.deployments_page"))
 
-    for display_id in display_ids:
-        queue_deploy_job(display_id, target, dry_run)
+    try:
+        for display_id in display_ids:
+            queue_deploy_job(display_id, target, dry_run)
+        flash(
+            f"Queued {target} for {len(display_ids)} display(s).",
+            "success",
+        )
+    except Exception as exc:
+        flash(str(exc), "error")
 
     return redirect(url_for("deployments.deployments_page"))
 
@@ -68,7 +114,11 @@ def queue_latest_deployment():
     if not display_id or not target:
         return redirect(request.referrer or url_for("dashboard.dashboard"))
 
-    queue_deploy_job(display_id, target, dry_run)
+    try:
+        queue_deploy_job(display_id, target, dry_run)
+        flash(f"Queued {target} for {display_id}.", "success")
+    except Exception as exc:
+        flash(str(exc), "error")
 
     return redirect(request.referrer or url_for("dashboard.dashboard"))
 
@@ -83,10 +133,18 @@ def queue_outdated_deployment():
 
     state = build_fleet_state()
     outdated_rows = state.get("outdated_rows", [])
+    display_ids = unique_display_ids(
+        row.get("id") for row in outdated_rows
+    )
 
-    for row in outdated_rows:
-        display_id = row.get("id")
-        if display_id:
+    try:
+        for display_id in display_ids:
             queue_deploy_job(display_id, target, dry_run)
+        flash(
+            f"Queued {target} for {len(display_ids)} outdated display(s).",
+            "success",
+        )
+    except Exception as exc:
+        flash(str(exc), "error")
 
     return redirect(request.referrer or url_for("deployments.deployments_page"))

@@ -3,7 +3,10 @@ from flask import Blueprint, jsonify, redirect, render_template, request, url_fo
 from services.config import load_config, load_hub_settings
 from services.drive import list_drive_folders
 from services.events import log_event
-from services.jobs import create_job, get_next_job, list_jobs, update_job
+from services.jobs import (
+    acknowledge_all_terminal_jobs, acknowledge_job, create_job, get_next_job,
+    list_jobs, request_cancel, retry_job, update_job,
+)
 from services.releases import list_git_tags
 
 
@@ -60,6 +63,38 @@ def add_job():
     create_job(display_id, job_type, payload)
     log_event(f"Queued job {job_type} for {display_id}")
 
+    return redirect(url_for("jobs.jobs_page"))
+
+
+@jobs_bp.route("/<job_id>/cancel", methods=["POST"])
+def cancel_job(job_id):
+    job = request_cancel(job_id)
+    if job:
+        log_event(f"Cancellation requested for job {job_id}")
+    return redirect(url_for("jobs.jobs_page"))
+
+
+@jobs_bp.route("/<job_id>/retry", methods=["POST"])
+def retry_job_route(job_id):
+    job = retry_job(job_id)
+    if job:
+        log_event(f"Manual retry queued for job {job_id}")
+    return redirect(url_for("jobs.jobs_page"))
+
+
+@jobs_bp.route("/<job_id>/acknowledge", methods=["POST"])
+def acknowledge_job_route(job_id):
+    note = request.form.get("note", "").strip()
+    job = acknowledge_job(job_id, note)
+    if job:
+        log_event(f"Marked job {job_id} resolved")
+    return redirect(url_for("jobs.jobs_page"))
+
+
+@jobs_bp.route("/acknowledge-terminal", methods=["POST"])
+def acknowledge_terminal_jobs_route():
+    count = acknowledge_all_terminal_jobs()
+    log_event(f"Marked {count} terminal job(s) resolved")
     return redirect(url_for("jobs.jobs_page"))
 
 

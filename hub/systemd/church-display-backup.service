@@ -1,0 +1,9 @@
+[Unit]
+Description=Church Display bi-weekly backup
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=lsfservice
+WorkingDirectory=/home/lsfservice/church-display-platform
+ExecStart=/home/lsfservice/church-display-platform/hub/venv/bin/python /home/lsfservice/church-display-platform/scripts/backup-platform.py

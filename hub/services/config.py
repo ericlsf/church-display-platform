@@ -23,8 +23,8 @@ def load_json(path, default):
         save_json(path, default)
         return default
     try:
-        with open(path, "r") as f:
-            data = json.load(f)
+        with open(path, "r", encoding="utf-8") as handle:
+            data = json.load(handle)
     except Exception:
         data = default
     return data
@@ -33,8 +33,8 @@ def load_json(path, default):
 def save_json(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
-    with open(tmp, "w") as f:
-        json.dump(data, f, indent=2)
+    with open(tmp, "w", encoding="utf-8") as handle:
+        json.dump(data, handle, indent=2)
     tmp.replace(path)
 
 
@@ -44,6 +44,11 @@ def load_config():
     for display in cfg["displays"]:
         display.setdefault("username", "")
         display.setdefault("password", "")
+        display.setdefault("hostname", "")
+        display.setdefault("ip", "")
+        display.setdefault("version", "")
+        display.setdefault("assigned_folder", "")
+        display.setdefault("provisioning_status", "approved")
     return cfg
 
 
@@ -79,15 +84,20 @@ def get_display(display_id):
 def slugify(value):
     value = (value or "").strip().lower()
     result = []
-    for ch in value:
-        if ch.isalnum():
-            result.append(ch)
-        elif ch in [" ", "-", "_"]:
+    for char in value:
+        if char.isalnum():
+            result.append(char)
+        elif char in {" ", "-", "_", "."}:
             result.append("-")
     slug = "".join(result).strip("-")
     while "--" in slug:
         slug = slug.replace("--", "-")
     return slug or "display"
+
+
+def normalize_display_id(value):
+    """Return the canonical stable display ID used by the Hub and agent."""
+    return slugify(value)
 
 
 def normalize_host(host):

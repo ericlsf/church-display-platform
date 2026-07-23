@@ -1,0 +1,21 @@
+Installer integration note
+
+Add the following verification after registration and agent startup:
+
+1. Poll:
+   GET /discovery/status?display_id=<stable-id>
+
+2. Display one of:
+   - Waiting for approval
+   - Approved, waiting for initial playlist
+   - Provisioning
+   - Ready
+
+3. Do not claim the display is fully ready until:
+   - the Hub reports approved;
+   - a playlist is assigned;
+   - the first set_sync_folder job succeeds;
+   - heartbeat reports media_count > 0.
+
+The maintained v4.2 installer already preserves dashed stable IDs. This release
+adds readiness and retry support on the Hub and hides the cursor in the player.

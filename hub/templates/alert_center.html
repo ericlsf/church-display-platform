@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Alert Center{% endblock %}
+
+{% block content %}
+<div class="alert-center-page">
+  <div class="page-header-row">
+    <div>
+      <h1>Alert Center</h1>
+      <p class="muted">
+        Actionable fleet issues with acknowledgement tracking.
+      </p>
+    </div>
+
+    <div class="alert-counts">
+      <span class="status-pill critical">
+        {{ center.counts.critical }} critical
+      </span>
+      <span class="status-pill warning">
+        {{ center.counts.warning }} warning
+      </span>
+      <span class="status-pill">
+        {{ center.counts.info }} info
+      </span>
+      <span class="status-pill">
+        {{ center.counts.acknowledged }} acknowledged
+      </span>
+    </div>
+  </div>
+
+  <div class="alert-toolbar">
+    <button
+      type="button"
+      data-alert-view="active"
+      class="active"
+    >
+      Active ({{ center.counts.active }})
+    </button>
+
+    <button
+      type="button"
+      data-alert-view="acknowledged"
+    >
+      Acknowledged ({{ center.counts.acknowledged }})
+    </button>
+
+    <span class="alert-toolbar-divider"></span>
+
+    <button type="button" data-alert-filter="all" class="active">
+      All severities
+    </button>
+    <button type="button" data-alert-filter="critical">
+      Critical
+    </button>
+    <button type="button" data-alert-filter="warning">
+      Warning
+    </button>
+    <button type="button" data-alert-filter="info">
+      Info
+    </button>
+  </div>
+
+  <div
+    class="alert-list"
+    data-alert-panel="active"
+  >
+    {% for alert in center.active_alerts %}
+      <article
+        class="alert-row {{ alert.severity }}"
+        data-alert-severity="{{ alert.severity }}"
+      >
+        <span class="alert-severity-icon">
+          {% if alert.severity == "critical" %}
+            !
+          {% elif alert.severity == "warning" %}
+            ⚠
+          {% else %}
+            i
+          {% endif %}
+        </span>
+
+        <div class="alert-main">
+          <div class="alert-title-row">
+            <strong>{{ alert.title }}</strong>
+            <span class="status-pill {{ alert.severity }}">
+              {{ alert.category }}
+            </span>
+          </div>
+
+          <p>{{ alert.detail }}</p>
+        </div>
+
+        <div class="alert-actions">
+          <a
+            class="button"
+            href="{{ alert.action_url }}"
+          >
+            {{ alert.action_label }}
+          </a>
+
+          <form
+            method="POST"
+            action="/alerts/acknowledge"
+            class="alert-ack-form"
+          >
+            <input
+              type="hidden"
+              name="key"
+              value="{{ alert.key }}"
+            >
+
+            <button
+              type="submit"
+              class="secondary"
+            >
+              Acknowledge
+            </button>
+          </form>
+        </div>
+      </article>
+    {% else %}
+      <div class="empty-state">
+        No active fleet alerts.
+      </div>
+    {% endfor %}
+  </div>
+
+  <div
+    class="alert-list"
+    data-alert-panel="acknowledged"
+    hidden
+  >
+    {% for alert in center.acknowledged_alerts %}
+      <article
+        class="alert-row acknowledged"
+        data-alert-severity="{{ alert.severity }}"
+      >
+        <span class="alert-severity-icon">✓</span>
+
+        <div class="alert-main">
+          <div class="alert-title-row">
+            <strong>{{ alert.title }}</strong>
+            <span class="status-pill">
+              acknowledged
+            </span>
+          </div>
+
+          <p>{{ alert.detail }}</p>
+
+          <small>
+            Acknowledged
+            {{ alert.acknowledgement.acknowledged_at }}
+            {% if alert.acknowledgement.acknowledged_by %}
+              by {{ alert.acknowledgement.acknowledged_by }}
+            {% endif %}
+          </small>
+        </div>
+
+        <div class="alert-actions">
+          <a
+            class="button"
+            href="{{ alert.action_url }}"
+          >
+            {{ alert.action_label }}
+          </a>
+
+          <form
+            method="POST"
+            action="/alerts/restore"
+          >
+            <input
+              type="hidden"
+              name="key"
+              value="{{ alert.key }}"
+            >
+
+            <button
+              type="submit"
+              class="secondary"
+            >
+              Restore
+            </button>
+          </form>
+        </div>
+      </article>
+    {% else %}
+      <div class="empty-state">
+        No acknowledged alerts.
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script src="/static/alert-center.js"></script>
+{% endblock %}

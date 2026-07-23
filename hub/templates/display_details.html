@@ -1,0 +1,688 @@
+{% extends "base.html" %}
+{% block title %}{{ display.name }} - Church Display Hub{% endblock %}
+
+{% block content %}
+<div class="section">
+  <div class="section-heading-row">
+    <div>
+      <h2>{{ display.name }}</h2>
+      <p class="muted">{{ display.id }}</p>
+    </div>
+
+    <div class="context-actions">
+      <form method="POST" action="/display/{{ display.id }}/action">
+        <input type="hidden" name="action" value="sync">
+        <button type="submit">Sync Now</button>
+      </form>
+
+      <form method="POST" action="/display/{{ display.id }}/action">
+        <input type="hidden" name="action" value="restart">
+        <button type="submit">Restart Player</button>
+      </form>
+
+      <form method="POST" action="/display/{{ display.id }}/action">
+        <input type="hidden" name="action" value="reboot">
+        <button class="danger" type="submit">Reboot</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <strong>{{ fleet.readiness|default("unknown")|replace("_", " ")|title }}</strong>
+    <span>Status</span>
+  </div>
+  <div class="stat-card">
+    <strong>{{ fleet.health_score|default(0) }}%</strong>
+    <span>Health</span>
+  </div>
+
+  <div class="stat-card update-stat-card">
+    {% if upgrade.update_available and not upgrade.active_job %}
+      <span class="update-available-label">Update Available</span>
+      <strong>{{ upgrade.current_version }} &rarr; {{ upgrade.latest_version }}</strong>
+      <form method="POST" action="/display/{{ display.id }}/upgrade">
+        <input type="hidden" name="target" value="{{ upgrade.latest_version }}">
+        <input type="hidden" name="mode" value="deploy">
+        {% if maintenance.enabled %}
+          <input type="hidden" name="override_maintenance" value="on">
+        {% endif %}
+        <button class="primary compact-upgrade-button" type="submit">Upgrade Now</button>
+      </form>
+    {% elif upgrade.active_job %}
+      <strong>{{ upgrade.active_job.progress|default(0) }}%</strong>
+      <span>Upgrade in progress</span>
+    {% else %}
+      <strong>{{ upgrade.current_version }}</strong>
+      <span>Software Current</span>
+    {% endif %}
+  </div>
+
+  <div class="stat-card">
+    <strong>{{ fleet.version|default("unknown") }}</strong>
+    <span>Version</span>
+  </div>
+  <div class="stat-card">
+    <strong>{{ fleet.media_count|default(0) }}</strong>
+    <span>Media Files</span>
+  </div>
+</div>
+
+<div class="display-details-grid">
+  <div class="section" id="content-settings" data-content-overlay-editor>
+  
+<div class="display-hero">
+  <div>
+    <div class="display-hero-title-row">
+      <h1>{{ display.name or display.id }}</h1>
+      <span class="status-pill {% if fleet.online %}online{% else %}offline{% endif %}">
+        {% if fleet.online %}Online{% else %}Offline{% endif %}
+      </span>
+    </div>
+
+    <div class="display-hero-meta">
+      <span>Heartbeat: {{ fleet.heartbeat or fleet.heartbeat_age or "Unknown" }}</span>
+      <span>Version: {{ fleet.version or "Unknown" }}</span>
+      <span>Sync: {{ fleet.sync_state or "Unknown" }}</span>
+    </div>
+  </div>
+
+  <div class="display-hero-actions">
+    <a class="button" href="#content-settings">Edit Content</a>
+    <a class="button" href="#health-diagnostics">Health</a>
+    <a class="button" href="#software-upgrade">Software</a>
+  </div>
+</div>
+
+<div class="display-summary-grid">
+  <div class="summary-card">
+    <span>Health</span>
+    <strong>{{ health_diagnostics.score }}%</strong>
+    <small>
+      {% if health_diagnostics.all_healthy %}
+        All checks passing
+      {% else %}
+        {{ health_diagnostics.failed_count }} issue{% if health_diagnostics.failed_count != 1 %}s{% endif %}
+      {% endif %}
+    </small>
+  </div>
+
+  <div class="summary-card">
+    <span>Media</span>
+    <strong>{{ fleet.media_count or 0 }}</strong>
+    <small>local file{% if (fleet.media_count or 0) != 1 %}s{% endif %}</small>
+  </div>
+
+  <div class="summary-card">
+    <span>Content Folder</span>
+    <strong>{{ assigned_folder or fleet.sync_folder or "None" }}</strong>
+    <small>{% if assigned_folder or fleet.sync_folder %}Assigned{% else %}Needs assignment{% endif %}</small>
+  </div>
+
+  <div class="summary-card">
+    <span>Software</span>
+    <strong>{{ upgrade.current_version or fleet.version or "Unknown" }}</strong>
+    <small>
+      {% if upgrade.update_available %}
+        Update available
+      {% elif upgrade.active_job %}
+        Deployment in progress
+      {% else %}
+        Current
+      {% endif %}
+    </small>
+  </div>
+</div>
+
+<div class="display-settings-layout">
+  <div class="display-settings-content-row">
+<div class="section-heading-row">
+    <div>
+      <h2>Content & Overlay</h2>
+      <p class="muted">
+        Assign content, preview the overlay, and apply everything in one action.
+      </p>
+    </div>
+    <span class="live-indicator" data-save-state>All changes saved</span>
+  </div>
+  </div>
+  <div class="display-settings-secondary-row">
+<div class="section">
+    <h2>Display Profile</h2>
+
+    <form method="POST" action="/display/{{ display.id }}/profile">
+      <label>Apply Profile</label>
+      <select name="profile_id" required>
+        <option value="">Choose profile</option>
+        {% for profile in profiles %}
+          <option value="{{ profile.id }}">
+            {{ profile.name }}
+          </option>
+        {% endfor %}
+      </select>
+
+      <button class="primary" type="submit">
+        Apply Profile
+      </button>
+    </form>
+  </div>
+<div class="section">
+    <h2>Maintenance</h2>
+
+    <form method="POST" action="/display/{{ display.id }}/maintenance">
+      <label class="checkbox-row">
+        <input
+          type="checkbox"
+          name="enabled"
+          {% if maintenance.enabled %}checked{% endif %}
+        >
+        Maintenance mode
+      </label>
+
+      <label>Reason</label>
+      <input
+        name="reason"
+        maxlength="250"
+        value="{{ maintenance.reason or '' }}"
+      >
+
+      <button type="submit">Save Maintenance State</button>
+    </form>
+  </div>
+  </div>
+</div>
+
+
+  <div class="content-editor-simple">
+    <form
+      method="POST"
+      action="/display/{{ display.id }}/settings"
+      class="content-editor-form"
+    >
+      <label>
+        Content Folder
+        <select name="folder" required>
+          <option value="">Choose a content folder</option>
+          {% for folder in folders %}
+            <option
+              value="{{ folder }}"
+              {% if folder == assigned_folder %}selected{% endif %}
+            >
+              {{ folder }}
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+
+      {% if folder_error %}
+        <p class="warning">
+          Folder list could not be refreshed: {{ folder_error }}
+        </p>
+      {% endif %}
+
+      <div class="editor-fieldset">
+        <h3>Overlay</h3>
+
+        <label class="checkbox-row">
+          <input
+            type="checkbox"
+            name="overlay_enabled"
+            {% if presentation.overlay.enabled %}checked{% endif %}
+          >
+          Show overlay text
+        </label>
+
+        <label>
+          Overlay Text
+          <input
+            type="text"
+            name="overlay_text"
+            maxlength="160"
+            value="{{ presentation.overlay.text }}"
+            placeholder="Welcome to Lifespring Fellowship"
+          >
+        </label>
+      </div>
+
+      <div class="editor-fieldset">
+        <h3>Clock & Countdown</h3>
+
+        <label class="checkbox-row">
+          <input
+            type="checkbox"
+            name="clock_enabled"
+            {% if presentation.clock.enabled %}checked{% endif %}
+          >
+          Show current time
+        </label>
+
+        <label class="checkbox-row">
+          <input
+            type="checkbox"
+            name="countdown_enabled"
+            {% if presentation.countdown.enabled %}checked{% endif %}
+          >
+          Show countdown
+        </label>
+
+        <label>
+          Countdown Label
+          <input
+            type="text"
+            name="countdown_text"
+            maxlength="80"
+            value="{{ presentation.countdown.text or '' }}"
+            placeholder="Service starts in"
+          >
+        </label>
+      </div>
+
+      <div class="editor-actions">
+        <button
+          type="submit"
+          name="action"
+          value="save"
+        >
+          Save Settings
+        </button>
+
+        <button
+          class="primary"
+          type="submit"
+          name="action"
+          value="save_sync"
+        >
+          Apply & Sync Now
+        </button>
+      </div>
+    </form>
+
+    
+  </div>
+</div>
+</div>
+
+<div class="section" data-live-display="{{ display.id }}">
+  <div class="section-heading-row">
+    <div>
+      <h2>Live Device Health</h2>
+      <span class="live-indicator">Updates every 15 seconds</span>
+    </div>
+  </div>
+
+  <div class="display-details-grid">
+    <div class="card preview-card">
+      {% set preview_url = fleet.get("preview_url") or fleet.get("screenshot_url") %}
+      <img
+        data-live-preview
+        src="{{ preview_url or '' }}"
+        alt="Current screenshot from {{ display.name }}"
+        {% if not preview_url %}hidden{% endif %}
+      >
+      <div class="preview-empty" {% if preview_url %}hidden{% endif %}>
+        No screenshot available
+      </div>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <span>Status</span>
+        <strong data-live-status>
+          {{ fleet.get("readiness", "unknown")|replace("_", " ")|title }}
+        </strong>
+      </div>
+
+      <div class="metric-card">
+        <span>Version</span>
+        <strong data-live-version>{{ fleet.get("version", "unknown") }}</strong>
+      </div>
+
+      <div class="metric-card">
+        <span>Media Files</span>
+        <strong data-live-media>{{ fleet.get("media_count", 0) }}</strong>
+      </div>
+
+      <div class="metric-card">
+        <span>CPU Temperature</span>
+        <strong data-live-temp>
+          {% if fleet.get("cpu_temperature") is not none %}
+            {{ fleet.get("cpu_temperature") }}°C
+          {% else %}
+            Unknown
+          {% endif %}
+        </strong>
+      </div>
+
+      <div class="metric-card">
+        <span>Storage</span>
+        <strong data-live-storage>
+          {% if fleet.get("storage_percent") is not none %}
+            {{ fleet.get("storage_percent") }}% used
+          {% elif fleet.get("disk_percent") is not none %}
+            {{ fleet.get("disk_percent") }}% used
+          {% else %}
+            Unknown
+          {% endif %}
+        </strong>
+      </div>
+
+      <div class="metric-card">
+        <span>Last Heartbeat</span>
+        <strong data-live-heartbeat>
+          {{ fleet.get("last_heartbeat") or fleet.get("last_seen") or "Unknown" }}
+        </strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="software-upgrade">
+  <div class="section">
+  <div class="section-heading-row">
+    <div><h2>Deployment Timeline</h2><p class="muted">Live progress through heartbeat verification.</p></div>
+  </div>
+  <div class="deployment-timeline" data-deployment-timeline data-display-id="{{ display.id }}">
+    <p class="muted">Loading deployment state...</p>
+  </div>
+</div>
+
+<div
+  class="automatic-rollback-card"
+  data-automatic-rollback
+  data-display-id="{{ display.id }}"
+  data-timeout="180"
+  hidden
+></div>
+
+<script src="/static/automatic-rollback.js"></script>
+
+
+<div class="section-heading-row">
+    <div>
+      <h2>Software Upgrade</h2>
+      <p class="muted">
+        Compare versions, run a preflight dry run, or deploy directly.
+      </p>
+    </div>
+    <a href="/deployments">All Deployments</a>
+  </div>
+
+<div
+  class="deployment-verification-card"
+  data-deployment-verification
+  data-display-id="{{ display.id }}"
+>
+  <strong data-verification-status>
+    Checking deployment verification…
+  </strong>
+  <p
+    class="muted"
+    data-verification-detail
+  ></p>
+</div>
+<div class="upgrade-grid">
+    <div class="metric-card">
+      <span>Current Version</span>
+      <strong>{{ upgrade.current_version }}</strong>
+    </div>
+
+    <div class="metric-card">
+      <span>Latest Version</span>
+      <strong>{{ upgrade.latest_version or "Unknown" }}</strong>
+    </div>
+
+    <div class="metric-card">
+      <span>Status</span>
+      <strong>
+        {% if upgrade.active_job %}
+          {{ upgrade.active_job.status|title }}
+        {% elif upgrade.update_available %}
+          Update Available
+        {% else %}
+          Current
+        {% endif %}
+      </strong>
+    </div>
+  </div>
+
+  {% if upgrade.active_job %}
+    <div class="deployment-progress-card">
+      <div class="section-heading-row">
+        <div>
+          <strong>
+            {{ upgrade.active_job.payload.target or "Deployment" }}
+          </strong>
+          <p class="muted">
+            {{ upgrade.active_job.message or upgrade.active_job.status }}
+          </p>
+        </div>
+        <span class="status-pill">
+          {{ upgrade.active_job.progress|default(0) }}%
+        </span>
+      </div>
+
+      <div class="progress-track">
+        <div
+          class="progress-fill"
+          style="--progress: {{ upgrade.active_job.progress|default(0) }}%"
+        ></div>
+      </div>
+    </div>
+  {% else %}
+    <form
+      method="POST"
+      action="/display/{{ display.id }}/upgrade"
+      class="upgrade-form"
+    >
+      <label>
+        Target Version
+        <select name="target" required>
+          <option value="">Choose version</option>
+          {% for tag in upgrade.release_tags %}
+            <option
+              value="{{ tag }}"
+              {% if tag == upgrade.latest_version %}selected{% endif %}
+            >
+              {{ tag }}
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>
+        Deployment Mode
+        <select name="mode">
+          <option value="dry_run">
+            Dry Run — verify only
+          </option>
+          <option value="deploy">
+            Deploy and restart
+          </option>
+        </select>
+      </label>
+
+      {% if maintenance.enabled %}
+        <label class="checkbox-row">
+          <input
+            type="checkbox"
+            name="override_maintenance"
+          >
+          Override maintenance protection
+        </label>
+      {% endif %}
+
+      <button class="primary" type="submit">
+        Start Upgrade
+      </button>
+    </form>
+  {% endif %}
+
+  {% if upgrade.last_job
+        and upgrade.last_job.status in
+          ["failed", "timed_out", "cancelled"] %}
+    <div class="warning-panel">
+      <strong>Last deployment did not complete successfully.</strong>
+      <p>
+        {{ upgrade.last_job.message or "The display reported a deployment failure." }}
+      </p>
+
+      <form
+        method="POST"
+        action="/display/{{ display.id }}/rollback"
+      >
+        <input
+          type="hidden"
+          name="failed_job_id"
+          value="{{ upgrade.last_job.id }}"
+        >
+        <button class="danger" type="submit">
+          Queue Rollback
+        </button>
+      </form>
+    </div>
+  {% endif %}
+</div>
+
+
+
+<div class="section compact-section" id="health-diagnostics">
+  <div class="section-heading-row">
+    <div>
+      <h2>Device Health</h2>
+      <p class="muted">
+        Each failed check includes the fastest available fix.
+      </p>
+    </div>
+
+    <span class="status-pill {% if health_diagnostics.all_healthy %}online{% else %}warning{% endif %}">
+      {{ health_diagnostics.score }}%
+    </span>
+  </div>
+
+  <div class="health-list-v600">
+    {% for check in health_diagnostics.checks %}
+      <div class="health-row-v600 {% if check.passed %}passed{% else %}failed{% endif %}">
+        <span class="health-icon-v600">
+          {% if check.passed %}✓{% else %}!{% endif %}
+        </span>
+
+        <div>
+          <strong>{{ check.label }}</strong>
+          <p>{{ check.summary }}</p>
+
+          {% if not check.passed and check.guidance %}
+            <small>{{ check.guidance }}</small>
+          {% endif %}
+        </div>
+
+        <div class="health-action-v600">
+          {% if check.passed %}
+            <span class="health-ok-label">Passing</span>
+          {% else %}
+            <form
+              method="POST"
+              action="/display/{{ display.id }}/health-action"
+            >
+              <input
+                type="hidden"
+                name="action"
+                value="{{ check.action }}"
+              >
+
+              <button
+                type="submit"
+                class="{% if check.action == 'reboot' %}danger{% endif %}"
+              >
+                {{ check.action_label }}
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+
+
+<div class="section">
+  <div class="section-heading-row">
+    <h2>Recent Jobs</h2>
+    <a href="/jobs?display_id={{ display.id }}">View All</a>
+  </div>
+
+  <div class="compact-list">
+    {% for job in jobs %}
+      <div class="compact-row">
+        <div>
+          <strong>{{ job.type|replace("_", " ")|title }}</strong>
+          <span class="muted">{{ job.created_at }}</span>
+        </div>
+        <div>{{ job.status|title }}</div>
+        <div>{{ job.progress|default(0) }}%</div>
+      </div>
+    {% else %}
+      <p class="muted">No jobs for this display.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-heading-row">
+    <h2>Recent Audit Activity</h2>
+    <a href="/audit?q={{ display.id }}">View All</a>
+  </div>
+
+  <div class="compact-list">
+    {% for row in audit_rows %}
+      <div class="compact-row">
+        <div>
+          <strong>{{ row.action|replace("_", " ") }}</strong>
+          <span class="muted">{{ row.timestamp }}</span>
+        </div>
+        <div>{{ row.actor }}</div>
+        <div>{{ row.status|title }}</div>
+      </div>
+    {% else %}
+      <p class="muted">No audit activity for this display.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="section">
+  <div class="breadcrumbs">
+    <a href="/operator/displays">Displays</a>
+    <span>›</span>
+    <strong>{{ display.name }}</strong>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-heading-row">
+    <h2>Last 10 Minutes</h2>
+    <button type="button" id="refresh-display-activity">Refresh</button>
+  </div>
+
+  <div
+    id="display-activity"
+    data-display-id="{{ display.id }}"
+    class="activity-timeline"
+  >
+    <p class="muted">Loading recent activity…</p>
+  </div>
+</div>
+
+<script src="/static/display-activity.js"></script>
+
+
+
+
+<script src="/static/live-display-health.js"></script>
+
+
+
+
+
+<script src="/static/live-deployment-status.js"></script>
+{% endblock %}

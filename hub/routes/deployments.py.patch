@@ -1,0 +1,24 @@
+# v4.6.1 integration instructions:
+#
+# Add:
+#   from services.deployment_guard import existing_deployment, unique_display_ids
+#
+# At the beginning of queue_deploy_job():
+#
+#   existing = existing_deployment(display_id, target, dry_run)
+#   if existing:
+#       return existing
+#
+# Return the newly created job from create_job().
+#
+# In all routes receiving display IDs:
+#
+#   display_ids = unique_display_ids(request.form.getlist("display_ids"))
+#
+# In queue_outdated_deployment():
+#
+#   display_ids = unique_display_ids(
+#       row.get("id") for row in outdated_rows
+#   )
+#   for display_id in display_ids:
+#       queue_deploy_job(display_id, target, dry_run)

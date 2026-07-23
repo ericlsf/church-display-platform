@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Fleet Overview - Church Display Hub{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="/static/display-fleet-v1120.css?v=11.2.1">
+{% endblock %}
 {% block content %}
 <section class="section fleet-hero">
   <div>
@@ -124,7 +127,7 @@
     <div class="fleet-card-select">
       <label aria-label="Select {{ row.name }}"><input class="display-selector" type="checkbox" value="{{ row.id }}"></label>
     </div>
-    <div class="fleet-thumbnail">
+    <div class="fleet-thumbnail display-preview">
       {% if row.preview_url %}
         <img src="{{ row.preview_url }}" alt="Latest screenshot from {{ row.name }}" loading="lazy">
       {% else %}
@@ -174,6 +177,7 @@
 
       <details class="fleet-manage">
         <summary>Manage display</summary>
+        <div class="advanced-menu">
         <form method="POST" action="/displays/update" class="fleet-form-grid">
           <input type="hidden" name="id" value="{{ row.id }}">
           <div><label>Name</label><input name="name" value="{{ row.name }}"></div>
@@ -181,8 +185,28 @@
           <div><label>Username</label><input name="username" value="{{ row.username }}"></div>
           <div><label>Password</label><input name="password" type="password" value="{{ row.password }}"></div>
           <div><label>Group</label><input name="group" value="{{ row.group }}"></div>
+          <div>
+            <label>Google Drive folder <span class="source-badge">Google Drive</span></label>
+            <select name="sync_folder" required>
+              {% for folder in row.folder_options %}<option value="{{ folder }}" {{ 'selected' if folder == row.sync_folder else '' }}>{{ folder }}</option>{% endfor %}
+            </select>
+          </div>
+          <div>
+            <label>Profile</label>
+            <select name="profile_id">
+              <option value="">No profile</option>
+              {% for profile in profiles %}<option value="{{ profile.id }}" {{ 'selected' if profile.id == row.profile_id else '' }}>{{ profile.name }}</option>{% endfor %}
+            </select>
+          </div>
+          <fieldset>
+            <legend>Groups</legend>
+            {% for group in group_records %}
+              <label><input type="checkbox" name="group_ids" value="{{ group.id }}" {{ 'checked' if group.id in row.group_ids else '' }}> {{ group.name }}</label>
+            {% else %}<span class="muted">No groups configured.</span>{% endfor %}
+          </fieldset>
           <div class="fleet-form-submit"><button class="primary" type="submit">Save changes</button></div>
         </form>
+        </div>
         <div class="fleet-manage-actions">
           <form method="POST" action="/displays/test">
             <input type="hidden" name="host" value="{{ row.host }}">
@@ -195,6 +219,7 @@
             <button class="danger" type="submit">Remove</button>
           </form>
         </div>
+        <button class="button-link" type="button" data-open-inspector="{{ row.id }}">Open inspector</button>
       </details>
     </div>
   </article>
@@ -205,6 +230,15 @@
   <div class="fleet-dialog-heading"><h2 id="fleet-dialog-title">Display details</h2><button class="button-link" type="button" data-close-dialog>Close</button></div>
   <div id="fleet-dialog-content"></div>
 </dialog>
+
+<aside class="display-inspector" data-display-inspector hidden aria-label="Display inspector">
+  <button type="button" data-close-inspector>Close inspector</button>
+  <div data-inspector-content></div>
+</aside>
+
+<form method="POST" action="/displays/bulk-workspace" id="fleet-workspace-form" hidden>
+  <input type="checkbox" name="display_ids" data-display-select>
+</form>
 
 <div class="section fleet-empty" id="fleet-empty" {% if rows %}hidden{% endif %}>
   <h2>No displays found</h2>
@@ -358,4 +392,7 @@
   applyFilters();
 })();
 </script>
+{% endblock %}
+{% block scripts %}
+<script src="/static/display-fleet-v1120.js?v=11.2.1"></script>
 {% endblock %}

@@ -1,0 +1,266 @@
+
+<div class="v8-shell" data-v8-shell>
+  <aside class="v8-sidebar" aria-label="Primary navigation">
+    <div class="v8-brand">
+      <a href="/fleet-dashboard" class="v8-brand-link">
+        <span class="v8-brand-mark">CD</span>
+        <span class="v8-brand-copy">
+          <strong>Church Display</strong>
+          <small>Operations Hub</small>
+        </span>
+      </a>
+
+      <button
+        type="button"
+        class="v8-sidebar-collapse"
+        data-sidebar-collapse
+        aria-label="Collapse navigation"
+        title="Collapse navigation"
+      >
+        ‹
+      </button>
+    </div>
+
+    <form class="v8-sidebar-search" action="/search" method="GET">
+      <span aria-hidden="true">⌕</span>
+      <input
+        type="search"
+        name="q"
+        placeholder="Search…"
+        autocomplete="off"
+      >
+    </form>
+
+    <nav class="v8-nav">
+      <section class="v8-nav-group" data-v8-section="dashboard">
+        <button
+          type="button"
+          class="v8-nav-group-label"
+          data-nav-group-toggle="dashboard"
+          aria-expanded="false"
+        >
+          <span class="v8-nav-group-title">
+            <span class="v8-section-icon">⌂</span>
+            <span class="v8-nav-text">Dashboard</span>
+          </span>
+          <span class="v8-chevron">›</span>
+        </button>
+
+        <div class="v8-nav-group-links" data-nav-group="dashboard" hidden>
+          <a href="/fleet-dashboard" data-v8-route="/fleet-dashboard" title="Overview">
+            <span class="v8-nav-icon">⌂</span>
+            <span class="v8-nav-text">Overview</span>
+          </a>
+          <a href="/fleet-map" data-v8-route="/fleet-map" title="Fleet Map">
+            <span class="v8-nav-icon">⌖</span>
+            <span class="v8-nav-text">Fleet Map</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="v8-nav-group" data-v8-section="fleet">
+        <button
+          type="button"
+          class="v8-nav-group-label"
+          data-nav-group-toggle="fleet"
+          aria-expanded="false"
+        >
+          <span class="v8-nav-group-title">
+            <span class="v8-section-icon">▣</span>
+            <span class="v8-nav-text">Fleet</span>
+          </span>
+          <span class="v8-chevron">›</span>
+        </button>
+
+        <div class="v8-nav-group-links" data-nav-group="fleet" hidden>
+          <a href="/displays" data-v8-route="/displays" title="Displays">
+            <span class="v8-nav-icon">▣</span>
+            <span class="v8-nav-text">Displays</span>
+          </a>
+          <a href="/groups" data-v8-route="/groups" title="Groups">
+            <span class="v8-nav-icon">◫</span>
+            <span class="v8-nav-text">Groups</span>
+          </a>
+          <a href="/display-profiles" data-v8-route="/display-profiles" title="Profiles">
+            <span class="v8-nav-icon">◧</span>
+            <span class="v8-nav-text">Profiles</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="v8-nav-group" data-v8-section="media">
+        <button
+          type="button"
+          class="v8-nav-group-label"
+          data-nav-group-toggle="media"
+          aria-expanded="false"
+        >
+          <span class="v8-nav-group-title">
+            <span class="v8-section-icon">▤</span>
+            <span class="v8-nav-text">Media</span>
+          </span>
+          <span class="v8-chevron">›</span>
+        </button>
+
+        <div class="v8-nav-group-links" data-nav-group="media" hidden>
+          <a href="/content" data-v8-route="/content" title="Content Library">
+            <span class="v8-nav-icon">▤</span>
+            <span class="v8-nav-text">Content Library</span>
+          </a>
+          <a href="/media" data-v8-route="/media" title="Media">
+            <span class="v8-nav-icon">▥</span>
+            <span class="v8-nav-text">Media</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="v8-nav-group" data-v8-section="operations">
+        <button
+          type="button"
+          class="v8-nav-group-label"
+          data-nav-group-toggle="operations"
+          aria-expanded="false"
+        >
+          <span class="v8-nav-group-title">
+            <span class="v8-section-icon">⚙</span>
+            <span class="v8-nav-text">Operations</span>
+          </span>
+          <span class="v8-chevron">›</span>
+        </button>
+
+        <div class="v8-nav-group-links" data-nav-group="operations" hidden>
+          <a href="/bulk-operations/" data-v8-route="/bulk-operations" title="Bulk Operations">
+            <span class="v8-nav-icon">⇉</span>
+            <span class="v8-nav-text">Bulk Operations</span>
+          </a>
+          <a href="/fleet-operations" data-v8-route="/fleet-operations" title="Fleet Operations">
+            <span class="v8-nav-icon">⚙</span>
+            <span class="v8-nav-text">Fleet Operations</span>
+          </a>
+          <a href="/jobs" data-v8-route="/jobs" title="Jobs">
+            <span class="v8-nav-icon">☷</span>
+            <span class="v8-nav-text">Jobs</span>
+          </a>
+          <a href="/alerts/" data-v8-route="/alerts" title="Alert Center">
+            <span class="v8-nav-icon">!</span>
+            <span class="v8-nav-text">Alert Center</span>
+          </a>
+          <a href="/history" data-v8-route="/history" title="History">
+            <span class="v8-nav-icon">◷</span>
+            <span class="v8-nav-text">History</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="v8-nav-group" data-v8-section="administration">
+        <button
+          type="button"
+          class="v8-nav-group-label"
+          data-nav-group-toggle="administration"
+          aria-expanded="false"
+        >
+          <span class="v8-nav-group-title">
+            <span class="v8-section-icon">♙</span>
+            <span class="v8-nav-text">Administration</span>
+          </span>
+          <span class="v8-chevron">›</span>
+        </button>
+
+        <div class="v8-nav-group-links" data-nav-group="administration" hidden>
+          <a href="/users" data-v8-route="/users" title="Users">
+            <span class="v8-nav-icon">♙</span>
+            <span class="v8-nav-text">Users</span>
+          </a>
+          <a href="/releases" data-v8-route="/releases" title="Releases">
+            <span class="v8-nav-icon">⬆</span>
+            <span class="v8-nav-text">Releases</span>
+          </a>
+          <a href="/system" data-v8-route="/system" title="System">
+            <span class="v8-nav-icon">◉</span>
+            <span class="v8-nav-text">System</span>
+          </a>
+          <a href="/alerts/rules/" data-v8-route="/alerts/rules" title="Alert Rules">
+            <span class="v8-nav-icon">≡</span>
+            <span class="v8-nav-text">Alert Rules</span>
+          </a>
+          <a href="/setup" data-v8-route="/setup" title="Settings">
+            <span class="v8-nav-icon">⚒</span>
+            <span class="v8-nav-text">Settings</span>
+          </a>
+        </div>
+      </section>
+    </nav>
+
+    <div class="v8-sidebar-footer">
+      <a href="/system/support" title="Support Bundle">
+        <span class="v8-nav-icon">?</span>
+        <span class="v8-nav-text">Support Bundle</span>
+      </a>
+    </div>
+  </aside>
+
+  <header class="v8-topbar">
+    <button
+      type="button"
+      class="v8-mobile-menu"
+      data-mobile-menu
+      aria-label="Open navigation"
+    >
+      ☰
+    </button>
+
+    <div class="v8-page-context" data-v8-page-context>
+      <strong>Church Display</strong>
+      <span>Operations Hub</span>
+    </div>
+
+    <div class="v8-topbar-actions">
+      <button
+        type="button"
+        class="v8-command-button"
+        data-command-button
+        aria-label="Open command palette"
+        title="Open command palette (Ctrl+K)"
+      >
+        ⚡
+        <span>Commands</span>
+        <kbd>Ctrl K</kbd>
+      </button>
+
+      <a
+        href="/notifications"
+        class="v8-notification-button"
+        aria-label="Notifications"
+        title="Notifications"
+      >
+        <span aria-hidden="true">●</span>
+        <span class="v8-notification-badge" data-notification-count hidden></span>
+      </a>
+
+      <div class="v8-user-menu">
+        <button
+          type="button"
+          data-user-menu-toggle
+          aria-expanded="false"
+          title="User menu"
+        >
+          <span class="v8-user-avatar">A</span>
+          <span class="v8-user-label">Admin</span>
+          <span aria-hidden="true">⌄</span>
+        </button>
+
+        <div class="v8-user-popover" data-user-menu hidden>
+          <a href="/users">User Administration</a>
+          <a href="/alerts/rules/">Alert Rules</a>
+          <a href="/system">System</a>
+          <hr>
+          <a href="/logout">Sign Out</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="v8-mobile-scrim" data-mobile-scrim hidden></div>
+</div>
+
+<div class="v8-breadcrumbs" data-v8-breadcrumbs aria-label="Breadcrumb"></div>

@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh Church Display media metadata index
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=lsfservice
+WorkingDirectory=/home/lsfservice/church-display-platform/hub
+ExecStart=/home/lsfservice/church-display-platform/hub/venv/bin/python /home/lsfservice/church-display-platform/hub/scripts/refresh_media_index.py --timeout 180

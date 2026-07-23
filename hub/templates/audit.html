@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Audit History - Church Display Hub{% endblock %}
+
+{% block content %}
+<div class="section">
+  <div class="section-heading-row">
+    <div>
+      <h2>Audit History</h2>
+      <p class="muted">
+        Review configuration changes, deployments, recovery actions, and other
+        administrative operations.
+      </p>
+    </div>
+    <a class="button" href="/audit/export.csv?{{ current|urlencode }}">
+      Export CSV
+    </a>
+  </div>
+</div>
+
+<div class="section">
+  <form method="GET" action="/audit" class="audit-filters">
+    <label>
+      Search
+      <input name="q" value="{{ current.get('q', '') }}" placeholder="display, folder, action">
+    </label>
+
+    <label>
+      Actor
+      <select name="actor">
+        <option value="">All actors</option>
+        {% for actor in actors %}
+          <option value="{{ actor }}" {% if current.get('actor') == actor %}selected{% endif %}>
+            {{ actor }}
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      Category
+      <select name="category">
+        <option value="">All categories</option>
+        {% for category in categories %}
+          <option value="{{ category }}" {% if current.get('category') == category %}selected{% endif %}>
+            {{ category|replace("_", " ")|title }}
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      Status
+      <select name="status">
+        <option value="">All statuses</option>
+        <option value="success" {% if current.get('status') == 'success' %}selected{% endif %}>Success</option>
+        <option value="failed" {% if current.get('status') == 'failed' %}selected{% endif %}>Failed</option>
+      </select>
+    </label>
+
+    <label>
+      Rows
+      <select name="limit">
+        {% for value in [50, 100, 250, 500] %}
+          <option value="{{ value }}" {% if current.get('limit', '100')|int == value %}selected{% endif %}>
+            {{ value }}
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <button class="primary" type="submit">Filter</button>
+    <a class="button" href="/audit">Clear</a>
+  </form>
+</div>
+
+<div class="section">
+  {% if rows %}
+    <div class="audit-list">
+      {% for row in rows %}
+        <details class="audit-row">
+          <summary>
+            <span class="audit-time">{{ row.timestamp }}</span>
+            <strong>{{ row.action|replace("_", " ") }}</strong>
+            <span>{{ row.actor }}</span>
+            <span class="{{ 'online' if row.status == 'success' else 'offline' }}">
+              {{ row.status|title }}
+            </span>
+          </summary>
+
+          <div class="audit-details">
+            <p><strong>Category:</strong> {{ row.category }}</p>
+            {% if row.target %}
+              <p><strong>Target:</strong> {{ row.target }}</p>
+            {% endif %}
+            {% if row.request_id %}
+              <p><strong>Request ID:</strong> {{ row.request_id }}</p>
+            {% endif %}
+            {% if row.remote_addr %}
+              <p><strong>Remote address:</strong> {{ row.remote_addr }}</p>
+            {% endif %}
+            <pre>{{ row.details|tojson(indent=2) }}</pre>
+          </div>
+        </details>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">No audit records match the selected filters.</p>
+  {% endif %}
+</div>
+{% endblock %}

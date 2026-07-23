@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Live Operations - Church Display{% endblock %}
+{% block content %}
+<div class="section">
+  <h2>Live Operations</h2>
+  <p class="muted">Updates automatically every few seconds.</p>
+  <div class="ops-summary" id="ops-summary"></div>
+</div>
+<div class="section"><h2>Displays</h2><div class="grid" id="ops-displays"></div></div>
+<div class="section"><h2>Groups</h2><div class="grid" id="ops-groups"></div></div>
+<div class="section"><h2>Active Jobs</h2><div class="grid" id="ops-jobs"></div></div>
+<script>
+const esc = value => String(value ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+function summary(data){
+ const s=data.summary||{};
+ document.getElementById('ops-summary').innerHTML=`<div class="grid"><div class="card"><h3>${s.online_count||0}/${s.display_count||0}</h3><p>Displays online</p></div><div class="card"><h3>${s.offline_count||0}</h3><p>Offline</p></div><div class="card"><h3>${s.outdated_count||0}</h3><p>Outdated</p></div><div class="card"><h3>${s.active_job_count||0}</h3><p>Active jobs</p></div><div class="card"><h3>${s.group_count||0}</h3><p>Groups</p></div></div>`;
+}
+function displays(rows){
+ document.getElementById('ops-displays').innerHTML=(rows||[]).map(r=>`<div class="card"><h3>${esc(r.name)}</h3>${r.preview_url?`<img src="${esc(r.preview_url)}" style="width:100%;border-radius:8px">`:''}<p class="${r.online?'online':'offline'}">${r.online?'● Online':'○ Offline'}</p><p><b>Media:</b> ${esc(r.current_media)}</p><p><b>Playlist:</b> ${esc(r.sync_folder)}</p><p><b>Version:</b> ${esc(r.current_tag)}</p><p><b>Heartbeat:</b> ${esc(r.heartbeat)}</p><p><b>CPU:</b> ${esc((r.system||{}).cpu_temp||'Unknown')}</p><p><b>Memory:</b> ${esc((r.system||{}).memory||'Unknown')}</p><p><b>Disk:</b> ${esc((r.system||{}).disk||'Unknown')}</p><p><b>Display App:</b> <span class="${r.display_app_running?'online':'offline'}">${r.display_app_running?'Running':esc(r.display_app_state||'Stopped')}</span></p>${r.heartbeat_fresh&&!r.display_app_running?`<form method="POST" action="/fleet/${encodeURIComponent(r.id)}/restart"><button class="safe" type="submit">Start Display App</button></form>`:''}</div>`).join('')||'<p class="muted">No displays.</p>';
+}
+function groups(rows){
+ document.getElementById('ops-groups').innerHTML=(rows||[]).map(g=>`<div class="card"><h3>${esc(g.name)}</h3><p>${esc(g.description)}</p><p><b>Online:</b> ${g.online_count}/${g.member_count}</p><p><b>Outdated:</b> ${g.outdated_count}</p><p><a href="/groups">Manage group</a></p></div>`).join('')||'<p class="muted">No groups.</p>';
+}
+function jobs(rows){
+ document.getElementById('ops-jobs').innerHTML=(rows||[]).map(j=>`<div class="card"><h3>${esc(j.type)}</h3><p><b>Display:</b> ${esc(j.display_id)}</p><p><b>Status:</b> ${esc(j.status)}</p><p>${esc(j.message)}</p><div style="height:10px;background:#111;border-radius:10px;overflow:hidden"><div style="height:100%;width:${Number(j.progress||0)}%;background:#2d7dff"></div></div><p>${Number(j.progress||0)}%</p></div>`).join('')||'<p class="muted">No active jobs.</p>';
+}
+function render(data){summary(data);displays((data.fleet||{}).rows);groups(data.groups);jobs(data.active_jobs);}
+render({{ state|tojson }});
+const source=new EventSource('/api/v1/events/operations');
+source.addEventListener('operations',e=>render(JSON.parse(e.data)));
+source.onerror=()=>console.log('Operations stream disconnected; retrying.');
+</script>
+{% endblock %}

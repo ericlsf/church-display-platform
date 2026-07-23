@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Fleet Map - Church Display Hub{% endblock %}
+
+{% block content %}
+<div class="section">
+  <div class="section-heading-row">
+    <div>
+      <h2>Fleet Map</h2>
+      <p class="muted">
+        View displays by saved group and take recovery actions without leaving
+        the page.
+      </p>
+    </div>
+    <a class="button" href="/fleet-config">Manage Groups</a>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card"><strong>{{ summary.total }}</strong><span>Total</span></div>
+  <div class="stat-card"><strong>{{ summary.ready }}</strong><span>Ready</span></div>
+  <div class="stat-card"><strong>{{ summary.attention }}</strong><span>Needs Attention</span></div>
+  <div class="stat-card"><strong>{{ summary.offline }}</strong><span>Offline</span></div>
+  <div class="stat-card"><strong>{{ summary.maintenance }}</strong><span>Maintenance</span></div>
+</div>
+
+{% for section in sections %}
+<div class="section fleet-map-section">
+  <div class="section-heading-row">
+    <div>
+      <h2>{{ section.name }}</h2>
+      <p class="muted">
+        {{ section.summary.total }} display(s) ·
+        {{ section.summary.ready }} ready ·
+        {{ section.summary.attention }} attention ·
+        {{ section.summary.offline }} offline
+      </p>
+    </div>
+  </div>
+
+  {% if section.members %}
+  <div class="fleet-map-grid">
+    {% for row in section.members %}
+    <div class="fleet-node state-{{ row.readiness }}">
+      <div class="fleet-node-header">
+        <div>
+          <h3>{{ row.name }}</h3>
+          <span class="muted">{{ row.id }}</span>
+        </div>
+
+        {% if row.readiness == "ready" %}
+          <span class="status-pill online">Ready</span>
+        {% elif row.readiness == "maintenance" %}
+          <span class="status-pill warning">Maintenance</span>
+        {% elif row.readiness == "offline" %}
+          <span class="status-pill offline">Offline</span>
+        {% elif row.readiness == "provisioning" %}
+          <span class="status-pill warning">Provisioning</span>
+        {% else %}
+          <span class="status-pill offline">Needs Attention</span>
+        {% endif %}
+      </div>
+
+      <div class="fleet-node-health">
+        <div><strong>Health</strong><span>{{ row.health_score }}%</span></div>
+        <div><strong>Version</strong><span>{{ row.version }}</span></div>
+        <div><strong>Playlist</strong><span>{{ row.assigned_folder or "None" }}</span></div>
+        <div><strong>Media</strong><span>{{ row.media_count }}</span></div>
+      </div>
+
+      {% if row.maintenance.enabled %}
+        <p class="warning">
+          {{ row.maintenance.reason or "Maintenance mode enabled" }}
+        </p>
+      {% endif %}
+
+      <div class="context-actions fleet-node-actions">
+        <form method="POST" action="/fleet-map/recover">
+          <input type="hidden" name="display_id" value="{{ row.id }}">
+          <input type="hidden" name="action" value="sync">
+          <button type="submit">Sync</button>
+        </form>
+
+        <form method="POST" action="/fleet-map/recover">
+          <input type="hidden" name="display_id" value="{{ row.id }}">
+          <input type="hidden" name="action" value="restart">
+          <button type="submit">Restart Player</button>
+        </form>
+
+        <form method="POST" action="/fleet-map/recover">
+          <input type="hidden" name="display_id" value="{{ row.id }}">
+          <input type="hidden" name="action" value="reboot">
+          <button class="danger" type="submit">Reboot</button>
+        </form>
+      </div>
+
+      <div class="fleet-node-links">
+        <a href="/operations-center">Quick Settings</a>
+        <a href="/deployments">Software</a>
+        <a href="/audit?q={{ row.id }}">Audit</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p class="muted">This group has no displays.</p>
+  {% endif %}
+</div>
+{% endfor %}
+{% endblock %}

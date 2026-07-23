@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Notifications - Church Display Hub{% endblock %}
+
+{% block content %}
+<div class="section">
+  <div class="section-heading-row">
+    <div>
+      <h2>Notifications</h2>
+      <p class="muted">
+        Enrollment, deployment, sync, restart, and fleet-health events.
+      </p>
+    </div>
+    <div class="context-actions">
+      <form method="POST" action="/notifications/read">
+        <input type="hidden" name="all" value="1">
+        <button type="submit">Mark All Read</button>
+      </form>
+      <form method="POST" action="/notifications/clear-resolved">
+        <button type="submit">Clear Completed</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  {% if notifications %}
+    <div class="notification-list">
+      {% for item in notifications %}
+        <div class="notification-card level-{{ item.level }} {% if not item.read %}unread{% endif %}">
+          <div class="notification-main">
+            <div>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.message }}</p>
+              <p class="muted">
+                {{ item.created_at }}
+                {% if item.target %} · {{ item.target }}{% endif %}
+              </p>
+            </div>
+
+            <div class="context-actions">
+              {% if item.link %}
+                <a class="button" href="{{ item.link }}">Open</a>
+              {% endif %}
+
+              {% if not item.read %}
+                <form method="POST" action="/notifications/read">
+                  <input type="hidden" name="notification_id" value="{{ item.id }}">
+                  <button type="submit">Mark Read</button>
+                </form>
+              {% endif %}
+
+              <form method="POST" action="/notifications/dismiss">
+                <input type="hidden" name="notification_id" value="{{ item.id }}">
+                <button type="submit">Dismiss</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">No notifications.</p>
+  {% endif %}
+</div>
+{% endblock %}

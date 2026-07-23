@@ -1,0 +1,11 @@
+v4.9.1 rollout integration
+
+When creating a rollout:
+- accept group IDs in addition to direct display IDs;
+- resolve group membership before unique-display normalization;
+- reject maintenance displays by default;
+- allow explicit maintenance override.
+
+When processing an existing rollout:
+- if a display enters maintenance before its job is queued, skip it unless
+  rollout.allow_maintenance is true.

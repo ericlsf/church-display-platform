@@ -1,0 +1,11 @@
+[Unit]
+Description=Church Display Scheduled Rollout Processor
+After=network-online.target church-display-hub.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=lsfservice
+WorkingDirectory=/home/lsfservice/church-display-platform
+Environment=PYTHONPATH=/home/lsfservice/church-display-platform/hub
+ExecStart=/home/lsfservice/church-display-platform/hub/venv/bin/python /home/lsfservice/church-display-platform/scripts/process-rollouts.py

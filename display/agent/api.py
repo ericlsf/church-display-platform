@@ -45,6 +45,20 @@ def post_heartbeat(payload):
     )
 
     with urllib.request.urlopen(request, timeout=10) as response:
+        raw = response.read().decode("utf-8")
+    try:
+        return json.loads(raw)
+    except Exception:
+        return {}
+
+
+def post_management_artifact(kind, payload):
+    body = json.dumps(payload).encode("utf-8")
+    request = urllib.request.Request(
+        f"{HUB_URL}/api/v1/management/artifact/{urllib.parse.quote(DISPLAY_ID)}/{urllib.parse.quote(kind)}",
+        data=body,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=30) as response:
         response.read()
-
-

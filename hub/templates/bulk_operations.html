@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Bulk Operations{% endblock %}
+
+{% block content %}
+<div class="bulk-operations-page">
+  <div class="page-header-row">
+    <div>
+      <h1>Bulk Operations</h1>
+      <p class="muted">
+        Apply one action to multiple managed displays.
+      </p>
+    </div>
+    <a class="button" href="/fleet-dashboard">Fleet Dashboard</a>
+  </div>
+
+  <form method="POST" action="/bulk-operations/run" data-bulk-operations-form>
+    <div class="bulk-layout">
+      <section class="section">
+        <div class="section-heading-row">
+          <div>
+            <h2>Select Displays</h2>
+            <p class="muted">
+              Choose individual displays or select the whole fleet.
+            </p>
+          </div>
+          <label class="checkbox-row compact-checkbox">
+            <input type="checkbox" data-select-all>
+            Select all
+          </label>
+        </div>
+
+        <div class="bulk-display-list">
+          {% for display in displays %}
+            <label class="bulk-display-row">
+              <input
+                type="checkbox"
+                name="display_ids"
+                value="{{ display.id }}"
+              >
+
+              <span class="fleet-status-dot {% if display.online or display.status_online %}online{% else %}offline{% endif %}"></span>
+
+              <span class="bulk-display-main">
+                <strong>{{ display.name or display.id }}</strong>
+                <small>
+                  {{ display.version or "Unknown" }} ·
+                  {{ display.sync_folder or "No folder" }} ·
+                  Health {{ display.health_score|default(0) }}%
+                </small>
+              </span>
+            </label>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="section bulk-action-panel">
+        <h2>Choose Action</h2>
+
+        <label>
+          Operation
+          <select name="operation" required data-operation>
+            <option value="">Choose an operation</option>
+            <option value="sync_now">Sync Now</option>
+            <option value="restart_display">Restart Player</option>
+            <option value="reboot">Reboot Device</option>
+            <option value="collect_logs">Collect Logs</option>
+            <option value="assign_folder">Assign Content Folder</option>
+            <option value="assign_profile">Assign Display Profile</option>
+            <option value="maintenance">Maintenance Mode</option>
+            <option value="deploy_update">Deploy Software Update</option>
+          </select>
+        </label>
+
+        <div data-option="assign_folder" hidden>
+          <label>
+            Content Folder
+            <select name="folder">
+              <option value="">Choose a folder</option>
+              {% for folder in folders %}
+                <option value="{{ folder }}">{{ folder }}</option>
+              {% endfor %}
+            </select>
+          </label>
+        </div>
+
+        <div data-option="assign_profile" hidden>
+          <label>
+            Display Profile
+            <select name="profile_id">
+              <option value="">Choose a profile</option>
+              {% for profile in profiles %}
+                <option value="{{ profile.id }}">
+                  {{ profile.name or profile.id }}
+                </option>
+              {% endfor %}
+            </select>
+          </label>
+        </div>
+
+        <div data-option="maintenance" hidden>
+          <label>
+            Maintenance Mode
+            <select name="maintenance_enabled">
+              <option value="">Choose state</option>
+              <option value="true">Enable</option>
+              <option value="false">Disable</option>
+            </select>
+          </label>
+        </div>
+
+        <div data-option="deploy_update" hidden>
+          <label>
+            Target Release
+            <select name="target">
+              <option value="">Choose a release</option>
+              {% for release in releases %}
+                <option value="{{ release.version or release.tag }}">
+                  {{ release.version or release.tag }}
+                </option>
+              {% endfor %}
+            </select>
+          </label>
+        </div>
+
+        <div class="bulk-selection-summary">
+          <strong data-selected-count>0</strong>
+          <span>display(s) selected</span>
+        </div>
+
+        <button class="primary" type="submit">
+          Queue Bulk Operation
+        </button>
+      </section>
+    </div>
+  </form>
+</div>
+
+<script src="/static/bulk-operations.js"></script>
+{% endblock %}

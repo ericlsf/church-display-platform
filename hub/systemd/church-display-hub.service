@@ -1,0 +1,16 @@
+[Unit]
+Description=Church Display Hub
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lsfservice
+WorkingDirectory=/home/lsfservice/church-display-platform/hub
+ExecStart=/home/lsfservice/church-display-platform/hub/venv/bin/python app.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

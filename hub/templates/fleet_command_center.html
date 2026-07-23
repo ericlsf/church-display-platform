@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Fleet Command Center{% endblock %}
+{% block content %}
+<div class="command-center-page" data-command-center>
+  <div class="command-center-header">
+    <div><h1>Fleet Command Center</h1><p class="muted">Live fleet status, recommended actions, and active jobs.</p></div>
+    <div class="command-center-header-actions"><a class="button" href="/displays">Manage Displays</a><a class="button" href="/bulk-operations/">Bulk Operations</a></div>
+  </div>
+
+  <section class="fleet-status-ribbon" data-status-ribbon>
+    <a href="/displays"><strong data-metric="online">{{ center.metrics.online }}</strong><span>Online</span></a>
+    <a href="/deployments"><strong data-metric="updating">{{ center.metrics.updating }}</strong><span>Updating</span></a>
+    <a href="/displays"><strong data-metric="offline">{{ center.metrics.offline }}</strong><span>Offline</span></a>
+    <a href="/alerts/"><strong data-metric="alerts">{{ center.metrics.alerts }}</strong><span>Alerts</span></a>
+    <a href="/releases"><strong data-metric="upgrades">{{ center.metrics.upgrades }}</strong><span>Upgrades</span></a>
+    <span class="fleet-refresh-age">Last heartbeat <strong data-metric="freshest">{% if center.metrics.freshest_heartbeat_seconds is not none %}{{ center.metrics.freshest_heartbeat_seconds }}s{% else %}Unknown{% endif %}</strong></span>
+  </section>
+
+  <section class="quick-actions-bar">
+    <form method="POST" action="/bulk-operations/run">
+      {% for display in center.displays %}<input type="hidden" name="display_ids" value="{{ display.id }}">{% endfor %}
+      <input type="hidden" name="operation" value="sync_now"><button type="submit">Sync All</button>
+    </form>
+    <a class="button" href="/releases">Check Updates</a>
+    <button type="button" data-refresh-command-center>Refresh Fleet</button>
+    <a class="button" href="/bulk-operations/">Push Media</a>
+    <a class="button" href="/system/support">Download Support Bundle</a>
+  </section>
+
+  <div class="command-center-layout">
+    <section class="section">
+      <div class="section-heading-row"><div><h2>Recommended Actions</h2><p class="muted">Issues that can be addressed now.</p></div><span class="status-pill" data-action-count>{{ center.actions|length }}</span></div>
+      <div class="recommended-action-list" data-recommended-actions>
+        {% for action in center.actions %}
+        <article class="recommended-action {{ action.severity }}"><div><strong>{{ action.title }}</strong><p>{{ action.detail }}</p></div><a class="button" href="{{ action.url }}">{{ action.label }}</a></article>
+        {% else %}<div class="empty-state">No immediate fleet actions are required.</div>{% endfor %}
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-heading-row"><div><h2>Displays</h2><p class="muted">Compact operational summaries.</p></div><a href="/displays">View all</a></div>
+      <div class="operator-display-grid">
+        {% for display in center.displays %}
+        <a class="operator-display-card" href="/display/{{ display.id }}">
+          <div class="operator-display-card-header"><strong>{{ display.name or display.id }}</strong><span class="status-pill {% if display.online or display.status_online %}online{% else %}critical{% endif %}">{% if display.online or display.status_online %}Online{% else %}Offline{% endif %}</span></div>
+          <div class="operator-display-card-body">
+            <span>Health<strong>{{ display.health_score|default(0) }}%</strong></span>
+            <span>Version<strong>{{ display.version or "Unknown" }}</strong></span>
+            <span>Media<strong>{{ display.media_count|default(0) }}</strong></span>
+            <span>Folder<strong>{{ display.sync_folder or "None" }}</strong></span>
+          </div>
+          <small>Heartbeat {{ display.heartbeat or display.heartbeat_age or "Unknown" }}</small>
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <aside class="job-drawer" data-job-drawer>
+    <button type="button" class="job-drawer-toggle" data-job-drawer-toggle>Active Jobs <span data-job-count>{{ center.active_jobs|length }}</span></button>
+    <div class="job-drawer-panel" data-job-drawer-panel hidden>
+      <div class="job-drawer-heading"><h2>Live Jobs</h2><button type="button" data-job-drawer-close>×</button></div>
+      <div class="job-drawer-list" data-job-list>
+        {% for job in center.active_jobs %}
+        <article class="job-drawer-row"><strong>{{ job.display_id }}</strong><span>{{ job.type }}</span><progress max="100" value="{{ job.progress|default(0) }}"></progress><small>{{ job.message or job.status }}</small></article>
+        {% else %}<div class="empty-state">No active jobs.</div>{% endfor %}
+      </div>
+    </div>
+  </aside>
+</div>
+<script src="/static/fleet-command-center.js"></script>
+{% endblock %}

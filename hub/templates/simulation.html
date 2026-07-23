@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Simulation - Church Display{% endblock %}
+{% block content %}
+<div class="section"><h2>Display Simulation</h2><p class="muted">Resolve the published content and schedule for a display at a selected date and time.</p></div>
+<div class="section"><form method="GET"><label>Display</label><select name="display_id" required><option value="">Select display</option>{% for d in displays %}<option value="{{ d.id }}" {% if d.id == selected_display %}selected{% endif %}>{{ d.name }}</option>{% endfor %}</select><label>Date and time</label><input type="datetime-local" name="when" value="{{ selected_when }}" required><button class="primary">Simulate</button></form>{% if error %}<p class="offline">{{ error }}</p>{% endif %}</div>
+{% if result %}<div class="section"><h2>{{ result.display_name }} at {{ result.when }}</h2>{% if result.maintenance_enabled %}<p class="offline">Maintenance mode: {{ result.maintenance_message }}</p>{% endif %}<p><strong>Resolution:</strong> {{ result.reason }}</p><p><strong>Scheduled action:</strong> {{ result.job_type or 'None' }}</p><p><strong>Published playlist:</strong> {{ result.folder or 'Current/default playlist' }}</p><p><strong>First media:</strong> {{ result.first_media or 'Unknown' }}</p></div><div class="section"><h2>Resolved Playlist</h2>{% if result.playlist %}<ol>{% for item in result.playlist %}<li>{{ item }}</li>{% endfor %}</ol>{% else %}<p class="muted">No published playlist was resolved for this time.</p>{% endif %}</div>{% endif %}
+{% endblock %}

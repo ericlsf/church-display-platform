@@ -35,14 +35,12 @@ def media_count_for(status, heartbeat):
         heartbeat.get("total_media"),
         heartbeat.get("media_count"),
     ]
-
     for value in candidates:
         try:
             if int(value) > 0:
                 return int(value)
         except (TypeError, ValueError):
             continue
-
     for value in candidates:
         try:
             return int(value)
@@ -54,35 +52,41 @@ def media_count_for(status, heartbeat):
 def system_health_for(status, heartbeat):
     hb_system = heartbeat.get("system") or {}
     status_system = status.get("system") or {}
-
     return {
         "cpu_temp": useful_value(
-            hb_system.get("cpu_temp"),
-            heartbeat.get("cpu_temp"),
-            status_system.get("cpu_temp"),
-            status.get("cpu_temp"),
+            hb_system.get("cpu_temp"), heartbeat.get("cpu_temp"),
+            status_system.get("cpu_temp"), status.get("cpu_temp"),
         ) or "Unknown",
         "memory": useful_value(
-            status.get("memory"),
-            status_system.get("memory"),
-            hb_system.get("memory"),
-            heartbeat.get("memory"),
+            status.get("memory"), status_system.get("memory"),
+            hb_system.get("memory"), heartbeat.get("memory"),
             heartbeat.get("memory_usage"),
         ) or "Unknown",
         "disk": useful_value(
-            status.get("disk"),
-            status_system.get("disk"),
-            hb_system.get("disk"),
-            heartbeat.get("disk"),
+            status.get("disk"), status_system.get("disk"),
+            hb_system.get("disk"), heartbeat.get("disk"),
             heartbeat.get("disk_usage"),
         ) or "Unknown",
         "uptime": useful_value(
-            status.get("uptime"),
-            status_system.get("uptime"),
-            hb_system.get("uptime"),
-            heartbeat.get("uptime"),
+            status.get("uptime"), status_system.get("uptime"),
+            hb_system.get("uptime"), heartbeat.get("uptime"),
         ) or "Unknown",
     }
+
+
+def health_state_for(online, system, active_job=None):
+    if active_job and active_job.get("type") == "deploy_update":
+        return "updating"
+    if not online:
+        return "offline"
+    for key in ("memory", "disk"):
+        value = str(system.get(key, "")).replace("%", "").strip()
+        try:
+            if float(value) >= 90:
+                return "warning"
+        except ValueError:
+            pass
+    return "online"
 
 
 def preview_url_for(display_id):
@@ -114,6 +118,14 @@ def build_alerts(rows, drive_error=""):
         if row.get("git", {}).get("dirty") == "yes":
             alerts.append({"level": "warning", "message": f"{name} has uncommitted local changes."})
 
+        if row.get("heartbeat_fresh") and not row.get("display_app_running"):
+            alerts.append({
+                "level": "danger",
+                "message": f"{name} display app is not running.",
+                "display_id": row.get("id"),
+                "action": "restart_display",
+            })
+
         temp = str(row.get("system", {}).get("cpu_temp", ""))
         try:
             temp_value = float(temp.replace("°C", "").strip())
@@ -127,21 +139,6 @@ def build_alerts(rows, drive_error=""):
     return alerts
 
 
-def health_state_for(online, system, active_job=None):
-    if active_job and active_job.get("type") == "deploy_update":
-        return "updating"
-    if not online:
-        return "offline"
-    for key in ("memory", "disk"):
-        value = str(system.get(key, "")).replace("%", "").strip()
-        try:
-            if float(value) >= 90:
-                return "warning"
-        except ValueError:
-            pass
-    return "online"
-
-
 def build_fleet_state():
     cfg = load_config()
     hub_settings = load_hub_settings()
@@ -153,9 +150,8 @@ def build_fleet_state():
     latest_tag = latest_git_tag()
     active_jobs = {}
     for job in list_jobs(500):
-        if job.get("status") not in {"queued", "running"}:
-            continue
-        active_jobs.setdefault(job.get("display_id"), job)
+        if job.get("status") in {"queued", "running"}:
+            active_jobs.setdefault(job.get("display_id"), job)
 
     rows = []
 
@@ -167,6 +163,7 @@ def build_fleet_state():
         hb_player = hb.get("player", {})
         hb_sync = hb.get("sync", {})
         hb_git = hb.get("git", {})
+        hb_display_app = hb.get("display_app", {})
 
         heartbeat_received_at = hb.get("received_at", "")
         heartbeat_fresh = is_fresh(heartbeat_received_at, 90)
@@ -218,6 +215,9 @@ def build_fleet_state():
             "sync_last_success": sync_status.get("last_success") or hb_sync.get("last_success") or "Unknown",
             "folder_options": folder_options,
             "system": system,
+            "display_app": hb_display_app,
+            "display_app_running": bool(hb_display_app.get("running")),
+            "display_app_state": hb_display_app.get("active_state", "unknown"),
             "preview_url": preview_url_for(display_id),
         })
 
@@ -226,10 +226,7 @@ def build_fleet_state():
     alerts = build_alerts(rows, drive_error)
     event_records = read_event_records(30)
     recent_outcomes = [
-        {
-            "level": event.get("level", "info"),
-            "message": event.get("message", ""),
-        }
+        {"level": event.get("level", "info"), "message": event.get("message", "")}
         for event in event_records
         if event.get("level") in {"success", "danger"}
     ][:5]
@@ -246,10 +243,7 @@ def build_fleet_state():
         "event_records": event_records,
         "alerts": alerts,
         "notifications": [
-            {
-                "level": alert.get("level", "warning"),
-                "message": alert.get("message", ""),
-            }
+            {"level": alert.get("level", "warning"), "message": alert.get("message", "")}
             for alert in alerts
         ] + recent_outcomes,
     }

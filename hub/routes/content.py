@@ -1,10 +1,18 @@
-from flask import Blueprint, redirect, render_template, request, url_for
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from services.config import load_config, load_hub_settings
 from services.drive import list_drive_folders
 from services.events import log_event
 from services.jobs import create_job, list_jobs
-from services.media import analyze_drive_folder, get_playlist_order, get_playlist_policy, save_playlist_order, save_playlist_policy
+from services.media import (
+    analyze_drive_folder,
+    discard_playlist_draft,
+    get_playlist_entry,
+    get_playlist_policy,
+    publish_playlist,
+    save_playlist_draft,
+    save_playlist_policy,
+)
 from services.content_cache import sync_playlist_from_drive
 from services.schedules import create_schedule
 
@@ -28,21 +36,30 @@ def current_analysis(remote, folder, recursive=False, supported_only=True):
     )
 
 
+def parse_order():
+    return [x.strip() for x in request.form.get("playlist_order", "").splitlines() if x.strip()]
+
+
 @content_bp.route("")
 def content_page():
     cfg = load_config()
-    hub_settings = load_hub_settings()
-    remote = hub_settings.get("drive_remote", "gdrive")
+    settings = load_hub_settings()
+    remote = settings.get("drive_remote", "gdrive")
     folders, drive_error = list_drive_folders(remote)
     folder = request.args.get("folder", "").strip().strip("/")
     recursive = bool_arg("recursive")
     supported_only = request.args.get("supported_only", "1") != "0"
-    analysis = current_analysis(remote, folder, recursive=recursive, supported_only=supported_only)
+    analysis = current_analysis(remote, folder, recursive, supported_only)
+    workflow = get_playlist_entry(remote, folder) if folder else {}
 
-    deploy_jobs = [
-        job for job in list_jobs(50)
-        if job.get("type") in ["set_sync_folder", "sync_now"]
-    ]
+    if analysis and workflow:
+        draft_order = workflow.get("draft_order") or analysis.get("playlist_order", [])
+        by_path = {item.get("path"): item for item in analysis.get("media_items", [])}
+        ordered = [by_path[path] for path in draft_order if path in by_path]
+        ordered.extend(item for item in analysis.get("media_items", []) if item.get("path") not in draft_order)
+        analysis["media_items"] = ordered
+
+    deploy_jobs = [job for job in list_jobs(50) if job.get("type") in ["set_sync_folder", "sync_now"]]
 
     return render_template(
         "content.html",
@@ -55,10 +72,10 @@ def content_page():
         recursive=recursive,
         supported_only=supported_only,
         analysis=analysis,
+        workflow=workflow,
         insertion_policy=get_playlist_policy(remote, folder) if folder else "newest_first",
         deploy_jobs=deploy_jobs,
     )
-
 
 
 @content_bp.route("/policy", methods=["POST"])
@@ -69,17 +86,39 @@ def save_policy():
     log_event(f"Playlist insertion policy set to {policy} for {remote}:{folder}", category="content")
     return redirect(url_for("content.content_page", folder=folder, supported_only="1"))
 
+
 @content_bp.route("/order", methods=["POST"])
 def save_order():
     folder = request.form.get("folder", "").strip().strip("/")
     remote = request.form.get("remote", "gdrive").strip() or "gdrive"
-    order_raw = request.form.get("playlist_order", "")
-    order = [x.strip() for x in order_raw.split("\n") if x.strip()]
-
     if folder:
-        saved = save_playlist_order(remote, folder, order)
-        log_event(f"Content playlist order saved for {remote}:{folder} with {len(saved)} item(s)")
+        saved = save_playlist_draft(remote, folder, parse_order(), request.form.get("draft_note", ""))
+        log_event(f"Saved draft playlist for {remote}:{folder} with {len(saved)} item(s)", category="content")
+        flash("Draft saved. Displays are still using the published order.", "success")
+    return redirect(url_for("content.content_page", folder=folder, supported_only="1"))
 
+
+@content_bp.route("/publish", methods=["POST"])
+def publish_order():
+    folder = request.form.get("folder", "").strip().strip("/")
+    remote = request.form.get("remote", "gdrive").strip() or "gdrive"
+    if folder:
+        if parse_order():
+            save_playlist_draft(remote, folder, parse_order(), request.form.get("draft_note", ""))
+        order = publish_playlist(remote, folder)
+        log_event(f"Published playlist {remote}:{folder} with {len(order)} item(s)", category="content")
+        flash("Playlist published.", "success")
+    return redirect(url_for("content.content_page", folder=folder, supported_only="1"))
+
+
+@content_bp.route("/discard", methods=["POST"])
+def discard_order():
+    folder = request.form.get("folder", "").strip().strip("/")
+    remote = request.form.get("remote", "gdrive").strip() or "gdrive"
+    if folder:
+        discard_playlist_draft(remote, folder)
+        log_event(f"Discarded draft playlist for {remote}:{folder}", category="content")
+        flash("Draft discarded.", "success")
     return redirect(url_for("content.content_page", folder=folder, supported_only="1"))
 
 
@@ -88,21 +127,26 @@ def deploy_playlist():
     display_ids = request.form.getlist("display_ids")
     folder = request.form.get("folder", "").strip().strip("/")
     remote = request.form.get("remote", "gdrive").strip() or "gdrive"
-    order_raw = request.form.get("playlist_order", "")
-    order = [x.strip() for x in order_raw.split("\n") if x.strip()]
+    publish_first = request.form.get("publish_first") == "1"
 
-    if folder and order:
-        order = save_playlist_order(remote, folder, order)
+    if publish_first and parse_order():
+        save_playlist_draft(remote, folder, parse_order(), request.form.get("draft_note", ""))
+        publish_playlist(remote, folder)
+
+    workflow = get_playlist_entry(remote, folder)
+    order = workflow.get("published_order", [])
 
     if not folder or not display_ids:
         return redirect(url_for("content.content_page", folder=folder, supported_only="1"))
-
-    manifest, cache_error = sync_playlist_from_drive(remote, folder)
-    if cache_error:
-        log_event(f"Hub cache sync failed for {remote}:{folder}: {cache_error}")
+    if not order:
+        flash("Publish the playlist before deploying it.", "error")
         return redirect(url_for("content.content_page", folder=folder, supported_only="1"))
 
-    order = manifest.get("order", order)
+    manifest, error = sync_playlist_from_drive(remote, folder)
+    if error:
+        log_event(f"Hub cache sync failed for {remote}:{folder}: {error}", category="content", level="error")
+        flash(f"Hub cache sync failed: {error}", "error")
+        return redirect(url_for("content.content_page", folder=folder, supported_only="1"))
 
     for display_id in display_ids:
         create_job(display_id, "set_sync_folder", {
@@ -111,8 +155,9 @@ def deploy_playlist():
             "run_now": True,
             "playlist_order": order,
         })
-        log_event(f"Content playlist deploy queued for {display_id}: {remote}:{folder}")
+        log_event(f"Published playlist deploy queued for {display_id}: {remote}:{folder}", category="content")
 
+    flash(f"Deployment queued for {len(display_ids)} display(s).", "success")
     return redirect(url_for("content.content_page", folder=folder, supported_only="1"))
 
 
@@ -123,26 +168,20 @@ def schedule_playlist():
     remote = request.form.get("remote", "gdrive").strip() or "gdrive"
     run_at = request.form.get("run_at", "").strip()
     recurrence = request.form.get("recurrence", "once").strip() or "once"
-    order_raw = request.form.get("playlist_order", "")
-    order = [x.strip() for x in order_raw.split("\n") if x.strip()]
+    order = get_playlist_entry(remote, folder).get("published_order", [])
 
-    if folder and order:
-        order = save_playlist_order(remote, folder, order)
-
-    if display_id and folder and run_at:
+    if display_id and folder and run_at and order:
         create_schedule(
             name=f"Deploy {folder}",
             display_id=display_id,
             job_type="set_sync_folder",
             run_at=run_at,
             recurrence=recurrence,
-            payload={
-                "remote": remote,
-                "folder": folder,
-                "run_now": True,
-                "playlist_order": order,
-            },
+            payload={"remote": remote, "folder": folder, "run_now": True, "playlist_order": order},
         )
-        log_event(f"Scheduled content playlist {folder} for {display_id} at {run_at}")
+        log_event(f"Scheduled published playlist {folder} for {display_id} at {run_at}", category="content")
+        flash("Playlist deployment scheduled.", "success")
+    else:
+        flash("Publish the playlist before scheduling it.", "error")
 
     return redirect(url_for("content.content_page", folder=folder, supported_only="1"))

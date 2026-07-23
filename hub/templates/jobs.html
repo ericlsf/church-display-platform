@@ -74,18 +74,28 @@
 </div>
 
 <div class="section">
-    <h2>Recent Jobs</h2>
+    <div class="section-heading"><h2>Recent Jobs</h2><form method="POST" action="/jobs/acknowledge-terminal"><button type="submit">Mark all errors resolved</button></form></div>
     <div id="jobs-grid" class="grid">
         {% if jobs %}
             {% for job in jobs %}
                 <div class="card">
                     <h3>{{ job.type }}</h3>
                     <p><strong>Display:</strong> {{ job.display_id }}</p>
-                    <p><strong>Status:</strong> {{ job.status }}</p>
+                    <p><strong>Status:</strong> {{ job.status }}{% if job.acknowledged %} <span class="muted">(resolved)</span>{% endif %}</p>
                     <p><strong>Progress:</strong> {{ job.progress }}%</p>
                     <p><strong>Message:</strong> {{ job.message }}</p>
                     <p><strong>Created:</strong> {{ job.created_at }}</p>
+                    <p><strong>Attempt:</strong> {{ job.attempt or 0 }}/{{ job.max_attempts or 1 }}</p>
                     <p><strong>Updated:</strong> {{ job.updated_at }}</p>
+                    <div class="job-controls">
+                      {% if job.status in ["queued", "running"] and job.cancellable %}
+                      <form method="POST" action="/jobs/{{ job.id }}/cancel"><button class="danger" type="submit">Cancel</button></form>
+                      {% endif %}
+                      {% if job.status in ["failed", "cancelled", "timed_out"] %}
+                      <form method="POST" action="/jobs/{{ job.id }}/retry"><button class="safe" type="submit">Retry</button></form>
+                      {% if not job.acknowledged %}<form method="POST" action="/jobs/{{ job.id }}/acknowledge"><button type="submit">Mark resolved</button></form>{% endif %}
+                      {% endif %}
+                    </div>
                     <p class="muted">{{ job.id }}</p>
                 </div>
             {% endfor %}
@@ -119,14 +129,19 @@ function renderJob(job) {
         <div class="card">
             <h3>${escapeHtml(job.type)}</h3>
             <p><strong>Display:</strong> ${escapeHtml(job.display_id)}</p>
-            <p><strong>Status:</strong> <span class="${cls}">${escapeHtml(job.status)}</span></p>
+            <p><strong>Status:</strong> <span class="${cls}">${escapeHtml(job.status)}</span>${job.acknowledged ? ` <span class="muted">(resolved)</span>` : ""}</p>
             <p><strong>Progress:</strong> ${escapeHtml(job.progress)}%</p>
             <div style="height:10px;background:#090909;border:1px solid #333;border-radius:999px;overflow:hidden;">
                 <div style="height:100%;width:${Number(job.progress || 0)}%;background:#2d7dff;"></div>
             </div>
             <p><strong>Message:</strong> ${escapeHtml(job.message)}</p>
             <p><strong>Created:</strong> ${escapeHtml(job.created_at)}</p>
+            <p><strong>Attempt:</strong> ${escapeHtml(job.attempt || 0)}/${escapeHtml(job.max_attempts || 1)}</p>
             <p><strong>Updated:</strong> ${escapeHtml(job.updated_at)}</p>
+            <div class="job-controls">
+              ${(job.status === "queued" || job.status === "running") && job.cancellable ? `<form method="POST" action="/jobs/${escapeHtml(job.id)}/cancel"><button class="danger" type="submit">Cancel</button></form>` : ""}
+              ${["failed", "cancelled", "timed_out"].includes(job.status) ? `<form method="POST" action="/jobs/${escapeHtml(job.id)}/retry"><button class="safe" type="submit">Retry</button></form>${job.acknowledged ? "" : `<form method="POST" action="/jobs/${escapeHtml(job.id)}/acknowledge"><button type="submit">Mark resolved</button></form>`}` : ""}
+            </div>
             <p class="muted">${escapeHtml(job.id)}</p>
         </div>
     `;

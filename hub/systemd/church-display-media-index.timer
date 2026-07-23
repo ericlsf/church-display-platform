@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh Church Display media metadata index periodically
+
+[Timer]
+OnBootSec=45s
+OnUnitActiveSec=2min
+Persistent=true
+RandomizedDelaySec=15s
+
+[Install]
+WantedBy=timers.target

@@ -341,3 +341,79 @@ def analyze_drive_folder(remote="gdrive", folder="", timeout=30, max_items=500, 
         "supported_only": supported_only,
         "error": "",
     }
+
+
+def get_playlist_entry(remote, folder):
+    data = load_playlists()
+    key = playlist_key(remote, folder)
+    entry = data.get("playlists", {}).get(key, {})
+    published = entry.get("published_order") or entry.get("order") or []
+    draft = entry.get("draft_order") or published
+    return {
+        **entry,
+        "remote": remote or "gdrive",
+        "folder": (folder or "").strip().strip("/"),
+        "published_order": [str(x) for x in published if str(x).strip()],
+        "draft_order": [str(x) for x in draft if str(x).strip()],
+        "status": entry.get("status") or ("draft" if draft != published else "published"),
+        "draft_note": entry.get("draft_note", ""),
+        "published_at": entry.get("published_at", ""),
+    }
+
+
+def save_playlist_draft(remote, folder, order, note=""):
+    clean = []
+    seen = set()
+    for item in order or []:
+        item = str(item).strip().strip("/")
+        if item and item not in seen:
+            seen.add(item)
+            clean.append(item)
+
+    data = load_playlists()
+    key = playlist_key(remote, folder)
+    entry = data.setdefault("playlists", {}).setdefault(key, {})
+    published = entry.get("published_order") or entry.get("order") or []
+    entry.update({
+        "remote": remote or "gdrive",
+        "folder": (folder or "").strip().strip("/"),
+        "draft_order": clean,
+        "draft_note": (note or "").strip(),
+        "status": "draft" if clean != published else "published",
+        "insertion_policy": entry.get("insertion_policy", "newest_first"),
+    })
+    save_playlists(data)
+    return clean
+
+
+def publish_playlist(remote, folder):
+    from datetime import datetime
+
+    data = load_playlists()
+    key = playlist_key(remote, folder)
+    entry = data.setdefault("playlists", {}).setdefault(key, {})
+    published = entry.get("draft_order") or entry.get("published_order") or entry.get("order") or []
+    entry.update({
+        "remote": remote or "gdrive",
+        "folder": (folder or "").strip().strip("/"),
+        "order": list(published),
+        "published_order": list(published),
+        "draft_order": list(published),
+        "status": "published",
+        "published_at": datetime.now().isoformat(timespec="seconds"),
+        "insertion_policy": entry.get("insertion_policy", "newest_first"),
+    })
+    save_playlists(data)
+    return list(published)
+
+
+def discard_playlist_draft(remote, folder):
+    data = load_playlists()
+    key = playlist_key(remote, folder)
+    entry = data.setdefault("playlists", {}).setdefault(key, {})
+    published = entry.get("published_order") or entry.get("order") or []
+    entry["draft_order"] = list(published)
+    entry["status"] = "published"
+    entry["draft_note"] = ""
+    save_playlists(data)
+    return list(published)

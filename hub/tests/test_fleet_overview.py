@@ -9,6 +9,11 @@ class FleetOverviewTests(unittest.TestCase):
     def setUp(self):
         self.app = create_app()
         self.app.config["TESTING"] = True
+        self.app.before_request_funcs[None] = [
+            handler
+            for handler in self.app.before_request_funcs.get(None, [])
+            if handler.__name__ != "church_display_auth_guard"
+        ]
         self.client = self.app.test_client()
 
     @patch("routes.displays.load_config")
