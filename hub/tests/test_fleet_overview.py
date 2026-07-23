@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch
 
 from app import create_app
+from services.fleet_state import media_count_for, system_health_for
 
 
 class FleetOverviewTests(unittest.TestCase):
@@ -59,6 +60,43 @@ class FleetOverviewTests(unittest.TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.headers["Location"].endswith("/displays"))
         create_job.assert_called_once_with("lobby", "restart_display", {})
+
+    def test_live_status_fills_media_memory_and_disk(self):
+        status = {
+            "total_media": 18,
+            "memory": "37%",
+            "disk": "22%",
+            "uptime": "2 days",
+        }
+        heartbeat = {
+            "media": {"total": 0},
+            "system": {"cpu_temp": "51.2 C", "memory": "Unknown", "disk": "Unknown"},
+        }
+
+        self.assertEqual(media_count_for(status, heartbeat), 18)
+        self.assertEqual(system_health_for(status, heartbeat), {
+            "cpu_temp": "51.2 C",
+            "memory": "37%",
+            "disk": "22%",
+            "uptime": "2 days",
+        })
+
+    def test_legacy_flat_heartbeat_health_is_supported(self):
+        heartbeat = {
+            "media_count": "9",
+            "cpu_temp": "49.0 C",
+            "memory_usage": "41%",
+            "disk_usage": "28%",
+            "uptime": "6 hours",
+        }
+
+        self.assertEqual(media_count_for({}, heartbeat), 9)
+        self.assertEqual(system_health_for({}, heartbeat), {
+            "cpu_temp": "49.0 C",
+            "memory": "41%",
+            "disk": "28%",
+            "uptime": "6 hours",
+        })
 
 
 if __name__ == "__main__":

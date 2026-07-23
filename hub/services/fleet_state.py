@@ -12,6 +12,78 @@ from services.timeutil import human_age, is_fresh, seconds_old
 PREVIEW_DIR = Path(__file__).resolve().parent.parent / "static" / "previews"
 
 
+def useful_value(*values):
+    for value in values:
+        if value is None:
+            continue
+        if isinstance(value, str) and value.strip().lower() in {"", "unknown", "n/a", "none", "null", "—"}:
+            continue
+        return value
+    return None
+
+
+def media_count_for(status, heartbeat):
+    hb_media = heartbeat.get("media") or {}
+    hb_player = heartbeat.get("player") or {}
+    candidates = [
+        status.get("total_media"),
+        status.get("media_count"),
+        status.get("player_media_count"),
+        hb_media.get("total"),
+        hb_player.get("media_count"),
+        heartbeat.get("total_media"),
+        heartbeat.get("media_count"),
+    ]
+
+    for value in candidates:
+        try:
+            if int(value) > 0:
+                return int(value)
+        except (TypeError, ValueError):
+            continue
+
+    for value in candidates:
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            continue
+    return 0
+
+
+def system_health_for(status, heartbeat):
+    hb_system = heartbeat.get("system") or {}
+    status_system = status.get("system") or {}
+
+    return {
+        "cpu_temp": useful_value(
+            hb_system.get("cpu_temp"),
+            heartbeat.get("cpu_temp"),
+            status_system.get("cpu_temp"),
+            status.get("cpu_temp"),
+        ) or "Unknown",
+        "memory": useful_value(
+            status.get("memory"),
+            status_system.get("memory"),
+            hb_system.get("memory"),
+            heartbeat.get("memory"),
+            heartbeat.get("memory_usage"),
+        ) or "Unknown",
+        "disk": useful_value(
+            status.get("disk"),
+            status_system.get("disk"),
+            hb_system.get("disk"),
+            heartbeat.get("disk"),
+            heartbeat.get("disk_usage"),
+        ) or "Unknown",
+        "uptime": useful_value(
+            status.get("uptime"),
+            status_system.get("uptime"),
+            hb_system.get("uptime"),
+            heartbeat.get("uptime"),
+        ) or "Unknown",
+    }
+
+
 def preview_url_for(display_id):
     path = PREVIEW_DIR / f"{display_id}.jpg"
     if path.exists():
@@ -72,9 +144,7 @@ def build_fleet_state():
         hb = get_heartbeat_for_display(display, heartbeats)
 
         hb_player = hb.get("player", {})
-        hb_media = hb.get("media", {})
         hb_sync = hb.get("sync", {})
-        hb_system = hb.get("system", {})
         hb_git = hb.get("git", {})
 
         heartbeat_received_at = hb.get("received_at", "")
@@ -112,7 +182,7 @@ def build_fleet_state():
             "config_version": hb.get("config_version", "Unknown"),
             "current_media": status.get("current_media") or hb_player.get("current_media") or "Unknown",
             "media_type": status.get("media_type") or hb_player.get("media_type") or "Unknown",
-            "media_count": hb_media.get("total", hb_player.get("media_count", 0)),
+            "media_count": media_count_for(status, hb),
             "overlay": status.get("overlay") or hb_player.get("overlay") or "",
             "countdown": status.get("countdown") or hb_player.get("countdown") or "",
             "last_update": status.get("last_update") or hb_player.get("last_update") or "Unknown",
@@ -121,7 +191,7 @@ def build_fleet_state():
             "sync_state": sync_status.get("state") or hb_sync.get("state") or "unknown",
             "sync_last_success": sync_status.get("last_success") or hb_sync.get("last_success") or "Unknown",
             "folder_options": folder_options,
-            "system": hb_system,
+            "system": system_health_for(status, hb),
             "preview_url": preview_url_for(display_id),
         })
 
