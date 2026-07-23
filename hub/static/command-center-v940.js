@@ -47,6 +47,22 @@
     if (!jobs?.length) { list.innerHTML = '<div class="command-empty">No active jobs.</div>'; return; }
     list.innerHTML = jobs.map((job) => `<article class="drawer-job"><div><strong>${String(job.type || "job").replaceAll("_", " ")}</strong><span>${job.display_id || "Fleet"}</span></div><span class="status-pill">${job.status || "Running"}</span><div class="drawer-progress"><span style="width:${Number(job.progress || 0)}%"></span></div><small>${Number(job.progress || 0)}%</small></article>`).join("");
   };
+  const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[char]);
+  const renderActivity = (items) => {
+    const timeline = root.querySelector("[data-activity-timeline]");
+    if (!timeline) return;
+    if (!items?.length) {
+      timeline.innerHTML = '<div class="command-empty">No recent activity.</div>';
+      return;
+    }
+    timeline.innerHTML = items.slice(0, 8).map((item) => `
+      <a class="activity-event level-${escapeHtml(item.level || "info")}" href="${escapeHtml(item.link || "/notifications")}">
+        <time>${escapeHtml(item.created_at || "")}</time><span class="activity-dot"></span>
+        <div><strong>${escapeHtml(item.title || "Fleet event")}</strong><small>${escapeHtml(item.target || "")}</small></div>
+      </a>`).join("");
+  };
   const checkCompletedJobs = (jobs) => {
     const current = new Map(); (jobs || []).forEach((job) => current.set(String(job.id), String(job.status || "")));
     knownJobs.forEach((status, id) => { if (!current.has(id) && ["running","queued","pending","retrying","in_progress"].includes(status.toLowerCase())) showToast("A fleet job completed."); }); knownJobs = current;
@@ -55,7 +71,7 @@
     liveDot?.classList.add("refreshing");
     try {
       const response = await fetch("/command-center/summary", {credentials:"same-origin",cache:"no-store"}); if (!response.ok) throw new Error();
-      const data = await response.json(); updateMetrics(data.summary); checkCompletedJobs(data.active_jobs || []); renderJobs(data.active_jobs || []); lastGeneratedAt = data.generated_at; if (updated) updated.textContent = relativeTime(lastGeneratedAt);
+      const data = await response.json(); updateMetrics(data.summary); checkCompletedJobs(data.active_jobs || []); renderJobs(data.active_jobs || []); renderActivity(data.notifications || []); lastGeneratedAt = data.generated_at; if (updated) updated.textContent = relativeTime(lastGeneratedAt);
     } catch (_) { if (updated) updated.textContent = "Refresh unavailable"; }
     finally { liveDot?.classList.remove("refreshing"); }
   };

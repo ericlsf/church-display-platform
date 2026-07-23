@@ -3,7 +3,10 @@ from services.deployment_guard import existing_deployment
 from services.display_artifacts import create_artifact
 from services.jobs import create_job, list_jobs
 from services.maintenance import in_maintenance
-from services.releases import latest_git_tag, list_git_tags
+from services.display_release_catalog import (
+    latest_display_tag,
+    list_display_release_tags,
+)
 
 
 ACTIVE = {
@@ -43,7 +46,7 @@ def display_upgrade_state(display_id, current_version=""):
         reverse=True,
     )
 
-    latest = latest_git_tag()
+    latest = latest_display_tag()
     active_job = next(
         (
             job
@@ -58,7 +61,7 @@ def display_upgrade_state(display_id, current_version=""):
 
     return {
         "latest_version": latest,
-        "release_tags": list_git_tags(),
+        "release_tags": list_display_release_tags(),
         "current_version": current_version or "unknown",
         "update_available": bool(
             latest

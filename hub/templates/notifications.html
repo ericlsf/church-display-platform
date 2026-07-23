@@ -49,6 +49,13 @@
                 </form>
               {% endif %}
 
+              {% if item.level in ["error", "warning"] and not item.resolved %}
+                <form method="POST" action="/notifications/resolve">
+                  <input type="hidden" name="notification_id" value="{{ item.id }}">
+                  <button type="submit">Resolve</button>
+                </form>
+              {% endif %}
+
               <form method="POST" action="/notifications/dismiss">
                 <input type="hidden" name="notification_id" value="{{ item.id }}">
                 <button type="submit">Dismiss</button>
