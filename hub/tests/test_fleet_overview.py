@@ -3,10 +3,16 @@ from pathlib import Path
 from unittest.mock import patch
 
 from app import create_app
-from services.fleet_state import media_count_for, system_health_for
+from services.fleet_state import health_state_for, media_count_for, system_health_for
 
 
 class FleetOverviewTests(unittest.TestCase):
+    def test_available_update_marks_online_display_as_warning(self):
+        self.assertEqual(
+            health_state_for(True, {"memory": "40%", "disk": "20%"}, update_available=True),
+            "warning",
+        )
+
     def test_offline_and_warning_badges_have_distinct_colors(self):
         stylesheet = (Path(__file__).parents[1] / "static" / "style.css").read_text()
         self.assertIn(".fleet-status.is-offline{color:#ff7b72", stylesheet)

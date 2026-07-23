@@ -74,7 +74,7 @@ def system_health_for(status, heartbeat):
     }
 
 
-def health_state_for(online, system, active_job=None):
+def health_state_for(online, system, active_job=None, update_available=False):
     if active_job and active_job.get("type") == "deploy_update":
         return "updating"
     if not online:
@@ -86,6 +86,8 @@ def health_state_for(online, system, active_job=None):
                 return "warning"
         except ValueError:
             pass
+    if update_available:
+        return "warning"
     return "online"
 
 
@@ -188,7 +190,7 @@ def build_fleet_state():
             "host": display.get("host", ""),
             "group": display.get("group", ""),
             "online": online,
-            "health_state": health_state_for(online, system, active_job),
+            "health_state": health_state_for(online, system, active_job, update_available),
             "active_job": active_job or {},
             "status_online": status_online,
             "sync_online": sync_online,
