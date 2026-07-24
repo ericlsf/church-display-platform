@@ -4,6 +4,7 @@ from services.notifications import (
     clear_resolved,
     dismiss,
     mark_read,
+    resolve_notification,
     unread_count,
     visible_notifications,
 )
@@ -54,4 +55,10 @@ def dismiss_one():
 @notifications_bp.route("/clear-resolved", methods=["POST"])
 def clear_resolved_route():
     clear_resolved()
+    return redirect(url_for("notifications.page"))
+
+
+@notifications_bp.route("/resolve", methods=["POST"])
+def resolve():
+    resolve_notification(request.form.get("notification_id", ""))
     return redirect(url_for("notifications.page"))

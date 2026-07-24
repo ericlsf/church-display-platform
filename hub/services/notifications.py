@@ -103,6 +103,14 @@ def refresh_notifications():
         display_id = job.get("display_id", "")
         message = job.get("message", "")
 
+        if job.get("resolved") or job.get("acknowledged"):
+            source_key = f"job-failed:{job_id}"
+            for existing in data["notifications"]:
+                if existing.get("source_key") == source_key:
+                    existing["resolved"] = True
+                    existing["read"] = True
+                    changed = True
+
         if status in PROBLEM_JOB_STATUSES:
             item = _add(
                 data,
@@ -192,6 +200,16 @@ def clear_resolved():
         if item.get("resolved") or item.get("level") == "success":
             item["dismissed"] = True
             item["read"] = True
+    save_notifications(data)
+
+
+def resolve_notification(notification_id):
+    data = load_notifications()
+    for item in data["notifications"]:
+        if item.get("id") == notification_id:
+            item["resolved"] = True
+            item["read"] = True
+            break
     save_notifications(data)
 
 

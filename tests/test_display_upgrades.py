@@ -6,11 +6,11 @@ from services.display_upgrades import display_upgrade_state
 
 class DisplayUpgradeTests(unittest.TestCase):
     @patch(
-        "services.display_upgrades.list_git_tags",
+        "services.display_upgrades.list_display_release_tags",
         return_value=["v5.3.1", "v5.4.0"],
     )
     @patch(
-        "services.display_upgrades.latest_git_tag",
+        "services.display_upgrades.latest_display_tag",
         return_value="v5.4.0",
     )
     @patch(

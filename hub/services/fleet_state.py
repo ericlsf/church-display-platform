@@ -7,7 +7,7 @@ from services.drive import list_drive_folders
 from services.events import read_event_records, read_events
 from services.heartbeat_store import load_heartbeats, get_heartbeat_for_display
 from services.jobs import list_jobs
-from services.releases import latest_git_tag
+from services.display_release_catalog import latest_display_tag
 from services.timeutil import human_age, is_fresh, seconds_old
 from services.telemetry_normalization import normalize_media_count
 
@@ -171,7 +171,7 @@ def build_fleet_state():
 
     drive_remote = hub_settings.get("drive_remote", "gdrive")
     drive_folders, drive_error = list_drive_folders(drive_remote)
-    latest_tag = latest_git_tag()
+    latest_tag = latest_display_tag()
     active_jobs = {}
     for job in list_jobs(500):
         if job.get("status") in {"queued", "running"}:
