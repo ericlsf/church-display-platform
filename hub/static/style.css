@@ -1770,6 +1770,8 @@ kbd { font:inherit; font-size:11px; color:#aaa; border:1px solid #454545; backgr
 .alert-toolbar{padding:.65rem;border:1px solid var(--border,#333);border-radius:.7rem;background:var(--panel,#1f1f1f)}
 .alert-toolbar button.active{border-color:var(--accent,#2f80ed);background:rgba(47,128,237,.14)}
 .alert-list{display:grid;gap:.6rem}
+.alert-list[hidden]{display:none}
+.alert-toolbar-action{margin-left:auto}
 .alert-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.8rem;align-items:center;padding:.85rem;border:1px solid var(--border,#333);border-radius:.65rem;background:var(--panel,#1f1f1f)}
 .alert-row.critical{border-left:5px solid #c62828}.alert-row.warning{border-left:5px solid #ef6c00}.alert-row.info{border-left:5px solid #1565c0}
 .alert-severity-icon{display:grid;place-items:center;width:1.75rem;height:1.75rem;border-radius:999px;background:rgba(127,127,127,.12);font-weight:800}

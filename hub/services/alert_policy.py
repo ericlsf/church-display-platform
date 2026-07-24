@@ -90,26 +90,40 @@ def apply_alert_policy(center, now=None):
         else:
             active.append(enriched)
 
+    active_alerts = [
+        alert
+        for alert in active
+        if not alert.get("acknowledged")
+    ]
+    acknowledged_alerts = [
+        alert
+        for alert in active
+        if alert.get("acknowledged")
+    ]
+
     counts = {
         "critical": sum(
             alert.get("severity") == "critical"
-            for alert in active
+            for alert in active_alerts
         ),
         "warning": sum(
             alert.get("severity") == "warning"
-            for alert in active
+            for alert in active_alerts
         ),
         "info": sum(
             alert.get("severity") == "info"
-            for alert in active
+            for alert in active_alerts
         ),
-        "active": len(active),
+        "active": len(active_alerts),
+        "acknowledged": len(acknowledged_alerts),
         "suppressed": len(suppressed),
     }
 
     return {
         **center,
         "alerts": active,
+        "active_alerts": active_alerts,
+        "acknowledged_alerts": acknowledged_alerts,
         "suppressed_alerts": suppressed,
         "rules": rules,
         "quiet_hours_active": quiet,

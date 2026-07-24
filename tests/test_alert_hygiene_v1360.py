@@ -4,6 +4,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 import services.alert_acknowledgements as acknowledgements
+from services.alert_policy import apply_alert_policy
 
 
 class AlertHygieneTests(TestCase):
@@ -47,3 +48,44 @@ class AlertHygieneTests(TestCase):
                 )
 
         self.assertEqual(count, 1)
+
+    @patch(
+        "services.alert_policy.load_alert_rules",
+        return_value={
+            "quiet_hours_enabled": False,
+            "categories": {},
+        },
+    )
+    def test_policy_recalculates_acknowledged_counts(self, _rules):
+        acknowledged = {
+            "key": "job:1",
+            "severity": "warning",
+            "acknowledged": True,
+        }
+        active = {
+            "key": "health:1",
+            "severity": "warning",
+            "acknowledged": False,
+        }
+
+        result = apply_alert_policy({
+            "alerts": [acknowledged, active],
+            "active_alerts": [acknowledged, active],
+            "acknowledged_alerts": [],
+            "counts": {},
+        })
+
+        self.assertEqual(result["counts"]["active"], 1)
+        self.assertEqual(result["counts"]["acknowledged"], 1)
+        self.assertEqual(result["counts"]["warning"], 1)
+        self.assertEqual(
+            [item["key"] for item in result["active_alerts"]],
+            ["health:1"],
+        )
+        self.assertEqual(
+            [
+                item["key"]
+                for item in result["acknowledged_alerts"]
+            ],
+            ["job:1"],
+        )
