@@ -21,15 +21,7 @@ bulk_operations_bp = Blueprint(
 
 @bulk_operations_bp.route("/", methods=["GET"])
 def page():
-    config = load_config()
-
-    return render_template(
-        "bulk_operations.html",
-        displays=list(fleet_rows()),
-        folders=config.get("folder_options", []),
-        profiles=config.get("display_profiles", []),
-        releases=config.get("display_releases", []),
-    )
+    return redirect(url_for("displays.page"), code=302)
 
 
 @bulk_operations_bp.route("/run", methods=["POST"])

@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, render_template
+from flask import Blueprint, jsonify, redirect, url_for
 from services.command_center import command_center_data
 
 command_center_bp = Blueprint("command_center", __name__, url_prefix="/command-center")
@@ -6,11 +6,7 @@ command_center_bp = Blueprint("command_center", __name__, url_prefix="/command-c
 
 @command_center_bp.route("")
 def page():
-    return render_template(
-        "command_center.html",
-        active="command_center",
-        **command_center_data(),
-    )
+    return redirect(url_for("fleet_dashboard.page"), code=302)
 
 
 @command_center_bp.route("/summary")

@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, render_template
+from flask import Blueprint, jsonify, redirect, url_for
 
 from services.fleet_state import build_fleet_state
 from services.jobs import list_jobs
@@ -45,11 +45,7 @@ def build_deployment_center_state():
 
 @deployment_center_bp.route("/deployment-center")
 def page():
-    return render_template(
-        "deployment_center.html",
-        active="deployment_center",
-        state=build_deployment_center_state(),
-    )
+    return redirect(url_for("content_deployments.page"), code=302)
 
 
 @deployment_center_bp.route("/api/v1/deployment-center")

@@ -14,35 +14,7 @@ fleet_operations_bp = Blueprint(
 
 @fleet_operations_bp.route("")
 def page():
-    rows = fleet_rows()
-    summary = {
-        "total": len(rows),
-        "ready": sum(1 for row in rows if row["readiness"] == "ready"),
-        "offline": sum(1 for row in rows if row["readiness"] == "offline"),
-        "maintenance": sum(
-            1 for row in rows if row["readiness"] == "maintenance"
-        ),
-        "attention": sum(
-            1
-            for row in rows
-            if row["readiness"] in {"needs_attention", "needs_playlist"}
-        ),
-        "provisioning": sum(
-            1
-            for row in rows
-            if row["readiness"] == "provisioning"
-        ),
-    }
-
-    return render_template(
-        "fleet_operations.html",
-        active="fleet_operations",
-        rows=rows,
-        groups=load_groups().get("groups", []),
-        summary=summary,
-        release_tags=list_git_tags(),
-        latest_tag=latest_git_tag(),
-    )
+    return redirect(url_for("displays.page"), code=302)
 
 
 @fleet_operations_bp.route("/bulk", methods=["POST"])

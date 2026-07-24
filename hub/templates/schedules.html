@@ -3,14 +3,18 @@
 {% block content %}
 
 <div class="section">
-  <h2>Schedules</h2>
-  <p class="muted">Schedule syncs, folder changes, restarts, and deployments. Due schedules are processed by the Hub when this page is opened or when you click Process Due Now.</p>
+  <div class="section-heading-row">
+    <div><p class="eyebrow">ACTIVITY</p><h2>Upcoming Work</h2></div>
+    <div class="workflow-tabs"><a class="button" href="/jobs">Jobs &amp; Work</a><a class="button" href="/history">Events &amp; Health</a><a class="button primary" href="/schedules">Upcoming Work</a></div>
+  </div>
+  <p class="muted">Review scheduled work. Create content schedules from Content Deployments and software schedules from Display Software.</p>
   {% if drive_error %}<p class="offline">Drive folders unavailable: {{ drive_error }}</p>{% endif %}
   <form method="POST" action="/schedules/process"><button class="safe" type="submit">Process Due Now</button></form>
 </div>
 
 <div class="section">
-  <h2>Add Schedule</h2>
+  <details>
+  <summary><strong>Create advanced schedule</strong></summary>
   <form method="POST" action="/schedules/add">
     <label>Name</label>
     <input name="name" placeholder="Sunday morning sync">
@@ -70,6 +74,7 @@
 
     <button class="primary" type="submit">Save Schedule</button>
   </form>
+  </details>
 </div>
 
 <div class="section">

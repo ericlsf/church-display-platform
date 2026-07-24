@@ -5,32 +5,33 @@
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
   const collapseKey = "church-display-shell-collapsed";
   const routes = [
-    ["/command-center","command",["Command Center","Operator Cockpit"]],
-    ["/alerts/rules","settings",["Settings","Alert Rules"]],
-    ["/alerts","command",["Command Center","Alert Center"]],
-    ["/fleet-operations","command",["Command Center","Fleet Operations"]],
-    ["/jobs","command",["Command Center","Jobs"]],
-    ["/history","command",["Command Center","History"]],
-    ["/media","media",["Media Library","Browse Media"]],
-    ["/content","media",["Media Library","Images & Playlists"]],
+    ["/command-center","home",["Home"]],
+    ["/alerts/rules","alerts",["Alerts","Configure Alerts"]],
+    ["/alerts","alerts",["Alerts"]],
+    ["/fleet-operations","displays",["Displays"]],
+    ["/bulk-operations","displays",["Displays"]],
+    ["/jobs","activity",["Activity"]],
+    ["/history","activity",["Activity","System Events"]],
+    ["/media","content",["Content","Browse Drive"]],
+    ["/content","content",["Content","Images & Playlists"]],
     ["/display/","displays",["Displays","Display Details"]],
-    ["/displays","displays",["Displays","All Displays"]],
+    ["/displays","displays",["Displays"]],
     ["/groups","displays",["Displays","Groups"]],
-    ["/display-profiles","displays",["Displays","Profiles"]],
-    ["/schedules","schedules",["Schedules"]],
-    ["/rollouts","schedules",["Schedules","Scheduled Rollouts"]],
-    ["/deployment-center","operations",["Operations","Deployment Center"]],
-    ["/content-deployments","operations",["Operations","Content Deployments"]],
-    ["/deployments","operations",["Operations","Software Deployments"]],
-    ["/bulk-operations","operations",["Operations","Bulk Operations"]],
-    ["/fleet-dashboard","dashboard",["Dashboard","Overview"]],
-    ["/fleet-map","dashboard",["Dashboard","Fleet Map"]],
+    ["/display-profiles","displays",["Displays","Display Presets"]],
+    ["/fleet-map","displays",["Displays"]],
+    ["/schedules","deployments",["Deployments","Scheduled Work"]],
+    ["/rollouts","deployments",["Deployments","Software Rollouts"]],
+    ["/deployment-center","deployments",["Deployments"]],
+    ["/content-deployments","deployments",["Deployments","Content"]],
+    ["/deployments","deployments",["Deployments","Software"]],
+    ["/fleet-dashboard","home",["Home"]],
     ["/users","settings",["Settings","Users"]],
-    ["/releases","settings",["Settings","Releases"]],
+    ["/releases","deployments",["Deployments","Software Releases"]],
+    ["/remote-access","settings",["Settings","General","Remote Access"]],
     ["/system","settings",["Settings","System"]],
     ["/setup","settings",["Settings","Platform Settings"]]
   ];
-  const route = routes.find(([prefix]) => path === prefix || path.startsWith(`${prefix}/`) || (prefix.endsWith("/") && path.startsWith(prefix))) || ["/fleet-dashboard","dashboard",["Dashboard"]];
+  const route = routes.find(([prefix]) => path === prefix || path.startsWith(`${prefix}/`) || (prefix.endsWith("/") && path.startsWith(prefix))) || ["/fleet-dashboard","home",["Home"]];
 
   const removeLegacyChrome = () => {
     document.querySelectorAll(".v7-shell,.v7-breadcrumbs,.v8-shell,.v8-breadcrumbs,[data-v7-shell],[data-v8-shell]").forEach((node) => node.remove());
@@ -70,9 +71,11 @@
     });
   };
 
+  const primaryRoutes = {home:"/fleet-dashboard",displays:"/displays",content:"/content",deployments:"/content-deployments",activity:"/jobs",alerts:"/alerts"};
   const markRoute = () => shell.querySelectorAll("[data-shell-route]").forEach((link) => {
     const target = (link.dataset.shellRoute || "").replace(/\/+$/, "");
-    link.classList.toggle("active", path === target || path.startsWith(`${target}/`));
+    const primary = primaryRoutes[route[1]];
+    link.classList.toggle("active", target === primary || path === target || path.startsWith(`${target}/`));
   });
 
   const buildBreadcrumbs = (main) => {
@@ -101,7 +104,7 @@
 
   removeLegacyChrome();
   const main = locateMain();
-  openSection(route[1]);
+  if (route[1] === "settings") openSection("settings");
   markRoute();
   buildBreadcrumbs(main);
   setCollapsed(localStorage.getItem(collapseKey) === "true");

@@ -7,11 +7,13 @@
 {% block content %}
 <section class="section fleet-hero">
   <div>
-    <p class="eyebrow">v13.7.0</p>
-    <h2>Fleet Overview</h2>
-    <p class="muted">Monitor every display and take action without leaving the fleet.</p>
+    <p class="eyebrow">v13.10.0</p>
+    <h2>Displays</h2>
+    <p class="muted">Monitor, organize, and operate every display from one place.</p>
   </div>
   <div class="fleet-hero-actions">
+    <a class="button-link" href="/groups">Manage groups</a>
+    <a class="button-link" href="/display-profiles">Display presets</a>
     <button class="button-link notification-toggle" type="button" data-toggle-notifications>Notifications <span class="notification-count" id="notification-count">{{ notifications|length }}</span></button>
     <button class="primary" type="button" data-toggle-add>+ Add display</button>
   </div>
@@ -94,15 +96,6 @@
       <input type="hidden" name="next" value="/displays">
       <button class="button-link" type="submit">Screenshot all</button>
     </form>
-    <form method="POST" action="/fleet/bulk/deploy" data-bulk-form onsubmit="return confirm('Deploy the latest release to selected displays?');">
-      <input type="hidden" name="next" value="/displays">
-      <input type="hidden" name="target" value="{{ latest_tag }}">
-      <button class="primary" type="submit">Deploy latest</button>
-    </form>
-    <form method="POST" action="/fleet/bulk/update" data-bulk-form>
-      <input type="hidden" name="next" value="/displays">
-      <button class="button-link" type="submit">Check updates</button>
-    </form>
     <form method="POST" action="/fleet/bulk/restart" data-bulk-form onsubmit="return confirm('Restart the selected display apps?');">
       <input type="hidden" name="next" value="/displays">
       <button class="danger" type="submit">Restart apps</button>
@@ -111,6 +104,8 @@
       <input type="hidden" name="next" value="/displays">
       <button class="danger" type="submit">Reboot devices</button>
     </form>
+    <a class="button-link" href="/display-profiles">Apply preset</a>
+    <a class="button-link" href="/deployments">Update software</a>
   </div>
 </section>
 

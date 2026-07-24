@@ -9,31 +9,33 @@
     </div>
     <form class="app-search" action="/search" method="GET">
       <span aria-hidden="true">⌕</span>
-      <input type="search" name="q" placeholder="Search displays, media, groups…" autocomplete="off">
+      <input type="search" name="q" placeholder="Search displays and content…" autocomplete="off">
     </form>
     <nav class="app-navigation">
-      {% set sections = [
-        ("dashboard", "⌂", "Dashboard", [("/fleet-dashboard", "⌂", "Overview"), ("/fleet-map", "⌖", "Fleet Map")]),
-        ("command", "⚡", "Command Center", [("/command-center", "⚡", "Operator Cockpit"), ("/alerts/", "!", "Alert Center"), ("/jobs", "☷", "Jobs"), ("/history", "◷", "History")]),
-        ("media", "▤", "Media Library", [("/content", "▥", "Images & Playlists")]),
-        ("displays", "▣", "Displays", [("/displays", "▣", "All Displays"), ("/groups", "◫", "Groups"), ("/display-profiles", "◧", "Profiles")]),
-        ("operations", "⚙", "Operations", [("/fleet-operations", "⚙", "Fleet Operations"), ("/deployment-center", "◈", "Deployment Center"), ("/content-deployments", "⇧", "Content Deployments"), ("/deployments", "⬆", "Display Software"), ("/bulk-operations/", "⇉", "Bulk Operations")]),
-        ("schedules", "◷", "Schedules", [("/schedules", "◷", "Schedules"), ("/rollouts", "↻", "Scheduled Rollouts")]),
-        ("settings", "⚒", "Settings", [("/setup", "⚒", "Platform Settings"), ("/remote-access", "⇄", "Remote Access"), ("/system", "◉", "System"), ("/users", "♙", "Users"), ("/releases", "⬆", "Releases"), ("/alerts/rules/", "≡", "Alert Rules")])
+      {% set primary_links = [
+        ("/fleet-dashboard", "⌂", "Home"),
+        ("/displays", "▣", "Displays"),
+        ("/content", "▥", "Content"),
+        ("/content-deployments", "⇧", "Deployments"),
+        ("/jobs", "☷", "Activity"),
+        ("/alerts/", "!", "Alerts")
       ] %}
-      {% for section_id, section_icon, section_label, links in sections %}
-      <section class="app-nav-section" data-shell-section="{{ section_id }}">
-        <button type="button" class="app-nav-section-toggle" data-shell-section-toggle="{{ section_id }}" aria-expanded="false">
-          <span><span class="app-nav-icon">{{ section_icon }}</span><span class="app-nav-label">{{ section_label }}</span></span>
+      <div class="app-nav-primary app-nav-links">
+        {% for href, icon, label in primary_links %}
+        <a href="{{ href }}" data-shell-route="{{ href }}" title="{{ label }}"><span class="app-nav-icon">{{ icon }}</span><span class="app-nav-label">{{ label }}</span></a>
+        {% endfor %}
+      </div>
+      <section class="app-nav-section app-nav-settings" data-shell-section="settings">
+        <button type="button" class="app-nav-section-toggle" data-shell-section-toggle="settings" aria-expanded="false">
+          <span><span class="app-nav-icon">⚒</span><span class="app-nav-label">Settings</span></span>
           <span class="app-nav-chevron">›</span>
         </button>
-        <div class="app-nav-links" data-shell-section-links="{{ section_id }}" hidden>
-          {% for href, icon, label in links %}
-          <a href="{{ href }}" data-shell-route="{{ href }}" title="{{ label }}"><span class="app-nav-icon">{{ icon }}</span><span class="app-nav-label">{{ label }}</span></a>
-          {% endfor %}
+        <div class="app-nav-links" data-shell-section-links="settings" hidden>
+          <a href="/setup" data-shell-route="/setup" title="General"><span class="app-nav-icon">⚒</span><span class="app-nav-label">General</span></a>
+          <a href="/users" data-shell-route="/users" title="Access &amp; Security"><span class="app-nav-icon">♙</span><span class="app-nav-label">Access &amp; Security</span></a>
+          <a href="/system" data-shell-route="/system" title="System"><span class="app-nav-icon">◉</span><span class="app-nav-label">System</span></a>
         </div>
       </section>
-      {% endfor %}
     </nav>
     <div class="app-sidebar-footer"><a href="/system/support" title="Support Bundle"><span class="app-nav-icon">?</span><span class="app-nav-label">Support Bundle</span></a></div>
   </aside>
@@ -45,7 +47,7 @@
       <a href="/notifications" class="app-notification-button" title="Notifications" aria-label="Notifications">●<span data-shell-notification-count hidden></span></a>
       <div class="app-user-menu">
         <button type="button" data-shell-user-toggle aria-expanded="false"><span class="app-user-avatar">A</span><span class="app-user-name">Admin</span><span>⌄</span></button>
-        <div data-shell-user-menu hidden><a href="/users">User Administration</a><a href="/alerts/rules/">Alert Rules</a><a href="/system">System</a><hr><a href="/logout">Sign Out</a></div>
+        <div data-shell-user-menu hidden><a href="/users">Access &amp; Security</a><a href="/alerts/rules/">Configure Alerts</a><a href="/system">System</a><hr><a href="/logout">Sign Out</a></div>
       </div>
     </div>
   </header>

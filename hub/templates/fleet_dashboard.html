@@ -1,21 +1,22 @@
 {% extends "base.html" %}
 
-{% block title %}Fleet Dashboard{% endblock %}
+{% block title %}Home - Church Display Hub{% endblock %}
 
 {% block content %}
 <div class="fleet-dashboard">
   <div class="fleet-dashboard-header">
     <div>
-      <h1>Fleet Dashboard</h1>
+      <p class="eyebrow">v13.10.0</p>
+      <h1>Home</h1>
       <p class="muted">
-        Live operational status across all managed displays.
+        See what needs attention and what is happening across your displays.
       </p>
     </div>
 
     <div class="fleet-dashboard-actions">
-      <a class="button primary" href="/displays">Manage Displays</a>
-      <a class="button" href="/jobs">Jobs</a>
-      <a class="button" href="/notifications">Alerts</a>
+      <a class="button primary" href="/displays">Displays</a>
+      <a class="button" href="/jobs">Activity</a>
+      <a class="button" href="/alerts/">Alerts</a>
     </div>
   </div>
 

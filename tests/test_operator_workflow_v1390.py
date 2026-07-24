@@ -45,9 +45,9 @@ def test_images_and_playlists_uses_one_name_everywhere():
     )
     assert "Images &amp; Playlists - Church Display Hub" in content
     assert "<h1>Images &amp; Playlists</h1>" in content
-    assert '("/content", "▥", "Images & Playlists")' in shell
+    assert '("/content", "▥", "Content")' in shell
     assert "Advanced Playlist Workflow" not in shell
-    assert '["Media Library","Images & Playlists"]' in shell_js
+    assert '["Content","Images & Playlists"]' in shell_js
 
 
 def test_images_and_playlists_keeps_the_everyday_workflow_simple():

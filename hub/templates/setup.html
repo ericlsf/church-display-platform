@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Setup & Enrollment - Church Display{% endblock %}
+{% block title %}General Settings - Church Display{% endblock %}
 
 {% block content %}
 <div class="section">
-  <h2>Setup & Enrollment</h2>
+  <h2>General Settings</h2>
   <p class="muted">
-    A display is ready only after its stable ID is approved and an initial
-    published playlist has been assigned.
+    Configure this Hub, its Google Drive connection, time zone, and connectivity.
   </p>
+  <p><a class="button-link" href="/remote-access">Remote access</a> <a class="button-link" href="/system">Backup &amp; system</a> <a class="button-link" href="/users">Access &amp; security</a></p>
 
   {% if message %}<p class="online">● {{ message }}</p>{% endif %}
   {% if error %}<p class="offline">● {{ error }}</p>{% endif %}
