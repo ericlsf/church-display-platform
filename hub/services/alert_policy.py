@@ -51,6 +51,11 @@ def apply_alert_policy(center, now=None):
         rules,
         now=now,
     )
+    acknowledged_by_key = {
+        alert.get("key"): alert
+        for alert in center.get("acknowledged_alerts", [])
+        if alert.get("key")
+    }
 
     active = []
     suppressed = []
@@ -79,8 +84,17 @@ def apply_alert_policy(center, now=None):
         ):
             reason = "quiet hours"
 
+        acknowledgement = acknowledged_by_key.get(
+            alert.get("key"),
+            {},
+        )
         enriched = {
             **alert,
+            "acknowledged": bool(acknowledgement),
+            "acknowledgement": acknowledgement.get(
+                "acknowledgement",
+                {},
+            ),
             "suppressed": bool(reason),
             "suppression_reason": reason,
         }

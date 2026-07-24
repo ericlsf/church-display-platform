@@ -69,9 +69,15 @@ class AlertHygieneTests(TestCase):
         }
 
         result = apply_alert_policy({
-            "alerts": [acknowledged, active],
-            "active_alerts": [acknowledged, active],
-            "acknowledged_alerts": [],
+            "alerts": [
+                {
+                    "key": acknowledged["key"],
+                    "severity": acknowledged["severity"],
+                },
+                active,
+            ],
+            "active_alerts": [active],
+            "acknowledged_alerts": [acknowledged],
             "counts": {},
         })
 
