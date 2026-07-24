@@ -29,6 +29,7 @@ def build_alert_center():
         url = f"/display/{display_id}"
         online = bool(row.get("online") or row.get("status_online"))
         health = int(row.get("health_score", 0) or 0)
+        controller = row.get("device_role") == "controller"
 
         if not online:
             alerts.append(_alert(
@@ -53,7 +54,7 @@ def build_alert_center():
             ))
 
         sync_state = str(row.get("sync_state", "")).strip().lower()
-        if sync_state not in {"", "success", "complete", "completed", "ok"}:
+        if not controller and sync_state not in {"", "success", "complete", "completed", "ok"}:
             alerts.append(_alert(
                 f"{display_id}:sync:{sync_state}", "warning",
                 f"{name} media sync needs attention",
@@ -61,7 +62,7 @@ def build_alert_center():
                 display_id, f"{url}#content-settings", "Review content", "content",
             ))
 
-        if not row.get("sync_folder"):
+        if not controller and not row.get("sync_folder"):
             alerts.append(_alert(
                 f"{display_id}:folder-missing", "warning",
                 f"{name} has no content folder",
@@ -70,7 +71,7 @@ def build_alert_center():
             ))
 
         media_count = int(row.get("media_count", 0) or 0)
-        if online and row.get("sync_folder") and media_count == 0:
+        if not controller and online and row.get("sync_folder") and media_count == 0:
             alerts.append(_alert(
                 f"{display_id}:no-media", "critical",
                 f"{name} has no local media",
@@ -78,7 +79,7 @@ def build_alert_center():
                 display_id, f"{url}#content-settings", "Sync media", "content",
             ))
 
-        if row.get("update_available"):
+        if not controller and row.get("update_available"):
             alerts.append(_alert(
                 f"{display_id}:update", "info",
                 f"{name} has an update available",

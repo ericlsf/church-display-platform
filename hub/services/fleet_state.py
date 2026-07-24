@@ -128,6 +128,7 @@ def build_alerts(rows, drive_error=""):
 
     for row in rows:
         name = row.get("name", "Display")
+        controller = row.get("device_role") == "controller"
 
         if not row.get("online"):
             alerts.append({"level": "danger", "message": f"{name} appears offline or has no recent heartbeat."})
@@ -136,13 +137,13 @@ def build_alerts(rows, drive_error=""):
         if hb_age is not None and hb_age > 120:
             alerts.append({"level": "warning", "message": f"{name} heartbeat is stale ({row.get('heartbeat_age')})."})
 
-        if str(row.get("sync_state", "")).lower() == "error":
+        if not controller and str(row.get("sync_state", "")).lower() == "error":
             alerts.append({"level": "danger", "message": f"{name} sync is reporting an error."})
 
         if row.get("git", {}).get("dirty") == "yes":
             alerts.append({"level": "warning", "message": f"{name} has uncommitted local changes."})
 
-        if row.get("heartbeat_fresh") and not row.get("display_app_running"):
+        if not controller and row.get("heartbeat_fresh") and not row.get("display_app_running"):
             alerts.append({
                 "level": "danger",
                 "message": f"{name} display app is not running.",
@@ -180,6 +181,8 @@ def build_fleet_state():
     rows = []
 
     for display in cfg.get("displays", []):
+        device_role = display.get("device_role", "display")
+        controller = device_role == "controller"
         status, status_online = get_status(display)
         sync_status, sync_online = get_sync_status(display)
         hb = get_heartbeat_for_display(display, heartbeats)
@@ -203,7 +206,11 @@ def build_fleet_state():
 
         display_id = display.get("id", "")
         current_tag = hb_git.get("tag") or "Unknown"
-        update_available = bool(latest_tag and current_tag not in [latest_tag, "Unknown", "untagged", ""])
+        update_available = bool(
+            not controller
+            and latest_tag
+            and current_tag not in [latest_tag, "Unknown", "untagged", ""]
+        )
         system = system_health_for(status, hb)
         online = bool(status_online or heartbeat_fresh)
         active_job = active_jobs.get(display_id)
@@ -215,6 +222,7 @@ def build_fleet_state():
             "name": display.get("name", "Unnamed Display"),
             "host": display.get("host", ""),
             "group": display.get("group", ""),
+            "device_role": device_role,
             "online": online,
             "health_state": health_state_for(online, system, active_job, update_available),
             "active_job": active_job or {},

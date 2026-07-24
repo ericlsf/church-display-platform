@@ -7,7 +7,7 @@
 {% block content %}
 <section class="section fleet-hero">
   <div>
-    <p class="eyebrow">v13.4.0</p>
+    <p class="eyebrow">v13.7.0</p>
     <h2>Fleet Overview</h2>
     <p class="muted">Monitor every display and take action without leaving the fleet.</p>
   </div>
@@ -139,7 +139,8 @@
 
     <div class="fleet-card-body">
       <div class="fleet-health-strip">
-        <span data-app-health class="health-chip {{ 'healthy' if row.display_app_running else 'critical' }}">Player {{ 'running' if row.display_app_running else 'stopped' }}</span>
+        {% if row.device_role == 'controller' %}<span class="health-chip healthy">Controller</span>
+        {% else %}<span data-app-health class="health-chip {{ 'healthy' if row.display_app_running else 'critical' }}">Player {{ 'running' if row.display_app_running else 'stopped' }}</span>{% endif %}
         {% if row.update_available %}<span class="health-chip warning" data-update-health>Update {{ row.latest_tag }}</span>{% endif %}
         {% if row.job.active_count %}<span class="health-chip working" data-job-health>{{ row.job.type|replace('_', ' ')|title }} · {{ row.job.progress }}%</span>
         {% elif row.job.failed_count %}<span class="health-chip critical" data-job-health>{{ row.job.failed_count }} failed job{{ '' if row.job.failed_count == 1 else 's' }}</span>
@@ -154,7 +155,7 @@
         <div class="fleet-metric"><span>CPU</span><strong data-cpu-temp>{{ row.system.cpu_temp if row.system else 'Unknown' }}</strong></div>
         <div class="fleet-metric"><span>RAM</span><strong data-memory-usage>{{ row.system.memory if row.system else 'Unknown' }}</strong></div>
         <div class="fleet-metric"><span>Disk</span><strong data-disk-usage>{{ row.system.disk if row.system else 'Unknown' }}</strong></div>
-        <div class="fleet-metric"><span>Media</span><strong data-media-count>{{ row.media_count }}</strong></div>
+        <div class="fleet-metric"><span>{{ 'Role' if row.device_role == 'controller' else 'Media' }}</span><strong data-media-count>{{ 'Hub' if row.device_role == 'controller' else row.media_count }}</strong></div>
       </div>
 
       <dl class="fleet-details">
@@ -163,6 +164,7 @@
       </dl>
 
       <div class="fleet-quick-actions">
+        {% if row.device_role != 'controller' %}
         <form method="POST" action="/fleet/{{ row.id }}/screenshot">
           <input type="hidden" name="next" value="/displays">
           <button class="button-link" type="submit">Screenshot</button>
@@ -175,6 +177,7 @@
           <input type="hidden" name="next" value="/displays">
           <button class="danger" type="submit">Restart</button>
         </form>
+        {% endif %}
         <form method="POST" action="/fleet/{{ row.id }}/reboot" onsubmit="return confirm('Reboot {{ row.name }}?');">
           <input type="hidden" name="next" value="/displays">
           <button class="danger" type="submit">Reboot</button>

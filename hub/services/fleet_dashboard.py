@@ -58,6 +58,7 @@ def build_fleet_dashboard():
     sync_errors = sum(
         1
         for row in rows
+        if row.get("device_role") != "controller"
         if str(row.get("sync_state", "")).lower()
         not in {"success", "completed", "complete", "ok", ""}
     )
@@ -80,6 +81,7 @@ def build_fleet_dashboard():
 
     for row in rows:
         reasons = []
+        controller = row.get("device_role") == "controller"
 
         if not (
             row.get("online")
@@ -104,14 +106,14 @@ def build_fleet_dashboard():
                 or [f'Health {int(row.get("health_score", 0) or 0)}%']
             )
 
-        if row.get("update_available"):
+        if not controller and row.get("update_available"):
             reasons.append("Display software update")
 
         sync_state = str(
             row.get("sync_state", "")
         ).strip().lower()
 
-        if sync_state not in {
+        if not controller and sync_state not in {
             "",
             "success",
             "completed",

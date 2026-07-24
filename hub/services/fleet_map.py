@@ -67,6 +67,24 @@ def summarize(rows):
 
 
 def recovery_action(display_id, action):
+    display = next(
+        (
+            item for item in load_config().get("displays", [])
+            if item.get("id") == display_id
+        ),
+        None,
+    )
+    if not display:
+        raise ValueError("Unknown machine")
+    if display.get("device_role") == "controller" and action in {
+        "restart",
+        "sync",
+        "retry_settings",
+    }:
+        raise ValueError(
+            "This action only applies to display devices."
+        )
+
     if action == "restart":
         return create_job(display_id, "restart_display", {})
     if action == "sync":

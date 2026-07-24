@@ -7,12 +7,13 @@ ACTIVE_STATES={"queued","pending","running","retrying","in_progress"}
 
 def _action(row):
     did=row.get("id",""); name=row.get("name") or did
+    controller=row.get("device_role")=="controller"
     if not (row.get("online") or row.get("status_online")):
         return {"severity":"critical","title":f"{name} is offline","detail":"Check power, networking, or the display agent.","label":"Open diagnostics","url":f"/display/{did}#health-diagnostics"}
-    if row.get("update_available"):
+    if not controller and row.get("update_available"):
         return {"severity":"warning","title":f"{name} has an update available","detail":f'Installed {row.get("version","unknown")}; latest {row.get("latest_tag","available")}.',"label":"Upgrade","url":f"/display/{did}#software-upgrade"}
     sync=str(row.get("sync_state","")).strip().lower()
-    if sync not in {"","success","complete","completed","ok"}:
+    if not controller and sync not in {"","success","complete","completed","ok"}:
         return {"severity":"warning","title":f"{name} media is out of sync","detail":f"Current sync state: {sync or 'unknown'}.","label":"Review content","url":f"/display/{did}#content-settings"}
     health=int(row.get("health_score",0) or 0)
     if health<100:
