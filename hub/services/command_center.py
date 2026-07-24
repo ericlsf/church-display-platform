@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from services.fleet_operations import fleet_rows
-from services.jobs import list_jobs
+from services.jobs import job_is_unresolved_failure, list_jobs
 from services.notifications import visible_notifications
 from services.releases import latest_git_tag
 
@@ -27,7 +27,7 @@ def command_center_data():
     jobs = list_jobs(500)
     latest = latest_git_tag()
     active_jobs = [j for j in jobs if str(j.get("status", "")).lower() in ACTIVE]
-    failed_jobs = [j for j in jobs if str(j.get("status", "")).lower() in FAILED and not j.get("resolved")]
+    failed_jobs = [j for j in jobs if job_is_unresolved_failure(j)]
     attention = [r for r in rows if r.get("readiness") in {"offline", "needs_attention", "needs_playlist", "provisioning"}]
     maintenance = [r for r in rows if r.get("readiness") == "maintenance"]
     # Hub release tags and display-player versions are separate products.

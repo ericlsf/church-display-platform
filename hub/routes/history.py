@@ -10,6 +10,8 @@ history_bp=Blueprint('history', __name__, url_prefix='/history')
 def history_page():
     display_id=request.args.get('display_id','').strip()
     category=request.args.get('category','').strip()
+    action_type=request.args.get('action_type','').strip()
+    result=request.args.get('result','').strip()
     view=request.args.get('view','compact').strip()
     if view not in {'compact','detailed'}:
         view='compact'
@@ -21,13 +23,24 @@ def history_page():
     offset=(page-1)*per_page
 
     health=query_health(display_id=display_id, days=days, limit=2000)
-    events=query_events(category=category, display_id=display_id, days=days, limit=per_page, offset=offset)
-    all_for_summary=query_events(category=category, display_id=display_id, days=days, limit=2000)
-    total_events=count_events(category=category, display_id=display_id, days=days)
+    event_filters=dict(
+        category=category, display_id=display_id,
+        action_type=action_type, result=result, days=days,
+    )
+    events=query_events(**event_filters, limit=per_page, offset=offset)
+    all_for_summary=query_events(**event_filters, limit=2000)
+    total_events=count_events(**event_filters)
     categories=sorted({e.get('category','general') for e in query_events(days=90,limit=2000)})
+    event_catalog=query_events(days=90,limit=2000)
+    action_types=sorted({
+        e.get('metadata',{}).get('job_type')
+        for e in event_catalog if e.get('metadata',{}).get('job_type')
+    })
     return render_template(
         'history.html', active='history', displays=load_config().get('displays', []),
         selected_display=display_id, selected_category=category, days=days, view=view,
+        selected_action=action_type, selected_result=result,
+        action_types=action_types,
         health_summary=summarize_health(health),
         health_rows=health[:100] if view == 'detailed' else [],
         event_summary=summarize_events(all_for_summary),

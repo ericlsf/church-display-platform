@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from services.fleet_operations import fleet_rows
-from services.jobs import list_jobs
+from services.jobs import job_is_unresolved_failure, list_jobs
 
 
 ACTIVE_JOB_STATES = {
@@ -66,9 +66,7 @@ def build_fleet_dashboard():
     failed_jobs = [
         job
         for job in jobs
-        if str(job.get("status", "")).lower()
-        in FAILED_JOB_STATES
-        and not job.get("resolved")
+        if job_is_unresolved_failure(job)
     ]
     active_jobs = [
         job

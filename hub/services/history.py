@@ -2,6 +2,7 @@ import json
 from datetime import datetime, timedelta
 
 from services.database import connection, initialize_database
+from services.jobs import parse_iso
 
 
 def initialize_history():
@@ -118,7 +119,10 @@ def summarize_health(rows):
     return sorted(result, key=lambda x: x['display_id'])
 
 
-def query_events(category='', display_id='', days=30, limit=500, offset=0):
+def query_events(
+    category='', display_id='', action_type='', result='',
+    days=30, limit=500, offset=0,
+):
     initialize_database()
     cutoff=(datetime.now()-timedelta(days=max(1,int(days)))).isoformat(timespec='seconds')
     sql='SELECT created_at, category, level, message, metadata_json FROM events WHERE created_at >= ?'
@@ -128,6 +132,12 @@ def query_events(category='', display_id='', days=30, limit=500, offset=0):
     if display_id:
         sql += " AND (message LIKE ? OR metadata_json LIKE ?)"
         needle=f'%{display_id}%'; params.extend([needle, needle])
+    if action_type:
+        sql += " AND metadata_json LIKE ?"
+        params.append(f'%"job_type": "{action_type}"%')
+    if result:
+        sql += " AND (level = ? OR metadata_json LIKE ?)"
+        params.extend([result, f'%"status": "{result}"%'])
     sql += ' ORDER BY id DESC LIMIT ? OFFSET ?'; params.extend([max(1,min(int(limit),2000)), max(0,int(offset))])
     with connection() as db:
         rows=db.execute(sql,params).fetchall()
@@ -136,11 +146,16 @@ def query_events(category='', display_id='', days=30, limit=500, offset=0):
         item=dict(row)
         try: item['metadata']=json.loads(item.pop('metadata_json') or '{}')
         except Exception: item['metadata']={}
+        parsed = parse_iso(item.get('created_at', ''))
+        item['created_display'] = (
+            parsed.strftime("%b %d, %Y %I:%M %p").replace(" 0", " ")
+            if parsed else item.get('created_at', 'Unknown')
+        )
         result.append(item)
     return result
 
 
-def count_events(category='', display_id='', days=30):
+def count_events(category='', display_id='', action_type='', result='', days=30):
     initialize_database()
     cutoff=(datetime.now()-timedelta(days=max(1,int(days)))).isoformat(timespec='seconds')
     sql='SELECT COUNT(*) AS total FROM events WHERE created_at >= ?'
@@ -150,6 +165,12 @@ def count_events(category='', display_id='', days=30):
     if display_id:
         sql += ' AND (message LIKE ? OR metadata_json LIKE ?)'
         needle=f'%{display_id}%'; params.extend([needle, needle])
+    if action_type:
+        sql += " AND metadata_json LIKE ?"
+        params.append(f'%"job_type": "{action_type}"%')
+    if result:
+        sql += " AND (level = ? OR metadata_json LIKE ?)"
+        params.extend([result, f'%"status": "{result}"%'])
     with connection() as db:
         row=db.execute(sql,params).fetchone()
     return int(row['total'] if row else 0)

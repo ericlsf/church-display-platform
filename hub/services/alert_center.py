@@ -1,7 +1,7 @@
 """Build actionable alerts from authoritative fleet state."""
 from services.fleet_operations import fleet_rows
 from services.fleet_truth import enrich_fleet_rows
-from services.jobs import list_jobs
+from services.jobs import job_is_unresolved_failure, list_jobs
 
 FAILED_STATES = {"failed", "timed_out", "cancelled"}
 
@@ -110,7 +110,7 @@ def build_alert_center():
 
     failed_jobs = [
         job for job in jobs
-        if str(job.get("status", "")).lower() in FAILED_STATES
+        if job_is_unresolved_failure(job)
     ]
     failed_jobs.sort(
         key=lambda job: job.get("updated_at") or job.get("created_at") or "",

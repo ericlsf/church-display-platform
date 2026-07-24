@@ -2,7 +2,7 @@ from services.config import load_config, load_hub_settings, save_config
 from services.content_cache import sync_playlist_from_drive
 from services.drive import list_drive_folders
 from services.fleet_operations import fleet_rows
-from services.jobs import create_job, list_jobs
+from services.jobs import create_job, job_is_unresolved_failure, list_jobs
 from services.releases import latest_git_tag
 
 PROBLEM_STATUSES = {"failed", "timed_out", "cancelled"}
@@ -18,7 +18,7 @@ def dashboard_data():
         "attention": sum(1 for r in rows if r.get("readiness") in {"needs_attention", "needs_playlist"}),
         "provisioning": sum(1 for r in rows if r.get("readiness") == "provisioning"),
         "running_jobs": sum(1 for j in jobs if str(j.get("status", "")).lower() in ACTIVE_STATUSES),
-        "failed_jobs": sum(1 for j in jobs if str(j.get("status", "")).lower() in PROBLEM_STATUSES and not j.get("resolved")),
+        "failed_jobs": sum(job_is_unresolved_failure(j) for j in jobs),
     }
     remote = load_hub_settings().get("drive_remote", "gdrive")
     folders, folder_error = list_drive_folders(remote)
