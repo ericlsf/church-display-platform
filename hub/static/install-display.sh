@@ -119,7 +119,10 @@ if [[ ! -f "$APP_DIR/config/config.json" ]]; then
   "timings": {"image_duration": 8},
   "countdown": {
     "enabled": true,
+    "text": "Service starts in",
+    "takeover_text": "Find your seat",
     "start_minutes": 20,
+    "takeover_seconds": 30,
     "services": [
       {"day": "Sunday", "time": "08:00"},
       {"day": "Sunday", "time": "09:30"},

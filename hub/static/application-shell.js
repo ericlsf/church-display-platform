@@ -12,7 +12,7 @@
     ["/jobs","command",["Command Center","Jobs"]],
     ["/history","command",["Command Center","History"]],
     ["/media","media",["Media Library","Browse Media"]],
-    ["/content","media",["Media Library","Playlists"]],
+    ["/content","media",["Media Library","Images & Playlists"]],
     ["/display/","displays",["Displays","Display Details"]],
     ["/displays","displays",["Displays","All Displays"]],
     ["/groups","displays",["Displays","Groups"]],

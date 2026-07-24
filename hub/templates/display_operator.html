@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Manage {{ display.name }} - Church Display Hub{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="/static/operator-workflow-v1390.css">
+{% endblock %}
+{% block content %}
+<div class="operator-page" data-operator-editor>
+  <header class="operator-hero">
+    <div>
+      <span class="eyebrow">Everyday display controls</span>
+      <h1>{{ display.name }}</h1>
+      <p>Choose the images, messages, and timing. Apply everything in one step.</p>
+    </div>
+    <a class="button-link" href="{{ url_for('display_details.page', display_id=display.id) }}">Advanced display details</a>
+  </header>
+
+  <nav class="operator-steps" aria-label="Editor sections">
+    <a href="#content">1. Content</a>
+    <a href="#messages">2. Messages</a>
+    <a href="#timing">3. Timing</a>
+    <a href="#apply">4. Apply</a>
+  </nav>
+
+  <form method="POST" action="{{ url_for('display_details.operator_apply', display_id=display.id) }}" id="operator-form">
+    <section class="operator-panel" id="content">
+      <div class="panel-heading">
+        <div><span class="step-number">1</span><h2>Content</h2><p>Images currently assigned to this display.</p></div>
+        <span class="sync-state">{{ analysis.media_items|length if analysis else 0 }} items</span>
+      </div>
+
+      <div class="folder-toolbar">
+        <label>
+          Google Drive folder
+          <select name="folder" data-folder-select required>
+            <option value="">Choose a folder</option>
+            {% for item in folders %}
+              <option value="{{ item }}" {% if item == folder %}selected{% endif %}>{{ item }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <button type="submit" class="button-link" form="refresh-form">Refresh from Drive</button>
+      </div>
+
+      {% if analysis and analysis.error %}
+        <p class="warning">{{ analysis.error }}</p>
+      {% elif analysis and analysis.media_items %}
+        <p class="helper">Drag thumbnails to change playback order. Your custom order is remembered when new images are added.</p>
+        <textarea name="playlist_order" data-order-field hidden>{% for item in analysis.media_items %}{{ item.path }}{% if not loop.last %}
+{% endif %}{% endfor %}</textarea>
+        <div class="operator-playlist" data-playlist>
+          {% for item in analysis.media_items %}
+          <article class="operator-media-card" draggable="true" data-path="{{ item.path }}">
+            <span class="order-number">{{ loop.index }}</span>
+            <div class="operator-thumb">
+              {% if item.type == "image" %}
+                <img loading="lazy" src="{{ url_for('media.media_preview', remote=remote, folder=folder, path=item.path) }}" alt="Preview of {{ item.name }}" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+                <span class="operator-thumb-fallback" hidden>Image preview unavailable</span>
+              {% else %}<span>{{ item.icon }}</span>{% endif %}
+            </div>
+            <strong>{{ item.name }}</strong>
+            <div class="order-controls">
+              <button type="button" data-move="-1" aria-label="Move {{ item.name }} earlier">&uarr;</button>
+              <button type="button" data-move="1" aria-label="Move {{ item.name }} later">&darr;</button>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="operator-empty">Choose a folder to see its images.</div>
+        <textarea name="playlist_order" data-order-field hidden></textarea>
+      {% endif %}
+    </section>
+
+    <section class="operator-panel" id="messages">
+      <div class="panel-heading">
+        <div><span class="step-number">2</span><h2>Messages</h2><p>Text viewers see over the slideshow and during countdown.</p></div>
+      </div>
+      <div class="message-layout">
+        <div class="form-stack">
+          <label class="toggle-row"><input type="checkbox" name="overlay_enabled" {% if presentation.overlay.enabled %}checked{% endif %}> Show overlay text</label>
+          <label>Overlay text<input name="overlay_text" maxlength="160" value="{{ presentation.overlay.text }}" placeholder="Welcome to Lifespring Fellowship"></label>
+          <label>Countdown label<input name="countdown_text" maxlength="80" value="{{ presentation.countdown.text }}" placeholder="Service starts in"></label>
+          <label>Final full-screen message<input name="takeover_text" maxlength="80" value="{{ presentation.countdown.takeover_text }}" placeholder="Find your seat"></label>
+        </div>
+        <div class="operator-preview">
+          <span data-preview-overlay>{{ presentation.overlay.text }}</span>
+          <div><strong data-preview-takeover>{{ presentation.countdown.takeover_text }}</strong><b>00:30</b></div>
+          <small>Live preview</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="operator-panel" id="timing">
+      <div class="panel-heading">
+        <div><span class="step-number">3</span><h2>Timing</h2><p>When countdowns appear and how quickly images advance.</p></div>
+      </div>
+      <div class="timing-grid">
+        <label class="toggle-row"><input type="checkbox" name="clock_enabled" {% if presentation.clock.enabled %}checked{% endif %}> Show current time</label>
+        <label class="toggle-row"><input type="checkbox" name="countdown_enabled" {% if presentation.countdown.enabled %}checked{% endif %}> Show service countdown</label>
+        <label>Begin countdown this many minutes before<input type="number" name="countdown_start_minutes" min="0" max="180" value="{{ presentation.countdown.start_minutes }}"></label>
+        <label>Take over the screen this many seconds before<input type="number" name="takeover_seconds" min="0" max="300" value="{{ presentation.countdown.takeover_seconds }}"></label>
+        <label>Seconds per image<input type="number" name="image_duration" min="1" max="300" value="{{ presentation.timings.image_duration }}"></label>
+      </div>
+      <div class="service-times">
+        <div class="service-heading"><h3>Service times</h3><button type="button" data-add-service>Add time</button></div>
+        <div data-service-list>
+          {% for service in presentation.countdown.services %}
+          <div class="service-row">
+            <select name="service_day">
+              {% for day in ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"] %}
+                <option value="{{ day }}" {% if day == service.day %}selected{% endif %}>{{ day }}</option>
+              {% endfor %}
+            </select>
+            <input type="time" name="service_time" value="{{ service.time }}" required>
+            <button type="button" data-remove-service aria-label="Remove service time">Remove</button>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="operator-apply" id="apply">
+      <div><span class="step-number">4</span><h2>Ready to update {{ display.name }}?</h2><p>Saves the order, refreshes the folder, syncs the media, and applies the messages and timing.</p></div>
+      <button class="primary operator-apply-button" type="submit">Apply Changes to {{ display.name }}</button>
+    </section>
+  </form>
+
+  <form method="POST" action="{{ url_for('display_details.operator_refresh', display_id=display.id) }}" id="refresh-form">
+    <input type="hidden" name="remote" value="{{ remote }}">
+    <input type="hidden" name="folder" value="{{ folder }}" data-refresh-folder>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/operator-workflow-v1390.js"></script>
+{% endblock %}

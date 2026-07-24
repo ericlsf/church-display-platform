@@ -272,11 +272,19 @@ class Player(QWidget):
         text, color, seconds = self.get_countdown_text()
 
         # ---------------- TAKEOVER ----------------
-        if seconds is not None and seconds <= 30:
+        takeover_seconds = max(
+            0,
+            int(cfg.get("countdown", {}).get("takeover_seconds", 30)),
+        )
+        if seconds is not None and seconds <= takeover_seconds:
             mins = seconds // 60
             secs = seconds % 60
 
-            self.takeover.setText(f"Find your seat\n{mins:02}:{secs:02}")
+            takeover_text = cfg.get("countdown", {}).get(
+                "takeover_text",
+                "Find your seat",
+            )
+            self.takeover.setText(f"{takeover_text}\n{mins:02}:{secs:02}")
             self.takeover.setVisible(True)
 
             self.top_center.setText("")
@@ -395,12 +403,14 @@ class Player(QWidget):
         # Sunday service countdowns ALWAYS take priority.
         c = cfg.get("countdown", {})
 
-        if c.get("enabled") and now.strftime("%A") == "Sunday":
+        if c.get("enabled"):
             best = None
             best_delta = None
 
             for svc in c.get("services", []):
                 try:
+                    if svc.get("day", "Sunday") != now.strftime("%A"):
+                        continue
                     t = datetime.strptime(svc["time"], "%H:%M").time()
                     dt = datetime.combine(now.date(), t)
                     delta = (dt - now).total_seconds()
@@ -414,9 +424,9 @@ class Player(QWidget):
 
                     if best_delta is None or delta < best_delta:
                         best_delta = delta
-                        label = "Find your seat:" if delta <= 300 else "Service starts:"
+                        label = c.get("text", "Service starts in").rstrip(":")
                         color = "yellow" if delta <= 300 else "white"
-                        best = (f"{label} {self.format_countdown_duration(delta)}", color, int(delta))
+                        best = (f"{label}: {self.format_countdown_duration(delta)}", color, int(delta))
                 except Exception:
                     pass
 

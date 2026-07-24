@@ -11,7 +11,7 @@ from services.events import log_event
 from services.jobs import create_job
 from services.media import save_playlist_order
 from services.media_index import analyze_cached_folder, cached_drive_folders, load_media_index
-from services.content_cache import sync_playlist_from_drive
+from services.content_cache import cache_path, sync_playlist_from_drive
 
 media_bp = Blueprint("media", __name__, url_prefix="/media")
 
@@ -106,6 +106,16 @@ def media_preview():
 
     folder = _safe_remote_path(request.args.get("folder"))
     path = _safe_remote_path(request.args.get("path"))
+    cache_root = cache_path(remote, folder).resolve()
+    cached_file = (cache_root / path).resolve()
+    if cache_root in cached_file.parents and cached_file.is_file():
+        content_type = mimetypes.guess_type(path)[0] or "application/octet-stream"
+        if not content_type.startswith("image/"):
+            abort(415)
+        response = send_file(cached_file, mimetype=content_type, max_age=300)
+        response.headers["Cache-Control"] = "private, max-age=300"
+        return response
+
     source = f"{remote}:{folder}/{path}"
     try:
         result = subprocess.run(

@@ -29,7 +29,15 @@ def _presentation_defaults(display):
 
     countdown = settings.setdefault("countdown", {})
     countdown.setdefault("enabled", True)
+    countdown.setdefault("text", "Service starts in")
+    countdown.setdefault("takeover_text", "Find your seat")
     countdown.setdefault("start_minutes", 20)
+    countdown.setdefault("takeover_seconds", 30)
+    countdown.setdefault("services", [
+        {"day": "Sunday", "time": "08:00"},
+        {"day": "Sunday", "time": "09:30"},
+        {"day": "Sunday", "time": "11:15"},
+    ])
 
     timings = settings.setdefault("timings", {})
     timings.setdefault("image_duration", 8)

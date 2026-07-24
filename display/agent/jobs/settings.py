@@ -20,10 +20,26 @@ def _clean_settings(raw):
         },
         "countdown": {
             "enabled": bool(countdown.get("enabled", True)),
+            "text": str(countdown.get("text", "Service starts in")).strip()[:80],
+            "takeover_text": str(
+                countdown.get("takeover_text", "Find your seat")
+            ).strip()[:80],
             "start_minutes": max(
                 0,
                 min(180, int(countdown.get("start_minutes", 20))),
             ),
+            "takeover_seconds": max(
+                0,
+                min(300, int(countdown.get("takeover_seconds", 30))),
+            ),
+            "services": [
+                {
+                    "day": str(item.get("day", "Sunday")).strip(),
+                    "time": str(item.get("time", "")).strip(),
+                }
+                for item in countdown.get("services", [])
+                if isinstance(item, dict) and item.get("time")
+            ],
         },
         "timings": {
             "image_duration": max(
