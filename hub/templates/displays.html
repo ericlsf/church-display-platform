@@ -165,6 +165,7 @@
 
       <div class="fleet-quick-actions">
         {% if row.device_role != 'controller' %}
+        <a class="primary button-link" href="/display/{{ row.id }}/operator">Manage Content &amp; Messages</a>
         <form method="POST" action="/fleet/{{ row.id }}/screenshot">
           <input type="hidden" name="next" value="/displays">
           <button class="button-link" type="submit">Screenshot</button>

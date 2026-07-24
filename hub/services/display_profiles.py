@@ -24,7 +24,15 @@ DEFAULT_SETTINGS = {
     },
     "countdown": {
         "enabled": True,
+        "text": "Service starts in",
+        "takeover_text": "Find your seat",
         "start_minutes": 20,
+        "takeover_seconds": 30,
+        "services": [
+            {"day": "Sunday", "time": "08:00"},
+            {"day": "Sunday", "time": "09:30"},
+            {"day": "Sunday", "time": "11:15"},
+        ],
     },
     "timings": {
         "image_duration": 8,
@@ -95,6 +103,35 @@ def normalize_settings(settings):
                 0,
                 180,
             ),
+            "text": str(
+                countdown.get(
+                    "text",
+                    DEFAULT_SETTINGS["countdown"]["text"],
+                )
+            ).strip()[:80],
+            "takeover_text": str(
+                countdown.get(
+                    "takeover_text",
+                    DEFAULT_SETTINGS["countdown"]["takeover_text"],
+                )
+            ).strip()[:80],
+            "takeover_seconds": _bounded_int(
+                countdown.get("takeover_seconds"),
+                DEFAULT_SETTINGS["countdown"]["takeover_seconds"],
+                0,
+                300,
+            ),
+            "services": [
+                {
+                    "day": str(item.get("day", "Sunday")).strip(),
+                    "time": str(item.get("time", "")).strip(),
+                }
+                for item in countdown.get(
+                    "services",
+                    DEFAULT_SETTINGS["countdown"]["services"],
+                )
+                if isinstance(item, dict) and item.get("time")
+            ],
         },
         "timings": {
             "image_duration": _bounded_int(
