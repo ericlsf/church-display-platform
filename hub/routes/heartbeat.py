@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, jsonify, request
 from services.events import log_event
+from services.display_address import refresh_approved_display_address
 from services.heartbeat_store import load_heartbeats, save_heartbeats
 from services.history import record_health_sample
 from services.resilience import agent_policy
@@ -19,6 +20,13 @@ def heartbeat():
     first_seen = display_id not in data["heartbeats"]
     data["heartbeats"][display_id] = payload
     save_heartbeats(data)
+    try:
+        changed_address_fields = refresh_approved_display_address(display_id, payload)
+        if changed_address_fields.intersection({"host", "ip"}):
+            log_event(f"Display address updated for {display_id}: {payload.get('host')}")
+    except Exception:
+        # Address discovery must never prevent an otherwise valid heartbeat.
+        pass
     try:
         record_health_sample(display_id, payload)
     except Exception:
