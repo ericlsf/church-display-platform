@@ -20,6 +20,8 @@ def _fleet_rows_base():
         display_id = display.get("id", "")
         health = state_rows.get(display_id, {})
         telemetry = normalize_fleet_telemetry(health, display)
+        device_role = display.get("device_role", "display")
+        controller = device_role == "controller"
         maintenance = display.get(
             "maintenance",
             {"enabled": False, "reason": ""},
@@ -38,13 +40,13 @@ def _fleet_rows_base():
         player_running = telemetry["player_running"]
         sync_ok = telemetry["sync_ok"]
 
-        checks = {
+        checks = ({"online": online} if controller else {
             "online": online,
             "player": player_running,
             "playlist": bool(assigned_folder),
             "media": media_count > 0,
             "sync": sync_ok,
-        }
+        })
         score = round(
             sum(1 for value in checks.values() if value)
             / len(checks)
@@ -68,6 +70,7 @@ def _fleet_rows_base():
             **display,
             **health,
             "id": display_id,
+            "device_role": device_role,
             "version": version,
             "assigned_folder": assigned_folder,
             "media_count": media_count,
@@ -123,6 +126,7 @@ def queue_bulk_action(
     }
 
     blocked = []
+    role_blocked = []
     eligible = []
 
     for display_id in targets:
@@ -132,13 +136,19 @@ def queue_bulk_action(
 
         if in_maintenance(display) and not allow_maintenance:
             blocked.append(display_id)
+        elif display.get("device_role") == "controller":
+            role_blocked.append(display_id)
         else:
             eligible.append(display_id)
 
-    if not eligible and blocked:
+    if not eligible and blocked and not role_blocked:
         raise ValueError(
             "All selected displays are in maintenance mode. "
             "Enable the maintenance override to continue."
+        )
+    if not eligible and role_blocked:
+        raise ValueError(
+            "The selected machines are controllers. Display actions only apply to display devices."
         )
 
     queued = []
@@ -194,6 +204,7 @@ def queue_bulk_action(
         "jobs": queued,
         "queued_display_ids": eligible,
         "blocked_display_ids": blocked,
+        "role_blocked_display_ids": role_blocked,
     }
 
 

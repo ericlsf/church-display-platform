@@ -39,6 +39,8 @@ def save_json(path, data):
 
 
 def load_config():
+    from services.device_roles import device_role_for
+
     cfg = load_json(DISPLAYS_FILE, DEFAULT_CONFIG)
     cfg.setdefault("displays", [])
     for display in cfg["displays"]:
@@ -49,6 +51,7 @@ def load_config():
         display.setdefault("version", "")
         display.setdefault("assigned_folder", "")
         display.setdefault("provisioning_status", "approved")
+        display["device_role"] = device_role_for(display)
     return cfg
 
 

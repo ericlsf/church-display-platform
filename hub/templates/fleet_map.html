@@ -48,7 +48,7 @@
         </div>
 
         {% if row.readiness == "ready" %}
-          <span class="status-pill online">Ready</span>
+          <span class="status-pill online">{{ 'Controller online' if row.device_role == 'controller' else 'Ready' }}</span>
         {% elif row.readiness == "maintenance" %}
           <span class="status-pill warning">Maintenance</span>
         {% elif row.readiness == "offline" %}
@@ -63,8 +63,13 @@
       <div class="fleet-node-health">
         <div><strong>Health</strong><span>{{ row.health_score }}%</span></div>
         <div><strong>Version</strong><span>{{ row.version }}</span></div>
+        {% if row.device_role == 'controller' %}
+        <div><strong>Role</strong><span>Hub controller</span></div>
+        <div><strong>State</strong><span>{{ 'Online' if row.online else 'Offline' }}</span></div>
+        {% else %}
         <div><strong>Playlist</strong><span>{{ row.assigned_folder or "None" }}</span></div>
         <div><strong>Media</strong><span>{{ row.media_count }}</span></div>
+        {% endif %}
       </div>
 
       {% if row.maintenance.enabled %}
@@ -74,6 +79,7 @@
       {% endif %}
 
       <div class="context-actions fleet-node-actions">
+        {% if row.device_role != 'controller' %}
         <form method="POST" action="/fleet-map/recover">
           <input type="hidden" name="display_id" value="{{ row.id }}">
           <input type="hidden" name="action" value="sync">
@@ -85,6 +91,7 @@
           <input type="hidden" name="action" value="restart">
           <button type="submit">Restart Player</button>
         </form>
+        {% endif %}
 
         <form method="POST" action="/fleet-map/recover">
           <input type="hidden" name="display_id" value="{{ row.id }}">
@@ -94,8 +101,10 @@
       </div>
 
       <div class="fleet-node-links">
+        {% if row.device_role != 'controller' %}
         <a href="/operations-center">Quick Settings</a>
         <a href="/deployments">Software</a>
+        {% endif %}
         <a href="/audit?q={{ row.id }}">Audit</a>
       </div>
     </div>

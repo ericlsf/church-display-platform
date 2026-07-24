@@ -82,16 +82,19 @@ def display_rows(test_message=""):
         presentation = _presentation_defaults(display)
         system = fleet.get("system", {}) or {}
         job_summary = _display_job_summary(display_id, jobs)
+        device_role = display.get("device_role", "display")
+        controller = device_role == "controller"
         attention = (
             not fleet.get("online", False)
-            or not fleet.get("display_app_running", False)
-            or str(fleet.get("sync_state", "")).lower() == "error"
-            or bool(fleet.get("update_available"))
+            or (not controller and not fleet.get("display_app_running", False))
+            or (not controller and str(fleet.get("sync_state", "")).lower() == "error")
+            or (not controller and bool(fleet.get("update_available")))
             or job_summary["failed_count"] > 0
         )
 
         rows.append({
             "id": display_id,
+            "device_role": device_role,
             "name": display.get("name", ""),
             "host": display.get("host", ""),
             "username": display.get("username", ""),
