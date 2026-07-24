@@ -43,6 +43,8 @@ hub/config/groups.json
 hub/config/groups.json.tmp
 hub/config/sites.json
 hub/config/notification_dismissals.json
+hub/config/alert_acknowledgements.json
+hub/config/alert_acknowledgements.json.tmp
 hub/config/resilience.json
 display/status/resilience.json
 display/status/resilience-policy.json

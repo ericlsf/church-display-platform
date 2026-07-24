@@ -70,6 +70,33 @@ def acknowledge_alert(key, *, user="", note=""):
     return data["acknowledgements"][key]
 
 
+def acknowledge_alerts(keys, *, user="", note=""):
+    keys = {
+        str(key or "").strip()
+        for key in keys
+        if str(key or "").strip()
+    }
+
+    if not keys:
+        return 0
+
+    record = {
+        "acknowledged_at": datetime.now(timezone.utc).isoformat(),
+        "acknowledged_by": str(user or ""),
+        "note": str(note or "").strip(),
+    }
+
+    with _LOCK:
+        data = _load()
+
+        for key in keys:
+            data["acknowledgements"][key] = dict(record)
+
+        _save(data)
+
+    return len(keys)
+
+
 def clear_acknowledgement(key):
     key = str(key or "").strip()
 
