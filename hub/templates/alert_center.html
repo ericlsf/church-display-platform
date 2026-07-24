@@ -58,6 +58,18 @@
     <button type="button" data-alert-filter="info">
       Info
     </button>
+
+    {% if center.counts.active %}
+      <form
+        method="POST"
+        action="/alerts/acknowledge-all"
+        class="alert-toolbar-action"
+      >
+        <button type="submit" class="secondary">
+          Acknowledge all active
+        </button>
+      </form>
+    {% endif %}
   </div>
 
   <div
