@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Content - Church Display Hub{% endblock %}
+{% block title %}Images &amp; Playlists - Church Display Hub{% endblock %}
 {% block content %}
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% for category, message in messages %}<p class="{{ 'offline' if category == 'error' else 'online' }}">{{ message }}</p>{% endfor %}
 {% endwith %}
 
 <div class="section hero-card">
-  <h2>Content Workflow</h2>
-  <p class="muted">Browse Drive media, edit playlist order, preview playback order, deploy now, or schedule a future content change.</p>
+  <h1>Images &amp; Playlists</h1>
+  <p class="muted">Choose Google Drive images, arrange their playback order, and send them to displays.</p>
   <p>Drive remote: <strong>{{ drive_remote }}</strong></p>
   {% if drive_error %}<p class="offline">Drive folder lookup failed: {{ drive_error }}</p>{% endif %}
 </div>

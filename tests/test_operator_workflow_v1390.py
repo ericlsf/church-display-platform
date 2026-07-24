@@ -35,6 +35,21 @@ def test_display_cards_link_to_operator_editor():
     assert "Manage Content &amp; Messages" in template
 
 
+def test_images_and_playlists_uses_one_name_everywhere():
+    content = Path("hub/templates/content.html").read_text(encoding="utf-8")
+    shell = Path("hub/templates/application_shell.html").read_text(
+        encoding="utf-8"
+    )
+    shell_js = Path("hub/static/application-shell.js").read_text(
+        encoding="utf-8"
+    )
+    assert "Images &amp; Playlists - Church Display Hub" in content
+    assert "<h1>Images &amp; Playlists</h1>" in content
+    assert '("/content", "▥", "Images & Playlists")' in shell
+    assert "Advanced Playlist Workflow" not in shell
+    assert '["Media Library","Images & Playlists"]' in shell_js
+
+
 def test_display_player_uses_configurable_takeover_and_service_day():
     player = Path("display/app/main.py").read_text(encoding="utf-8")
     agent = Path("display/agent/jobs/settings.py").read_text(encoding="utf-8")
