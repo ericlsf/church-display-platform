@@ -78,6 +78,10 @@ def test_simple_content_page_has_responsive_reordering_assets():
     assert "@media" in css
     assert "dragstart" in javascript
     assert "data-simple-order" in javascript
+    assert "event.clientX" in javascript
+    assert "drop-before" in javascript
+    assert "drop-after" in javascript
+    assert ".simple-image-card.drop-before::before" in css
 
 
 def test_display_player_uses_configurable_takeover_and_service_day():
