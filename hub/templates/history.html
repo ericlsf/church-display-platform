@@ -3,7 +3,8 @@
 {% block content %}
 <div class="section">
   <div class="section-heading">
-    <div><h2>Operational History</h2><p class="muted">Compact summaries by default, with detailed drill-down when needed.</p></div>
+    <div><p class="eyebrow">ACTIVITY</p><h2>Events &amp; Health</h2><p class="muted">Review system events and display health over time.</p></div>
+    <div class="workflow-tabs"><a class="button" href="/jobs">Jobs &amp; Work</a><a class="button primary" href="/history">Events &amp; Health</a><a class="button" href="/schedules">Upcoming Work</a></div>
     <div class="history-view-toggle">
       <a class="button-link {% if view == 'compact' %}active{% endif %}" href="?display_id={{ selected_display }}&category={{ selected_category }}&days={{ days }}&view=compact">Condensed</a>
       <a class="button-link {% if view == 'detailed' %}active{% endif %}" href="?display_id={{ selected_display }}&category={{ selected_category }}&days={{ days }}&view=detailed">Detailed</a>

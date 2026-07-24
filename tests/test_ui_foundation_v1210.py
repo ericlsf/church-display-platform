@@ -36,11 +36,11 @@ class UiFoundationV1210Tests(unittest.TestCase):
         page = (TEMPLATES / "content_deployments.html").read_text(encoding="utf-8")
         shell_js = (ROOT / "hub" / "static" / "application-shell.js").read_text(encoding="utf-8")
         self.assertTrue(page.startswith('{% extends "base.html" %}'))
-        self.assertIn('["/content-deployments","operations"', shell_js)
+        self.assertIn('["/content-deployments","deployments"', shell_js)
 
     def test_command_palette_includes_core_workflows(self):
         base = (TEMPLATES / "base.html").read_text(encoding="utf-8")
-        for href in ("/command-center", "/media", "/displays", "/content-deployments"):
+        for href in ("/fleet-dashboard", "/content", "/displays", "/content-deployments", "/jobs", "/alerts/"):
             self.assertIn(f'href="{href}"', base)
 
 

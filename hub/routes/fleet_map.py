@@ -12,11 +12,7 @@ fleet_map_bp = Blueprint(
 
 @fleet_map_bp.route("")
 def page():
-    return render_template(
-        "fleet_map.html",
-        active="fleet_map",
-        **build_fleet_map(),
-    )
+    return redirect(url_for("displays.page"), code=302)
 
 
 @fleet_map_bp.route("/recover", methods=["POST"])
