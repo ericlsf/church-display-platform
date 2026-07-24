@@ -17,6 +17,16 @@ def test_operator_template_has_one_step_workflow():
     assert "Final full-screen message" in template
     assert "Take over the screen this many seconds before" in template
     assert "Apply Changes to {{ display.name }}" in template
+    assert "Image preview unavailable" in template
+
+
+def test_media_previews_prefer_the_synced_hub_cache():
+    route = Path("hub/routes/media.py").read_text(encoding="utf-8")
+    assert "cache_path(remote, folder)" in route
+    assert "cached_file.is_file()" in route
+    assert route.index("cached_file.is_file()") < route.index(
+        '["rclone", "cat", source]'
+    )
 
 
 def test_display_cards_link_to_operator_editor():
