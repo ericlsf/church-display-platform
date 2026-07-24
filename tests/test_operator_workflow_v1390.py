@@ -50,6 +50,36 @@ def test_images_and_playlists_uses_one_name_everywhere():
     assert '["Media Library","Images & Playlists"]' in shell_js
 
 
+def test_images_and_playlists_keeps_the_everyday_workflow_simple():
+    content = Path("hub/templates/content.html").read_text(encoding="utf-8")
+    routes = Path("hub/routes/content.py").read_text(encoding="utf-8")
+
+    assert "Choose an image folder" in content
+    assert "Arrange playback order" in content
+    assert "Save playback order" in content
+    assert 'action="/content/save"' in content
+    assert "media.media_preview" in content
+    assert '@content_bp.route("/save", methods=["POST"])' in routes
+    assert "Deploy Now" not in content
+    assert "Schedule Deployment" not in content
+    assert "Automatic Insertion Policy" not in content
+    assert "Recent Content Jobs" not in content
+    assert "Save Draft" not in content
+
+
+def test_simple_content_page_has_responsive_reordering_assets():
+    css = Path("hub/static/content-simple-v1390.css").read_text(
+        encoding="utf-8"
+    )
+    javascript = Path("hub/static/content-simple-v1390.js").read_text(
+        encoding="utf-8"
+    )
+    assert "position:sticky" in css
+    assert "@media" in css
+    assert "dragstart" in javascript
+    assert "data-simple-order" in javascript
+
+
 def test_display_player_uses_configurable_takeover_and_service_day():
     player = Path("display/app/main.py").read_text(encoding="utf-8")
     agent = Path("display/agent/jobs/settings.py").read_text(encoding="utf-8")

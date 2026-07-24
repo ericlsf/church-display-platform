@@ -1,14 +1,13 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from services.config import load_config, load_hub_settings
+from services.config import load_hub_settings
 from services.drive import list_drive_folders
 from services.events import log_event
-from services.jobs import create_job, list_jobs
+from services.jobs import create_job
 from services.media import (
     analyze_drive_folder,
     discard_playlist_draft,
     get_playlist_entry,
-    get_playlist_policy,
     publish_playlist,
     save_playlist_draft,
     save_playlist_policy,
@@ -42,7 +41,6 @@ def parse_order():
 
 @content_bp.route("")
 def content_page():
-    cfg = load_config()
     settings = load_hub_settings()
     remote = settings.get("drive_remote", "gdrive")
     folders, drive_error = list_drive_folders(remote)
@@ -53,18 +51,15 @@ def content_page():
     workflow = get_playlist_entry(remote, folder) if folder else {}
 
     if analysis and workflow:
-        draft_order = workflow.get("draft_order") or analysis.get("playlist_order", [])
+        published_order = workflow.get("published_order") or analysis.get("playlist_order", [])
         by_path = {item.get("path"): item for item in analysis.get("media_items", [])}
-        ordered = [by_path[path] for path in draft_order if path in by_path]
-        ordered.extend(item for item in analysis.get("media_items", []) if item.get("path") not in draft_order)
+        ordered = [by_path[path] for path in published_order if path in by_path]
+        ordered.extend(item for item in analysis.get("media_items", []) if item.get("path") not in published_order)
         analysis["media_items"] = ordered
-
-    deploy_jobs = [job for job in list_jobs(50) if job.get("type") in ["set_sync_folder", "sync_now"]]
 
     return render_template(
         "content.html",
         active="content",
-        displays=cfg.get("displays", []),
         drive_remote=remote,
         drive_folders=folders,
         drive_error=drive_error,
@@ -73,9 +68,28 @@ def content_page():
         supported_only=supported_only,
         analysis=analysis,
         workflow=workflow,
-        insertion_policy=get_playlist_policy(remote, folder) if folder else "newest_first",
-        deploy_jobs=deploy_jobs,
     )
+
+
+@content_bp.route("/save", methods=["POST"])
+def save_published_order():
+    folder = request.form.get("folder", "").strip().strip("/")
+    remote = request.form.get("remote", "gdrive").strip() or "gdrive"
+    if folder:
+        order = parse_order()
+        save_playlist_draft(
+            remote,
+            folder,
+            order,
+            "Saved from Images & Playlists",
+        )
+        published = publish_playlist(remote, folder)
+        log_event(
+            f"Saved playback order for {remote}:{folder} with {len(published)} item(s)",
+            category="content",
+        )
+        flash(f"Playback order saved for {len(published)} image(s).", "success")
+    return redirect(url_for("content.content_page", folder=folder, supported_only="1"))
 
 
 @content_bp.route("/policy", methods=["POST"])
