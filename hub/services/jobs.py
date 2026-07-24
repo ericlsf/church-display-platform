@@ -7,6 +7,9 @@ from services.resilience import maintenance_enabled
 
 JOBS_FILE = CONFIG_DIR / "jobs.json"
 TERMINAL_STATUSES = {"success", "failed", "cancelled", "timed_out"}
+FAILURE_STATUSES = {"failed", "cancelled", "timed_out"}
+RESOLVED_RETENTION_DAYS = 90
+SUCCESS_RETENTION_DAYS = 30
 MAINTENANCE_ALLOWED = {
     "heartbeat", "collect_logs", "list_files", "read_file", "upload_preview",
     "service_action", "update_check",
@@ -19,7 +22,10 @@ def now_iso():
 
 def parse_iso(value):
     try:
-        return datetime.fromisoformat(value)
+        parsed = datetime.fromisoformat(value)
+        if parsed.tzinfo is not None:
+            parsed = parsed.astimezone().replace(tzinfo=None)
+        return parsed
     except Exception:
         return None
 
@@ -53,7 +59,59 @@ def normalize_job(job):
     job.setdefault("acknowledged", False)
     job.setdefault("acknowledged_at", "")
     job.setdefault("acknowledged_note", "")
+    resolved = bool(job.get("acknowledged") or job.get("resolved"))
+    job["acknowledged"] = resolved
+    job["resolved"] = resolved
     return job
+
+
+def job_is_resolved(job):
+    return bool(job.get("acknowledged") or job.get("resolved"))
+
+
+def job_is_unresolved_failure(job):
+    return (
+        str(job.get("status", "")).lower() in FAILURE_STATUSES
+        and not job_is_resolved(job)
+    )
+
+
+def format_job_time(value):
+    parsed = parse_iso(value)
+    if not parsed:
+        return "Unknown"
+    return parsed.strftime("%b %d, %Y %I:%M %p").replace(" 0", " ")
+
+
+def _prune_history(data):
+    now = datetime.now()
+    kept = []
+    changed = False
+    for job in data["jobs"]:
+        normalize_job(job)
+        timestamp = parse_iso(
+            job.get("completed_at")
+            or job.get("updated_at")
+            or job.get("created_at")
+            or ""
+        )
+        age = (now - timestamp).days if timestamp else 0
+        status = str(job.get("status", "")).lower()
+        discard = (
+            status == "success" and age > SUCCESS_RETENTION_DAYS
+        ) or (
+            status in FAILURE_STATUSES
+            and job_is_resolved(job)
+            and age > RESOLVED_RETENTION_DAYS
+        )
+        if discard:
+            changed = True
+        else:
+            kept.append(job)
+    if changed:
+        data["jobs"] = kept
+        save_jobs(data)
+    return changed
 
 
 def create_job(display_id, job_type, payload=None, max_attempts=2, timeout_seconds=900):
@@ -120,6 +178,7 @@ def _expire_and_retry(data):
 def list_jobs(limit=100):
     data = load_jobs()
     _expire_and_retry(data)
+    _prune_history(data)
     return list(reversed(data["jobs"][-limit:]))
 
 
@@ -216,6 +275,7 @@ def acknowledge_job(job_id, note=""):
         if job.get("id") != job_id:
             continue
         job["acknowledged"] = True
+        job["resolved"] = True
         job["acknowledged_at"] = now_iso()
         job["acknowledged_note"] = str(note or "Marked resolved by operator")[:500]
         job["updated_at"] = now_iso()
@@ -234,8 +294,9 @@ def acknowledge_all_terminal_jobs():
     changed = 0
     for job in data["jobs"]:
         normalize_job(job)
-        if job.get("status") in {"failed", "cancelled", "timed_out"} and not job.get("acknowledged"):
+        if job_is_unresolved_failure(job):
             job["acknowledged"] = True
+            job["resolved"] = True
             job["acknowledged_at"] = now_iso()
             job["acknowledged_note"] = "Bulk marked resolved by operator"
             job["updated_at"] = now_iso()

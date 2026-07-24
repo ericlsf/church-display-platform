@@ -74,7 +74,19 @@
 </div>
 
 <div class="section">
-    <div class="section-heading"><h2>Recent Jobs</h2><form method="POST" action="/jobs/acknowledge-terminal"><button type="submit">Mark all errors resolved</button></form></div>
+    <div class="section-heading">
+      <div><h2>Fleet History</h2><p class="muted">{{ unresolved_count }} unresolved failure{{ '' if unresolved_count == 1 else 's' }}</p></div>
+      {% if unresolved_count %}<form method="POST" action="/jobs/acknowledge-terminal" onsubmit="return confirm('Resolve all current job failures?');"><button type="submit">Resolve all old failures</button></form>{% endif %}
+    </div>
+    <form method="GET" class="fleet-form-grid">
+      <div><label>Device</label><select name="display_id"><option value="">All devices</option>{% for display in displays %}<option value="{{ display.id }}" {{ 'selected' if display.id == selected_display else '' }}>{{ display.name }}</option>{% endfor %}</select></div>
+      <div><label>Action</label><select name="type"><option value="">All actions</option>{% for job_type in job_types %}<option value="{{ job_type }}" {{ 'selected' if job_type == selected_type else '' }}>{{ job_type|replace('_', ' ')|title }}</option>{% endfor %}</select></div>
+      <div><label>Result</label><select name="result">
+        {% for value, label in [('all','All results'),('unresolved','Unresolved failures'),('resolved','Resolved failures'),('success','Successful'),('active','Active')] %}<option value="{{ value }}" {{ 'selected' if value == selected_result else '' }}>{{ label }}</option>{% endfor %}
+      </select></div>
+      <div><label>Date range</label><select name="days">{% for value in [7,30,90,365] %}<option value="{{ value }}" {{ 'selected' if value == days else '' }}>Last {{ value }} days</option>{% endfor %}</select></div>
+      <div class="fleet-form-submit"><button class="primary" type="submit">Apply filters</button> <a class="button-link" href="/jobs">Clear</a></div>
+    </form>
     <div id="jobs-grid" class="grid">
         {% if jobs %}
             {% for job in jobs %}
@@ -84,9 +96,9 @@
                     <p><strong>Status:</strong> {{ job.status }}{% if job.acknowledged %} <span class="muted">(resolved)</span>{% endif %}</p>
                     <p><strong>Progress:</strong> {{ job.progress }}%</p>
                     <p><strong>Message:</strong> {{ job.message }}</p>
-                    <p><strong>Created:</strong> {{ job.created_at }}</p>
+                    <p><strong>Created:</strong> {{ job.created_display }}</p>
                     <p><strong>Attempt:</strong> {{ job.attempt or 0 }}/{{ job.max_attempts or 1 }}</p>
-                    <p><strong>Updated:</strong> {{ job.updated_at }}</p>
+                    <p><strong>Updated:</strong> {{ job.updated_display }}</p>
                     <div class="job-controls">
                       {% if job.status in ["queued", "running"] and job.cancellable %}
                       <form method="POST" action="/jobs/{{ job.id }}/cancel"><button class="danger" type="submit">Cancel</button></form>
@@ -122,6 +134,16 @@ function statusClass(status) {
     return "muted";
 }
 
+function readableTime(value) {
+    if (!value) return "Unknown";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return new Intl.DateTimeFormat(undefined, {
+        month: "short", day: "numeric", year: "numeric",
+        hour: "numeric", minute: "2-digit"
+    }).format(parsed);
+}
+
 function renderJob(job) {
     const cls = statusClass(job.status);
 
@@ -135,9 +157,9 @@ function renderJob(job) {
                 <div style="height:100%;width:${Number(job.progress || 0)}%;background:#2d7dff;"></div>
             </div>
             <p><strong>Message:</strong> ${escapeHtml(job.message)}</p>
-            <p><strong>Created:</strong> ${escapeHtml(job.created_at)}</p>
+            <p><strong>Created:</strong> ${escapeHtml(readableTime(job.created_at))}</p>
             <p><strong>Attempt:</strong> ${escapeHtml(job.attempt || 0)}/${escapeHtml(job.max_attempts || 1)}</p>
-            <p><strong>Updated:</strong> ${escapeHtml(job.updated_at)}</p>
+            <p><strong>Updated:</strong> ${escapeHtml(readableTime(job.updated_at))}</p>
             <div class="job-controls">
               ${(job.status === "queued" || job.status === "running") && job.cancellable ? `<form method="POST" action="/jobs/${escapeHtml(job.id)}/cancel"><button class="danger" type="submit">Cancel</button></form>` : ""}
               ${["failed", "cancelled", "timed_out"].includes(job.status) ? `<form method="POST" action="/jobs/${escapeHtml(job.id)}/retry"><button class="safe" type="submit">Retry</button></form>${job.acknowledged ? "" : `<form method="POST" action="/jobs/${escapeHtml(job.id)}/acknowledge"><button type="submit">Mark resolved</button></form>`}` : ""}
@@ -149,7 +171,7 @@ function renderJob(job) {
 
 async function refreshJobs() {
     try {
-        const response = await fetch("/api/v1/jobs", { cache: "no-store" });
+        const response = await fetch("/api/v1/jobs" + window.location.search, { cache: "no-store" });
         if (!response.ok) return;
 
         const data = await response.json();

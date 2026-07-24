@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 
 from services.config import load_config, load_hub_settings
@@ -5,7 +7,9 @@ from services.drive import list_drive_folders
 from services.events import log_event
 from services.jobs import (
     acknowledge_all_terminal_jobs, acknowledge_job, create_job, get_next_job,
-    list_jobs, request_cancel, retry_job, update_job,
+    format_job_time, job_is_resolved, job_is_unresolved_failure, list_jobs,
+    parse_iso,
+    request_cancel, retry_job, update_job,
 )
 from services.releases import list_git_tags
 
@@ -23,11 +27,53 @@ def jobs_page():
     drive_folders, drive_error = list_drive_folders(drive_remote)
     release_tags = list_git_tags()
 
+    all_jobs = list_jobs(1000)
+    selected_display = request.args.get("display_id", "").strip()
+    selected_type = request.args.get("type", "").strip()
+    selected_result = request.args.get("result", "all").strip().lower()
+    try:
+        days = max(1, min(int(request.args.get("days", "30")), 365))
+    except ValueError:
+        days = 30
+    cutoff = datetime.now() - timedelta(days=days)
+
+    def matches(job):
+        timestamp = parse_iso(
+            job.get("updated_at") or job.get("created_at") or ""
+        )
+        if timestamp and timestamp < cutoff:
+            return False
+        if selected_display and job.get("display_id") != selected_display:
+            return False
+        if selected_type and job.get("type") != selected_type:
+            return False
+        status = str(job.get("status", "")).lower()
+        if selected_result == "unresolved" and not job_is_unresolved_failure(job):
+            return False
+        if selected_result == "resolved" and not job_is_resolved(job):
+            return False
+        if selected_result == "success" and status != "success":
+            return False
+        if selected_result == "active" and status not in {"queued", "running"}:
+            return False
+        return True
+
+    jobs = [dict(job) for job in all_jobs if matches(job)]
+    for job in jobs:
+        job["created_display"] = format_job_time(job.get("created_at"))
+        job["updated_display"] = format_job_time(job.get("updated_at"))
+
     return render_template(
         "jobs.html",
         active="jobs",
         displays=cfg.get("displays", []),
-        jobs=list_jobs(150),
+        jobs=jobs[:150],
+        job_types=sorted({job.get("type", "") for job in all_jobs if job.get("type")}),
+        selected_display=selected_display,
+        selected_type=selected_type,
+        selected_result=selected_result,
+        days=days,
+        unresolved_count=sum(job_is_unresolved_failure(job) for job in all_jobs),
         drive_remote=drive_remote,
         drive_folders=drive_folders,
         drive_error=drive_error,
@@ -100,7 +146,37 @@ def acknowledge_terminal_jobs_route():
 
 @jobs_api_bp.route("")
 def api_list_jobs():
-    return jsonify({"ok": True, "jobs": list_jobs(150)})
+    jobs = list_jobs(1000)
+    display_id = request.args.get("display_id", "").strip()
+    job_type = request.args.get("type", "").strip()
+    result = request.args.get("result", "all").strip().lower()
+    try:
+        cutoff = datetime.now() - timedelta(
+            days=max(1, min(int(request.args.get("days", "30")), 365))
+        )
+    except ValueError:
+        cutoff = datetime.now() - timedelta(days=30)
+
+    filtered = []
+    for job in jobs:
+        timestamp = parse_iso(job.get("updated_at") or job.get("created_at") or "")
+        status = str(job.get("status", "")).lower()
+        if timestamp and timestamp < cutoff:
+            continue
+        if display_id and job.get("display_id") != display_id:
+            continue
+        if job_type and job.get("type") != job_type:
+            continue
+        if result == "unresolved" and not job_is_unresolved_failure(job):
+            continue
+        if result == "resolved" and not job_is_resolved(job):
+            continue
+        if result == "success" and status != "success":
+            continue
+        if result == "active" and status not in {"queued", "running"}:
+            continue
+        filtered.append(job)
+    return jsonify({"ok": True, "jobs": filtered[:150]})
 
 
 @jobs_api_bp.route("/next")

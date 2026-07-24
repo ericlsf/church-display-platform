@@ -13,6 +13,8 @@
     <input type="hidden" name="view" value="{{ view }}">
     <label>Display</label><select name="display_id"><option value="">All displays</option>{% for d in displays %}<option value="{{ d.id }}" {% if d.id == selected_display %}selected{% endif %}>{{ d.name }}</option>{% endfor %}</select>
     <label>Event category</label><select name="category"><option value="">All categories</option>{% for c in categories %}<option value="{{ c }}" {% if c == selected_category %}selected{% endif %}>{{ c }}</option>{% endfor %}</select>
+    <label>Action</label><select name="action_type"><option value="">All actions</option>{% for action in action_types %}<option value="{{ action }}" {% if action == selected_action %}selected{% endif %}>{{ action|replace('_',' ')|title }}</option>{% endfor %}</select>
+    <label>Result</label><select name="result"><option value="">All results</option>{% for value, label in [('success','Successful'),('danger','Failed')] %}<option value="{{ value }}" {% if value == selected_result %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
     <label>Range</label><select name="days">{% for n in [1,7,14,30,90] %}<option value="{{ n }}" {% if n == days %}selected{% endif %}>{{ n }} day{% if n != 1 %}s{% endif %}</option>{% endfor %}</select>
     <button class="primary">Apply</button>
   </form>
@@ -24,15 +26,15 @@
 </div>
 
 {% if view == 'compact' %}
-<div class="section"><h2>Event Summary</h2>{% if event_summary %}<div class="history-summary-grid">{% for item in event_summary %}<a class="history-summary-card" href="?display_id={{ selected_display }}&category={{ item.category }}&days={{ days }}&view=detailed"><strong>{{ item.category }}</strong><span>{{ item.count }} event{% if item.count != 1 %}s{% endif %}</span><small>{{ item.latest_message }}</small><small class="muted">Latest {{ item.latest_at }}</small></a>{% endfor %}</div>{% else %}<p class="muted">No events found.</p>{% endif %}</div>
+<div class="section"><h2>Event Summary</h2>{% if event_summary %}<div class="history-summary-grid">{% for item in event_summary %}<a class="history-summary-card" href="?display_id={{ selected_display }}&category={{ item.category }}&action_type={{ selected_action }}&result={{ selected_result }}&days={{ days }}&view=detailed"><strong>{{ item.category }}</strong><span>{{ item.count }} event{% if item.count != 1 %}s{% endif %}</span><small>{{ item.latest_message }}</small><small class="muted">Latest {{ item.latest_at }}</small></a>{% endfor %}</div>{% else %}<p class="muted">No events found.</p>{% endif %}</div>
 {% endif %}
 
 <div class="section">
   <div class="section-heading"><h2>{% if view == 'compact' %}Recent Events{% else %}Detailed Event Timeline{% endif %}</h2><span class="muted">{{ total_events }} total</span></div>
-  {% if events %}<div class="history-list">{% for e in events %}<article class="history-item"><div><strong>{{ e.category }}</strong> <span class="muted">{{ e.created_at }}</span></div><p>{{ e.message }}</p>{% if view == 'detailed' and e.metadata %}<details><summary>Metadata</summary><pre>{{ e.metadata | tojson(indent=2) }}</pre></details>{% endif %}</article>{% endfor %}</div>{% else %}<p class="muted">No events found.</p>{% endif %}
+  {% if events %}<div class="history-list">{% for e in events %}<article class="history-item"><div><strong>{{ e.category }}</strong> <span class="muted">{{ e.created_display }}</span></div><p>{{ e.message }}</p>{% if view == 'detailed' and e.metadata %}<details><summary>Metadata</summary><pre>{{ e.metadata | tojson(indent=2) }}</pre></details>{% endif %}</article>{% endfor %}</div>{% else %}<p class="muted">No events found.</p>{% endif %}
   <div class="history-pagination">
-    {% if page > 1 %}<a class="button-link" href="?display_id={{ selected_display }}&category={{ selected_category }}&days={{ days }}&view={{ view }}&page={{ page - 1 }}">Previous</a>{% endif %}
-    {% if has_more %}<a class="button-link primary" href="?display_id={{ selected_display }}&category={{ selected_category }}&days={{ days }}&view={{ view }}&page={{ page + 1 }}">Show more</a>{% endif %}
+    {% if page > 1 %}<a class="button-link" href="?display_id={{ selected_display }}&category={{ selected_category }}&action_type={{ selected_action }}&result={{ selected_result }}&days={{ days }}&view={{ view }}&page={{ page - 1 }}">Previous</a>{% endif %}
+    {% if has_more %}<a class="button-link primary" href="?display_id={{ selected_display }}&category={{ selected_category }}&action_type={{ selected_action }}&result={{ selected_result }}&days={{ days }}&view={{ view }}&page={{ page + 1 }}">Show more</a>{% endif %}
   </div>
 </div>
 
