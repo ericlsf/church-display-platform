@@ -15,7 +15,7 @@
     <div>
       <span class="simple-eyebrow">Media Library</span>
       <h1>Images &amp; Playlists</h1>
-      <p>Choose a Google Drive folder, arrange its images, and save the playback order.</p>
+      <p>Create one shared playlist per Google Drive folder. Every display using that folder follows the same order.</p>
     </div>
     <a class="button-link" href="/content-deployments">Advanced deployments</a>
   </header>
@@ -56,7 +56,7 @@
         <section class="simple-content-panel">
           <div class="simple-step-heading">
             <span>2</span>
-            <div><h2>Arrange playback order</h2><p>Drag images or use the arrow buttons. The first image plays first.</p></div>
+            <div><h2>Arrange the shared “{{ selected_folder }}” playlist</h2><p>Drag images or use the arrow buttons. The first image plays first on every assigned display.</p></div>
             <strong class="simple-count">{{ analysis["media_items"]|length }} images</strong>
           </div>
 
@@ -100,9 +100,9 @@
         <section class="simple-save-panel">
           <div class="simple-step-heading">
             <span>3</span>
-            <div><h2>Save playback order</h2><p>Displays will use this order the next time they synchronize this folder.</p></div>
+            <div><h2>Publish shared playlist</h2><p>This updates all {{ playlist_display_count }} display(s) currently using “{{ selected_folder }}”.</p></div>
           </div>
-          <button class="primary" type="submit" {% if not analysis["media_items"] %}disabled{% endif %}>Save Order</button>
+          <button class="primary" type="submit" {% if not analysis["media_items"] %}disabled{% endif %}>Publish Playlist</button>
         </section>
       </form>
 

@@ -48,12 +48,12 @@ def test_editor_separates_visible_and_hidden_playlist_items():
     ] == ["hide.jpg"]
 
 
-def test_everyday_editor_exposes_hide_and_restore_controls():
+def test_everyday_editor_points_to_the_shared_folder_playlist():
     template = (
         Path(__file__).parents[1] / "hub" / "templates" / "display_operator.html"
     ).read_text(encoding="utf-8")
 
-    assert 'name="playlist_excluded"' in template
-    assert "data-hide-media" in template
-    assert "data-restore-media" in template
-    assert "without deleting it from Google Drive" in template
+    assert "Using the shared" in template
+    assert "Edit {{ folder }} playlist" in template
+    assert 'name="playlist_excluded"' not in template
+    assert "data-hide-media" not in template
