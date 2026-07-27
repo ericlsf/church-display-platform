@@ -10,6 +10,7 @@ from services.media import (
     get_playlist_entry,
     publish_playlist,
     save_playlist_draft,
+    save_playlist_exclusions,
     save_playlist_policy,
 )
 from services.content_cache import sync_playlist_from_drive
@@ -32,6 +33,7 @@ def current_analysis(remote, folder, recursive=False, supported_only=True):
         supported_only=supported_only,
         timeout=45,
         max_items=800,
+        include_excluded=True,
     )
 
 
@@ -51,10 +53,12 @@ def content_page():
     workflow = get_playlist_entry(remote, folder) if folder else {}
 
     if analysis and workflow:
+        excluded = set(workflow.get("draft_excluded", []))
         published_order = workflow.get("published_order") or analysis.get("playlist_order", [])
         by_path = {item.get("path"): item for item in analysis.get("media_items", [])}
-        ordered = [by_path[path] for path in published_order if path in by_path]
-        ordered.extend(item for item in analysis.get("media_items", []) if item.get("path") not in published_order)
+        ordered = [by_path[path] for path in published_order if path in by_path and path not in excluded]
+        ordered.extend(item for item in analysis.get("media_items", []) if item.get("path") not in published_order and item.get("path") not in excluded)
+        analysis["hidden_media_items"] = [item for item in analysis.get("media_items", []) if item.get("path") in excluded]
         analysis["media_items"] = ordered
 
     return render_template(
@@ -77,6 +81,8 @@ def save_published_order():
     remote = request.form.get("remote", "gdrive").strip() or "gdrive"
     if folder:
         order = parse_order()
+        excluded = [x.strip() for x in request.form.get("playlist_excluded", "").splitlines() if x.strip()]
+        save_playlist_exclusions(remote, folder, excluded, draft=True)
         save_playlist_draft(
             remote,
             folder,

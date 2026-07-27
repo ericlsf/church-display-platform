@@ -100,6 +100,36 @@ def get_playlist_order(remote, folder):
     return [str(x) for x in order if str(x).strip()]
 
 
+def get_playlist_exclusions(remote, folder, draft=False):
+    data = load_playlists()
+    entry = data.get("playlists", {}).get(playlist_key(remote, folder), {})
+    key = "draft_excluded" if draft else "published_excluded"
+    values = entry.get(key)
+    if values is None:
+        values = entry.get("excluded", [])
+    return [str(x) for x in values if str(x).strip()]
+
+
+def save_playlist_exclusions(remote, folder, excluded, draft=True):
+    clean = []
+    seen = set()
+    for item in excluded or []:
+        item = str(item).strip().strip("/")
+        if item and item not in seen:
+            seen.add(item)
+            clean.append(item)
+    data = load_playlists()
+    key = playlist_key(remote, folder)
+    entry = data.setdefault("playlists", {}).setdefault(key, {})
+    entry.update({
+        "remote": remote or "gdrive",
+        "folder": (folder or "").strip().strip("/"),
+        "draft_excluded" if draft else "published_excluded": clean,
+    })
+    save_playlists(data)
+    return clean
+
+
 def save_playlist_order(remote, folder, order):
     clean = []
     seen = set()
@@ -197,8 +227,13 @@ def parent_folder(folder):
     return folder.rsplit("/", 1)[0]
 
 
-def ordered_media_items(items, saved_order):
+def ordered_media_items(items, saved_order, excluded=None):
+    excluded = set(excluded or [])
     media = [item for item in items if item.get("supported") and not item.get("is_dir")]
+    media = [
+        item for item in media
+        if (item.get("path") or item.get("name") or "") not in excluded
+    ]
     order_index = {name: idx for idx, name in enumerate(saved_order or [])}
 
     def key(item):
@@ -210,10 +245,11 @@ def ordered_media_items(items, saved_order):
     return sorted(media, key=key)
 
 
-def analyze_drive_folder(remote="gdrive", folder="", timeout=30, max_items=500, recursive=False, supported_only=False):
+def analyze_drive_folder(remote="gdrive", folder="", timeout=30, max_items=500, recursive=False, supported_only=False, include_excluded=False):
     remote = remote or "gdrive"
     folder = (folder or "").strip().strip("/")
     saved_order = get_playlist_order(remote, folder)
+    excluded = get_playlist_exclusions(remote, folder)
 
     if not folder:
         return {
@@ -312,7 +348,11 @@ def analyze_drive_folder(remote="gdrive", folder="", timeout=30, max_items=500, 
             })
 
     items.sort(key=lambda x: (not x["is_dir"], x["type"] not in ["image", "video"], x["name"].lower()))
-    media_items = ordered_media_items(items, saved_order)
+    media_items = ordered_media_items(
+        items,
+        saved_order,
+        [] if include_excluded else excluded,
+    )
     playlist_order = [item.get("path") or item.get("name") for item in media_items]
     playlist_runtime_seconds = sum(int(item.get("duration_seconds") or 0) for item in media_items)
     playlist_runtime_note = "Images estimate 8s each. Video runtime is shown after future metadata support."
@@ -349,12 +389,18 @@ def get_playlist_entry(remote, folder):
     entry = data.get("playlists", {}).get(key, {})
     published = entry.get("published_order") or entry.get("order") or []
     draft = entry.get("draft_order") or published
+    published_excluded = entry.get("published_excluded") or entry.get("excluded") or []
+    draft_excluded = entry.get("draft_excluded")
+    if draft_excluded is None:
+        draft_excluded = published_excluded
     return {
         **entry,
         "remote": remote or "gdrive",
         "folder": (folder or "").strip().strip("/"),
         "published_order": [str(x) for x in published if str(x).strip()],
         "draft_order": [str(x) for x in draft if str(x).strip()],
+        "published_excluded": [str(x) for x in published_excluded if str(x).strip()],
+        "draft_excluded": [str(x) for x in draft_excluded if str(x).strip()],
         "status": entry.get("status") or ("draft" if draft != published else "published"),
         "draft_note": entry.get("draft_note", ""),
         "published_at": entry.get("published_at", ""),
@@ -393,12 +439,18 @@ def publish_playlist(remote, folder):
     key = playlist_key(remote, folder)
     entry = data.setdefault("playlists", {}).setdefault(key, {})
     published = entry.get("draft_order") or entry.get("published_order") or entry.get("order") or []
+    excluded = entry.get("draft_excluded")
+    if excluded is None:
+        excluded = entry.get("published_excluded") or entry.get("excluded") or []
     entry.update({
         "remote": remote or "gdrive",
         "folder": (folder or "").strip().strip("/"),
         "order": list(published),
         "published_order": list(published),
         "draft_order": list(published),
+        "excluded": list(excluded),
+        "published_excluded": list(excluded),
+        "draft_excluded": list(excluded),
         "status": "published",
         "published_at": datetime.now().isoformat(timespec="seconds"),
         "insertion_policy": entry.get("insertion_policy", "newest_first"),
@@ -413,6 +465,7 @@ def discard_playlist_draft(remote, folder):
     entry = data.setdefault("playlists", {}).setdefault(key, {})
     published = entry.get("published_order") or entry.get("order") or []
     entry["draft_order"] = list(published)
+    entry["draft_excluded"] = list(entry.get("published_excluded") or entry.get("excluded") or [])
     entry["status"] = "published"
     entry["draft_note"] = ""
     save_playlists(data)

@@ -7,7 +7,7 @@
 {% block content %}
 <section class="section fleet-hero">
   <div>
-    <p class="eyebrow">v13.10.1</p>
+    <p class="eyebrow">v13.11.0</p>
     <h2>Displays</h2>
     <p class="muted">Monitor, organize, and operate every display from one place.</p>
   </div>
@@ -136,14 +136,20 @@
       <div class="fleet-health-strip">
         {% if row.device_role == 'controller' %}<span class="health-chip healthy">Controller</span>
         {% else %}<span data-app-health class="health-chip {{ 'healthy' if row.display_app_running else 'critical' }}">Player {{ 'running' if row.display_app_running else 'stopped' }}</span>{% endif %}
-        {% if row.update_available %}<span class="health-chip warning" data-update-health>Update {{ row.latest_tag }}</span>{% endif %}
+        {% if row.update_available %}
+          <form method="POST" action="/deployments/queue-latest" class="fleet-update-action" data-update-health>
+            <input type="hidden" name="display_id" value="{{ row.id }}">
+            <input type="hidden" name="target" value="{{ row.latest_tag }}">
+            <input type="hidden" name="dry_run" value="false">
+            <button class="health-chip warning" type="submit">Update to {{ row.latest_tag }}</button>
+          </form>
+        {% endif %}
         {% if row.job.active_count %}<span class="health-chip working" data-job-health>{{ row.job.type|replace('_', ' ')|title }} · {{ row.job.progress }}%</span>
         {% elif row.job.failed_count %}<span class="health-chip critical" data-job-health>{{ row.job.failed_count }} failed job{{ '' if row.job.failed_count == 1 else 's' }}</span>
         {% else %}<span class="health-chip muted-chip" data-job-health>No active jobs</span>{% endif %}
       </div>
       <div class="fleet-card-heading">
         <div><h2>{{ row.name }}</h2><p class="muted fleet-host">{{ row.host }}</p></div>
-        {% if row.update_available %}<span class="badge fleet-update-badge">Update</span>{% endif %}
       </div>
 
       <div class="fleet-metrics">
@@ -160,26 +166,33 @@
 
       <div class="fleet-quick-actions">
         {% if row.device_role != 'controller' %}
-        <a class="primary button-link" href="/display/{{ row.id }}/operator">Manage Content &amp; Messages</a>
-        <form method="POST" action="/fleet/{{ row.id }}/screenshot">
-          <input type="hidden" name="next" value="/displays">
-          <button class="button-link" type="submit">Screenshot</button>
-        </form>
+        <a class="primary button-link fleet-primary-action" href="/display/{{ row.id }}/operator">Manage</a>
         <form method="POST" action="/fleet/{{ row.id }}/sync-now">
           <input type="hidden" name="next" value="/displays">
           <button class="safe" type="submit">Sync</button>
         </form>
-        <form method="POST" action="/fleet/{{ row.id }}/restart" onsubmit="return confirm('Restart {{ row.name }}?');">
+        <form method="POST" action="/fleet/{{ row.id }}/screenshot">
           <input type="hidden" name="next" value="/displays">
-          <button class="danger" type="submit">Restart</button>
+          <button class="button-link" type="submit">Screenshot</button>
         </form>
         {% endif %}
-        <form method="POST" action="/fleet/{{ row.id }}/reboot" onsubmit="return confirm('Reboot {{ row.name }}?');">
-          <input type="hidden" name="next" value="/displays">
-          <button class="danger" type="submit">Reboot</button>
-        </form>
-        <button class="button-link" type="button" data-show-logs="{{ row.id }}" data-display-name="{{ row.name }}">View logs</button>
-        <button class="button-link" type="button" data-show-diagnostics="{{ row.host }}" data-display-name="{{ row.name }}">Diagnostics</button>
+        <details class="fleet-more-actions">
+          <summary>More</summary>
+          <div>
+            {% if row.device_role != 'controller' %}
+            <form method="POST" action="/fleet/{{ row.id }}/restart" onsubmit="return confirm('Restart {{ row.name }}?');">
+              <input type="hidden" name="next" value="/displays">
+              <button type="submit">Restart player</button>
+            </form>
+            {% endif %}
+            <form method="POST" action="/fleet/{{ row.id }}/reboot" onsubmit="return confirm('Reboot {{ row.name }}?');">
+              <input type="hidden" name="next" value="/displays">
+              <button class="danger" type="submit">Reboot device</button>
+            </form>
+            <button type="button" data-show-logs="{{ row.id }}" data-display-name="{{ row.name }}">View logs</button>
+            <button type="button" data-show-diagnostics="{{ row.host }}" data-display-name="{{ row.name }}">Diagnostics</button>
+          </div>
+        </details>
       </div>
 
       <details class="fleet-manage">
