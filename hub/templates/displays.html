@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Fleet Overview - Church Display Hub{% endblock %}
+{% block title %}Displays - Church Display Hub{% endblock %}
 {% block head %}
 <link rel="stylesheet" href="/static/display-fleet-v1120.css?v=11.2.1">
 <link rel="stylesheet" href="/static/display-fleet-v1300.css?v=13.0.0">
@@ -7,7 +7,7 @@
 {% block content %}
 <section class="section fleet-hero">
   <div>
-    <p class="eyebrow">v13.12.0</p>
+    <p class="eyebrow">v13.13.0</p>
     <h2>Displays</h2>
     <p class="muted">Monitor, organize, and operate every display from one place.</p>
   </div>
@@ -19,13 +19,18 @@
   </div>
 </section>
 
-{% if test_message %}<div class="section fleet-notice"><strong>{{ test_message }}</strong></div>{% endif %}
+{% if test_message %}
+<div class="fleet-toast" role="status" data-fleet-toast>
+  <span>{{ test_message }}</span>
+  <button type="button" aria-label="Dismiss message" data-dismiss-toast>&times;</button>
+</div>
+{% endif %}
 
 <section class="fleet-summary" aria-label="Fleet summary">
-  <div><span class="summary-icon online"></span><strong data-online-count>{{ rows|selectattr('online')|list|length }}</strong><span>Online</span></div>
-  <div><span class="summary-icon offline"></span><strong data-offline-count>{{ rows|rejectattr('online')|list|length }}</strong><span>Offline</span></div>
-  <div><span class="summary-icon attention">!</span><strong data-attention-count>{{ rows|selectattr('attention')|list|length }}</strong><span>Need attention</span></div>
-  <div><span class="summary-icon jobs">↻</span><strong data-active-jobs>{{ rows|sum(attribute='job.active_count') }}</strong><span>Active jobs</span></div>
+  <div class="fleet-summary-item"><span class="summary-icon online" aria-hidden="true"></span><span class="fleet-summary-copy"><strong data-online-count>{{ rows|selectattr('online')|list|length }}</strong><span>Online</span></span></div>
+  <div class="fleet-summary-item"><span class="summary-icon offline" aria-hidden="true"></span><span class="fleet-summary-copy"><strong data-offline-count>{{ rows|rejectattr('online')|list|length }}</strong><span>Offline</span></span></div>
+  <div class="fleet-summary-item"><span class="summary-icon attention" aria-hidden="true">!</span><span class="fleet-summary-copy"><strong data-attention-count>{{ rows|selectattr('attention')|list|length }}</strong><span>Needs attention</span></span></div>
+  <div class="fleet-summary-item"><span class="summary-icon jobs" aria-hidden="true">&#8635;</span><span class="fleet-summary-copy"><strong data-active-jobs>{{ rows|sum(attribute='job.active_count') }}</strong><span>Active jobs</span></span></div>
 </section>
 
 <aside class="section notification-center fleet-notification-panel" id="notification-center" hidden>
@@ -119,10 +124,8 @@
     data-search="{{ row.name }} {{ row.host }} {{ row.group }} {{ row.version }} {{ row.current_tag }}"
     data-status="{{ row.health_state }}"
     data-group="{{ row.group|lower }}"
+    data-device-role="{{ row.device_role }}"
     data-version="{{ 'unknown' if row.current_tag in ['Unknown', 'untagged', ''] else ('outdated' if row.update_available else 'current') }}">
-    <div class="fleet-card-select">
-      <label aria-label="Select {{ row.name }}"><input class="display-selector" data-display-select type="checkbox" value="{{ row.id }}"></label>
-    </div>
     <div class="fleet-thumbnail display-preview">
       {% if row.preview_url %}
         <img src="{{ row.preview_url }}" alt="Latest screenshot from {{ row.name }}" loading="lazy">
@@ -133,6 +136,7 @@
     </div>
 
     <div class="fleet-card-body">
+      <div class="fleet-card-topline">
       <div class="fleet-health-strip">
         {% if row.device_role == 'controller' %}<span class="health-chip healthy">Controller</span>
         {% else %}<span data-app-health class="health-chip {{ 'healthy' if row.display_app_running else 'critical' }}">Player {{ 'running' if row.display_app_running else 'stopped' }}</span>{% endif %}
@@ -141,21 +145,26 @@
             <input type="hidden" name="display_id" value="{{ row.id }}">
             <input type="hidden" name="target" value="{{ row.latest_tag }}">
             <input type="hidden" name="dry_run" value="false">
-            <button class="health-chip warning" type="submit">Update to {{ row.latest_tag }}</button>
+            <button class="health-chip warning card-update-button" type="submit" title="Install {{ row.latest_tag }} on {{ row.name }}" aria-label="Update {{ row.name }} to {{ row.latest_tag }}">Update {{ row.latest_tag }}</button>
           </form>
         {% endif %}
-        {% if row.job.active_count %}<span class="health-chip working" data-job-health>{{ row.job.type|replace('_', ' ')|title }} · {{ row.job.progress }}%</span>
+        {% if row.job.active_count %}<span class="health-chip working" data-job-health>{{ row.job.type|replace('_', ' ')|title }} &middot; {{ row.job.progress }}%</span>
         {% elif row.job.failed_count %}<span class="health-chip critical" data-job-health>{{ row.job.failed_count }} failed job{{ '' if row.job.failed_count == 1 else 's' }}</span>
         {% else %}<span class="health-chip muted-chip" data-job-health>No active jobs</span>{% endif %}
+      </div>
+      <label class="fleet-card-selection-control">
+        <input class="display-selector" data-display-select type="checkbox" value="{{ row.id }}">
+        <span>Select</span>
+      </label>
       </div>
       <div class="fleet-card-heading">
         <div><h2>{{ row.name }}</h2><p class="muted fleet-host">{{ row.host }}</p></div>
       </div>
 
       <div class="fleet-metrics">
-        <div class="fleet-metric"><span>CPU</span><strong data-cpu-temp>{{ row.system.cpu_temp if row.system else 'Unknown' }}</strong></div>
-        <div class="fleet-metric"><span>RAM</span><strong data-memory-usage>{{ row.system.memory if row.system else 'Unknown' }}</strong></div>
-        <div class="fleet-metric"><span>Disk</span><strong data-disk-usage>{{ row.system.disk if row.system else 'Unknown' }}</strong></div>
+        <div class="fleet-metric"><span>CPU</span><strong data-cpu-temp>{{ row.system.cpu_temp if row.system and row.system.cpu_temp else '—' }}</strong></div>
+        <div class="fleet-metric"><span>RAM</span><strong data-memory-usage>{{ row.system.memory if row.system and row.system.memory else '—' }}</strong></div>
+        <div class="fleet-metric"><span>Disk</span><strong data-disk-usage>{{ row.system.disk if row.system and row.system.disk else '—' }}</strong></div>
         <div class="fleet-metric"><span>{{ 'Role' if row.device_role == 'controller' else 'Media' }}</span><strong data-media-count>{{ 'Hub' if row.device_role == 'controller' else row.media_count }}</strong></div>
       </div>
 
@@ -171,26 +180,27 @@
           <input type="hidden" name="next" value="/displays">
           <button class="safe" type="submit">Sync</button>
         </form>
-        <form method="POST" action="/fleet/{{ row.id }}/screenshot">
-          <input type="hidden" name="next" value="/displays">
-          <button class="button-link" type="submit">Screenshot</button>
-        </form>
         {% endif %}
         <details class="fleet-more-actions">
-          <summary>More</summary>
-          <div>
+          <summary aria-label="More actions for {{ row.name }}">More</summary>
+          <div role="menu">
             {% if row.device_role != 'controller' %}
+            <form method="POST" action="/fleet/{{ row.id }}/screenshot">
+              <input type="hidden" name="next" value="/displays">
+              <button type="submit" role="menuitem">Take screenshot</button>
+            </form>
             <form method="POST" action="/fleet/{{ row.id }}/restart" onsubmit="return confirm('Restart {{ row.name }}?');">
               <input type="hidden" name="next" value="/displays">
-              <button type="submit">Restart player</button>
+              <button type="submit" role="menuitem">Restart player</button>
             </form>
             {% endif %}
+            <button type="button" role="menuitem" data-show-logs="{{ row.id }}" data-display-name="{{ row.name }}">View logs</button>
+            <button type="button" role="menuitem" data-show-diagnostics="{{ row.host }}" data-display-name="{{ row.name }}">Diagnostics</button>
+            <div class="fleet-menu-divider" aria-hidden="true"></div>
             <form method="POST" action="/fleet/{{ row.id }}/reboot" onsubmit="return confirm('Reboot {{ row.name }}?');">
               <input type="hidden" name="next" value="/displays">
-              <button class="danger" type="submit">Reboot device</button>
+              <button class="fleet-menu-danger" type="submit" role="menuitem">Reboot device</button>
             </form>
-            <button type="button" data-show-logs="{{ row.id }}" data-display-name="{{ row.name }}">View logs</button>
-            <button type="button" data-show-diagnostics="{{ row.host }}" data-display-name="{{ row.name }}">Diagnostics</button>
           </div>
         </details>
       </div>
@@ -266,14 +276,17 @@
   <p class="muted">{% if rows %}Try adjusting your search or filters.{% else %}Add your first display to start monitoring the fleet.{% endif %}</p>
 </div>
 
-<section class="fleet-operations-layout fleet-secondary-panels">
-  <aside class="section activity-feed">
-    <div class="fleet-section-heading"><div><h2>Live activity</h2><p class="muted"><span class="live-dot"></span> Connected</p></div></div>
-    <ol id="activity-list" class="activity-list">
-      {% for event in event_records[:8] %}<li><time>{{ event.created_at }}</time><span>{{ event.message }}</span></li>
-      {% else %}<li class="muted">Waiting for fleet activity…</li>{% endfor %}
-    </ol>
-  </aside>
+<section class="fleet-activity-strip" aria-label="Latest fleet activity">
+  <span class="live-dot" aria-hidden="true"></span>
+  <strong>Latest activity</strong>
+  {% if event_records %}
+  <time id="fleet-latest-event-time">{{ event_records[0].created_at }}</time>
+  <span id="fleet-latest-event-message">{{ event_records[0].message }}</span>
+  {% else %}
+  <time id="fleet-latest-event-time"></time>
+  <span id="fleet-latest-event-message" class="muted">Waiting for fleet activity…</span>
+  {% endif %}
+  <a href="/jobs">View activity</a>
 </section>
 
 <script>
@@ -296,6 +309,8 @@
     const selected = selectors().filter(box => box.checked);
     selectedCount.textContent = selected.length;
     bulkBar.hidden = selected.length === 0;
+    document.getElementById("fleet-card-grid").classList.toggle("is-selecting", selected.length > 0);
+    cards.forEach(card => card.classList.toggle("is-selected", card.querySelector(".display-selector").checked));
     const visible = visibleCards().map(card => card.querySelector(".display-selector"));
     selectVisible.checked = visible.length > 0 && visible.every(box => box.checked);
     selectVisible.indeterminate = visible.some(box => box.checked) && !selectVisible.checked;
@@ -349,6 +364,29 @@
     panel.hidden = !panel.hidden;
   }));
 
+  const toast = document.querySelector("[data-fleet-toast]");
+  const dismissToast = () => {
+    if (!toast) return;
+    toast.classList.add("is-leaving");
+    window.setTimeout(() => toast.remove(), 180);
+  };
+  document.querySelector("[data-dismiss-toast]")?.addEventListener("click", dismissToast);
+  if (toast) window.setTimeout(dismissToast, 8000);
+
+  const moreMenus = [...document.querySelectorAll(".fleet-more-actions")];
+  moreMenus.forEach(menu => menu.addEventListener("toggle", () => {
+    if (!menu.open) return;
+    moreMenus.forEach(other => { if (other !== menu) other.open = false; });
+  }));
+  document.addEventListener("click", event => {
+    moreMenus.forEach(menu => {
+      if (menu.open && !menu.contains(event.target)) menu.open = false;
+    });
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") moreMenus.forEach(menu => { menu.open = false; });
+  });
+
   const dialog = document.getElementById("fleet-dialog");
   const dialogTitle = document.getElementById("fleet-dialog-title");
   const dialogContent = document.getElementById("fleet-dialog-content");
@@ -390,9 +428,11 @@
   }
 
   function renderActivity(events) {
-    document.getElementById("activity-list").innerHTML = events.length
-      ? events.slice(0, 8).map(item => `<li><time>${escapeHtml(item.created_at)}</time><span>${escapeHtml(item.message)}</span></li>`).join("")
-      : '<li class="muted">Waiting for fleet activity…</li>';
+    const latest = events[0] || {};
+    document.getElementById("fleet-latest-event-time").textContent = latest.created_at || "";
+    const message = document.getElementById("fleet-latest-event-message");
+    message.textContent = latest.message || "Waiting for fleet activity…";
+    message.classList.toggle("muted", !latest.message);
   }
 
   function updateLiveCard(row) {
@@ -403,8 +443,10 @@
     health.className = `fleet-status is-${row.health_state}`;
     health.textContent = row.health_state.charAt(0).toUpperCase() + row.health_state.slice(1);
     const metrics = card.querySelectorAll(".fleet-metric strong");
-    [row.system.cpu_temp, row.system.memory, row.system.disk, row.media_count].forEach((value, index) => {
-      if (metrics[index]) metrics[index].textContent = value == null ? "Unknown" : value;
+    const values = [row.system.cpu_temp, row.system.memory, row.system.disk];
+    if (card.dataset.deviceRole !== "controller") values.push(row.media_count);
+    values.forEach((value, index) => {
+      if (metrics[index]) metrics[index].textContent = value == null || value === "" ? "—" : value;
     });
   }
 
