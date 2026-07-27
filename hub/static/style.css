@@ -3522,3 +3522,64 @@ body.v8-sidebar-collapsed .v8-main-content{
 .fleet-dialog-heading{justify-content:space-between;margin-bottom:14px}.fleet-dialog-heading h2{margin:0}.log-panel pre{max-height:320px;overflow:auto;padding:14px;border:1px solid #333;border-radius:10px;background:#090909;color:#d7e5d8;white-space:pre-wrap;word-break:break-word}.diagnostics-frame{width:100%;height:68vh;border:1px solid #333;border-radius:10px;background:white}
 @media(max-width:900px){.fleet-toolbar{grid-template-columns:1fr 1fr}.fleet-search,.fleet-results{grid-column:1/-1}.fleet-operations-layout:has(.notification-center:not([hidden])){grid-template-columns:1fr}}
 @media(max-width:560px){.fleet-hero,.fleet-section-heading,.fleet-bulk-bar{align-items:stretch;flex-direction:column}.fleet-toolbar,.fleet-form-grid{grid-template-columns:1fr}.fleet-search,.fleet-results,.fleet-form-submit{grid-column:auto}.fleet-card-grid{grid-template-columns:1fr}.fleet-metrics{grid-template-columns:1fr 1fr}.fleet-bulk-actions form,.fleet-bulk-actions button{width:100%}.fleet-quick-actions{grid-template-columns:1fr 1fr!important}.fleet-primary-action{grid-column:1/-1}}
+
+/* v13.13.0 Displays workspace polish */
+.fleet-summary{display:flex;flex-wrap:wrap;gap:10px;padding:16px 20px}
+.fleet-summary>.fleet-summary-item{display:flex;align-items:center;gap:11px;min-width:160px;padding:11px 14px}
+.fleet-summary-copy{display:grid;grid-template-columns:auto;line-height:1.15}
+.fleet-summary-copy strong{font-size:1rem;font-variant-numeric:tabular-nums}
+.fleet-summary .fleet-summary-copy>span{grid-column:auto;color:var(--fleet-muted);font-size:.75rem}
+.fleet-summary .summary-icon{display:grid;grid-row:auto;place-items:center;flex:0 0 28px;width:28px;height:28px;border-radius:50%;font-size:.78rem;font-weight:900}
+.fleet-summary .summary-icon.online,.fleet-summary .summary-icon.offline{width:10px;height:10px;flex-basis:10px;margin:0 9px}
+.fleet-summary .summary-icon.attention{background:rgba(245,189,79,.14);color:#ffd27b}
+.fleet-summary .summary-icon.jobs{background:rgba(75,147,255,.14);color:#a9caff}
+
+.fleet-toast{position:fixed;top:82px;right:24px;z-index:90;display:flex;align-items:center;gap:16px;max-width:min(520px,calc(100vw - 32px));padding:12px 14px 12px 16px;border:1px solid rgba(50,199,119,.38);border-radius:11px;background:#14201a;color:#dff7e8;box-shadow:0 16px 42px #0009;transition:opacity .18s ease,transform .18s ease}
+.fleet-toast button{display:grid;place-items:center;width:28px;height:28px;margin:0;padding:0;border:0;border-radius:7px;background:transparent;color:inherit;font-size:1.35rem}
+.fleet-toast button:hover{background:#ffffff12}.fleet-toast.is-leaving{opacity:0;transform:translateY(-8px)}
+
+.fleet-card-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,390px),1fr))}
+.fleet-card-body{padding:0 16px 16px}
+.fleet-card-topline{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:0 -16px;padding:9px 12px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.16)}
+.fleet-card-topline .fleet-health-strip{flex:1;padding:0;border:0;background:transparent}
+.fleet-card-selection-control{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;margin:0;padding:4px 7px;border:1px solid #3b424d;border-radius:8px;color:var(--muted);font-size:.72rem;font-weight:700;cursor:pointer}
+.fleet-card-selection-control:hover{border-color:#5d7da8;color:#d9e8ff}
+.fleet-card-selection-control input{width:17px;height:17px;margin:0;accent-color:var(--blue)}
+.fleet-card.is-selected{border-color:#4b93ff;box-shadow:0 0 0 2px rgba(75,147,255,.18)}
+.fleet-card-heading{padding-top:14px}.fleet-card-heading h2{font-size:1.1rem}
+.fleet-metrics{margin-top:15px}.fleet-details{margin:14px 0 0;padding-bottom:14px}
+
+.card-update-button{cursor:pointer;text-decoration:none}
+.card-update-button:hover,.card-update-button:focus-visible{border-color:#eab83f;background:rgba(245,189,79,.2);color:#ffe5a5}
+.fleet-update-action{margin:0}
+
+.fleet-quick-actions{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px;padding-top:14px}
+.fleet-quick-actions>a,.fleet-quick-actions button,.fleet-more-actions>summary{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;line-height:1}
+.fleet-quick-actions form{margin:0}.fleet-primary-action{font-weight:750}
+.fleet-more-actions>summary{min-width:72px;padding:0 12px}
+.fleet-more-actions[open]>summary{border-color:#629eff;background:#1a2638;color:#b9d3ff}
+.fleet-more-actions>div{bottom:calc(100% + 8px);min-width:210px;padding:6px;border-radius:11px}
+.fleet-more-actions>div form{display:block}
+.fleet-more-actions>div button{display:flex;align-items:center;min-height:38px;margin:0;padding:8px 10px;border:0;border-radius:7px;background:transparent;color:#e7ecf1;font-size:.86rem;font-weight:650}
+.fleet-more-actions>div button:hover,.fleet-more-actions>div button:focus-visible{background:#252a31}
+.fleet-menu-divider{height:1px;margin:5px 4px;background:#ffffff17}
+.fleet-more-actions>div .fleet-menu-danger{color:#ff9e9e}
+.fleet-more-actions>div .fleet-menu-danger:hover{background:rgba(198,47,42,.18)}
+
+.fleet-activity-strip{display:grid;grid-template-columns:auto auto minmax(110px,auto) minmax(0,1fr) auto;align-items:center;gap:10px;margin-top:18px;padding:12px 16px;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+.fleet-activity-strip time{color:var(--muted);font-size:.75rem;font-variant-numeric:tabular-nums}
+.fleet-activity-strip #fleet-latest-event-message{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fleet-activity-strip a{font-weight:700;white-space:nowrap}
+
+.fleet-quick-actions :focus-visible,.fleet-card-selection-control:focus-within,.fleet-summary a:focus-visible,.fleet-toast button:focus-visible{outline:2px solid #78aefc;outline-offset:2px}
+
+@media(max-width:700px){
+  .fleet-summary{padding:12px 0}.fleet-summary>.fleet-summary-item{flex:1 1 140px;min-width:140px}
+  .fleet-toast{top:68px;right:16px}
+  .fleet-card-selection-control span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .fleet-activity-strip{grid-template-columns:auto auto 1fr}.fleet-activity-strip time{display:none}.fleet-activity-strip #fleet-latest-event-message{grid-column:2/4}.fleet-activity-strip a{grid-column:2}
+}
+@media(max-width:560px){
+  .fleet-quick-actions{grid-template-columns:1fr auto!important}.fleet-primary-action{grid-column:auto}
+  .fleet-more-actions>summary{min-width:64px}.fleet-card-topline{align-items:center}
+}
