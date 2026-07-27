@@ -69,13 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
     card.querySelector('[data-status-text]')?.replaceChildren(document.createTextNode(row.online ? 'Online' : 'Offline'));
     const media = card.querySelector('[data-current-media]');
     if (media) { media.textContent = row.current_media || 'Nothing playing'; media.title = row.current_media || ''; }
-    const heartbeat = card.querySelector('[data-heartbeat]'); if (heartbeat) heartbeat.textContent = row.heartbeat || 'Unknown';
-    const version = card.querySelector('[data-version]'); if (version) version.textContent = row.version || 'Unknown';
+    const heartbeat = card.querySelector('[data-heartbeat]'); if (heartbeat) heartbeat.textContent = row.heartbeat || '—';
+    const version = card.querySelector('[data-version]'); if (version) version.textContent = row.version || '—';
     const sync = card.querySelector('[data-sync-state]'); if (sync) sync.textContent = titleCase(row.sync_state);
-    const mediaCount = card.querySelector('[data-media-count]'); if (mediaCount) mediaCount.textContent = row.media_count ?? 0;
-    const cpu = card.querySelector('[data-cpu-temp]'); if (cpu) cpu.textContent = row.cpu_temp || 'Unknown';
-    const disk = card.querySelector('[data-disk-usage]'); if (disk) disk.textContent = row.disk_usage || 'Unknown';
-    const memory = card.querySelector('[data-memory-usage]'); if (memory) memory.textContent = row.memory_usage || 'Unknown';
+    const mediaCount = card.querySelector('[data-media-count]'); if (mediaCount && card.dataset.deviceRole !== 'controller') mediaCount.textContent = row.media_count ?? 0;
+    const cpu = card.querySelector('[data-cpu-temp]'); if (cpu) cpu.textContent = row.cpu_temp || '—';
+    const disk = card.querySelector('[data-disk-usage]'); if (disk) disk.textContent = row.disk_usage || '—';
+    const memory = card.querySelector('[data-memory-usage]'); if (memory) memory.textContent = row.memory_usage || '—';
     card.classList.toggle('needs-attention', Boolean(row.attention));
 
     const appHealth = card.querySelector('[data-app-health]');
