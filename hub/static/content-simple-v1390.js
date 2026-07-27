@@ -2,7 +2,26 @@
   const page = document.querySelector("[data-simple-content]");
   const playlist = page?.querySelector("[data-simple-playlist]");
   const orderField = page?.querySelector("[data-simple-order]");
-  if (!playlist || !orderField) return;
+  const excludedField = page?.querySelector("[data-simple-excluded]");
+  const hiddenTray = page?.querySelector("[data-hidden-tray]");
+  const hiddenList = page?.querySelector("[data-hidden-list]");
+  if (!playlist || !orderField || !excludedField) return;
+
+  const hidden = new Map();
+  [...hiddenList?.querySelectorAll("[data-restore]") || []].forEach(button => {
+    hidden.set(button.dataset.restore, button.firstChild?.textContent.trim() || button.dataset.restore);
+  });
+
+  const renderHidden = () => {
+    excludedField.value = [...hidden.keys()].join("\n");
+    if (!hiddenTray || !hiddenList) return;
+    hiddenTray.hidden = hidden.size === 0;
+    const count = hiddenTray.querySelector("[data-hidden-count]");
+    if (count) count.textContent = String(hidden.size);
+    hiddenList.innerHTML = [...hidden].map(([path, name]) =>
+      `<button type="button" data-restore="${path.replaceAll("&", "&amp;").replaceAll('"', "&quot;")}">${name.replaceAll("&", "&amp;").replaceAll("<", "&lt;")} <span>Restore</span></button>`
+    ).join("");
+  };
 
   const syncOrder = () => {
     const cards = [...playlist.querySelectorAll("[data-path]")];
@@ -14,6 +33,15 @@
   };
 
   playlist.addEventListener("click", event => {
+    const hideButton = event.target.closest("[data-hide]");
+    if (hideButton) {
+      const card = hideButton.closest("[data-path]");
+      hidden.set(card.dataset.path, card.querySelector("strong")?.textContent || card.dataset.path);
+      card.remove();
+      syncOrder();
+      renderHidden();
+      return;
+    }
     const button = event.target.closest("[data-move]");
     if (!button) return;
     const card = button.closest("[data-path]");
@@ -25,6 +53,21 @@
       playlist.insertBefore(card.nextElementSibling, card);
     }
     syncOrder();
+  });
+
+  hiddenTray?.addEventListener("click", event => {
+    const restore = event.target.closest("[data-restore]");
+    if (restore) {
+      const path = restore.dataset.restore;
+      hidden.delete(path);
+      renderHidden();
+      page.querySelector("#simple-order-form")?.requestSubmit();
+    }
+    if (event.target.closest("[data-restore-all]")) {
+      hidden.clear();
+      renderHidden();
+      page.querySelector("#simple-order-form")?.requestSubmit();
+    }
   });
 
   let dragged = null;
@@ -83,4 +126,5 @@
   });
 
   syncOrder();
+  renderHidden();
 })();

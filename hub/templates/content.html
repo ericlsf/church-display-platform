@@ -50,6 +50,8 @@
         <input type="hidden" name="folder" value="{{ selected_folder }}">
         <textarea name="playlist_order" data-simple-order hidden>{% for item in analysis["media_items"] %}{{ item.path }}{% if not loop.last %}
 {% endif %}{% endfor %}</textarea>
+        <textarea name="playlist_excluded" data-simple-excluded hidden>{% for item in analysis.get("hidden_media_items", []) %}{{ item.path }}{% if not loop.last %}
+{% endif %}{% endfor %}</textarea>
 
         <section class="simple-content-panel">
           <div class="simple-step-heading">
@@ -75,6 +77,7 @@
                   <div class="simple-order-buttons">
                     <button type="button" data-move="-1" aria-label="Move {{ item.name }} earlier">&uarr;</button>
                     <button type="button" data-move="1" aria-label="Move {{ item.name }} later">&darr;</button>
+                    <button type="button" data-hide aria-label="Remove {{ item.name }} from playlist">Remove</button>
                   </div>
                 </article>
               {% endfor %}
@@ -82,6 +85,16 @@
           {% else %}
             <div class="simple-empty">This folder does not contain any supported images.</div>
           {% endif %}
+          <div class="simple-hidden-tray" data-hidden-tray {% if not analysis.get("hidden_media_items") %}hidden{% endif %}>
+            <div><strong>Hidden from this playlist</strong><span data-hidden-count>{{ analysis.get("hidden_media_items", [])|length }}</span></div>
+            <p>These files remain safely in Google Drive.</p>
+            <div data-hidden-list>
+              {% for item in analysis.get("hidden_media_items", []) %}
+                <button type="button" data-restore="{{ item.path }}">{{ item.name }} <span>Restore</span></button>
+              {% endfor %}
+            </div>
+            <button type="button" data-restore-all>Restore all</button>
+          </div>
         </section>
 
         <section class="simple-save-panel">

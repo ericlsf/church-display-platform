@@ -78,51 +78,53 @@ def build_fleet_dashboard():
     attention = []
 
     for row in rows:
-        reasons = []
+        issues = []
         controller = row.get("device_role") == "controller"
+        display_id = row.get("id")
+        is_online = bool(row.get("online") or row.get("status_online"))
 
-        if not (
-            row.get("online")
-            or row.get("status_online")
-        ):
-            reasons.append("Offline")
+        def add_issue(key, label, action_label, href="", endpoint=""):
+            if any(issue["key"] == key for issue in issues):
+                return
+            issues.append({
+                "key": key,
+                "label": label,
+                "action_label": action_label,
+                "href": href,
+                "endpoint": endpoint,
+            })
 
-        if int(row.get("health_score", 0) or 0) < 100:
-            failed_checks = [
-                label
-                for key, label in (
-                    ("online", "Hub connection"),
-                    ("player", "Player stopped"),
-                    ("playlist", "No content assigned"),
-                    ("media", "No local media"),
-                    ("sync", "Sync incomplete"),
-                )
-                if not (row.get("checks", {}) or {}).get(key, False)
-            ]
-            reasons.extend(
-                failed_checks
-                or [f'Health {int(row.get("health_score", 0) or 0)}%']
-            )
+        if not is_online:
+            add_issue("offline", "Offline", "Open diagnostics", f"/display/{display_id}")
+
+        checks = row.get("checks", {}) or {}
+        if is_online and int(row.get("health_score", 0) or 0) < 100:
+            if not checks.get("player", False) and not controller:
+                add_issue("player", "Player stopped", "Restart player", endpoint=f"/fleet/{display_id}/restart")
+            if not checks.get("playlist", False) and not controller:
+                add_issue("playlist", "No content assigned", "Manage content", f"/display/{display_id}/operator")
+            if not checks.get("media", False) and not controller:
+                add_issue("media", "No local media", "Sync now", endpoint=f"/fleet/{display_id}/sync-now")
+            if not checks.get("sync", False) and not controller:
+                add_issue("sync", "Sync incomplete", "Sync now", endpoint=f"/fleet/{display_id}/sync-now")
 
         if not controller and row.get("update_available"):
-            reasons.append("Display software update")
+            add_issue("update", "Software update available", "Update display", endpoint="/deployments/queue-latest")
 
         sync_state = str(
             row.get("sync_state", "")
         ).strip().lower()
 
-        if not controller and sync_state not in {
+        if is_online and not controller and sync_state not in {
             "",
             "success",
             "completed",
             "complete",
             "ok",
         }:
-            reasons.append(
-                f"Sync {sync_state}"
-            )
+            add_issue("sync", f"Sync {sync_state}", "Sync now", endpoint=f"/fleet/{display_id}/sync-now")
 
-        if reasons:
+        if issues:
             attention.append({
                 "id": row.get("id"),
                 "name": row.get("name") or row.get("id"),
@@ -139,7 +141,10 @@ def build_fleet_dashboard():
                     row.get("sync_folder")
                     or "None"
                 ),
-                "reasons": reasons,
+                "issues": issues,
+                "primary_issue": issues[0],
+                "additional_issue_count": max(0, len(issues) - 1),
+                "latest_tag": row.get("latest_tag", ""),
             })
 
     attention.sort(

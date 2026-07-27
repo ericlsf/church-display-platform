@@ -6,7 +6,7 @@
 <div class="fleet-dashboard">
   <div class="fleet-dashboard-header">
     <div>
-      <p class="eyebrow">v13.10.1</p>
+      <p class="eyebrow">v13.11.0</p>
       <h1>Home</h1>
       <p class="muted">
         See what needs attention and what is happening across your displays.
@@ -66,10 +66,7 @@
       {% if dashboard.attention %}
         <div class="fleet-attention-list">
           {% for item in dashboard.attention %}
-            <a
-              class="fleet-attention-row"
-              href="/display/{{ item.id }}"
-            >
+            <div class="fleet-attention-row">
               <span class="fleet-status-dot {% if item.online %}online{% else %}offline{% endif %}"></span>
 
               <div class="fleet-attention-main">
@@ -79,14 +76,28 @@
                 </small>
               </div>
 
-              <div class="fleet-reason-list">
-                {% for reason in item.reasons %}
-                  <span class="status-pill warning">
-                    {{ reason }}
-                  </span>
-                {% endfor %}
+              <div class="fleet-issue-summary">
+                <strong>{{ item.primary_issue.label }}</strong>
+                {% if item.additional_issue_count %}
+                  <a href="/display/{{ item.id }}">+{{ item.additional_issue_count }} more</a>
+                {% endif %}
               </div>
-            </a>
+              <div class="fleet-attention-action">
+                {% if item.primary_issue.endpoint %}
+                  <form method="POST" action="{{ item.primary_issue.endpoint }}">
+                    <input type="hidden" name="next" value="/fleet-dashboard">
+                    {% if item.primary_issue.key == 'update' %}
+                      <input type="hidden" name="display_id" value="{{ item.id }}">
+                      <input type="hidden" name="target" value="{{ item.latest_tag }}">
+                      <input type="hidden" name="dry_run" value="false">
+                    {% endif %}
+                    <button class="{{ 'danger' if item.primary_issue.key == 'player' else 'primary' }}" type="submit">{{ item.primary_issue.action_label }}</button>
+                  </form>
+                {% else %}
+                  <a class="button-link" href="{{ item.primary_issue.href }}">{{ item.primary_issue.action_label }}</a>
+                {% endif %}
+              </div>
+            </div>
           {% endfor %}
         </div>
       {% else %}

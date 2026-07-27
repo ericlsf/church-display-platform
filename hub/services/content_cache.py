@@ -5,7 +5,7 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
-from services.media import get_playlist_policy, load_playlists, media_kind, playlist_key, save_playlists
+from services.media import get_playlist_exclusions, get_playlist_policy, load_playlists, media_kind, playlist_key, save_playlists
 
 HUB_DIR = Path(__file__).resolve().parent.parent
 CONTENT_DIR = HUB_DIR / "content"
@@ -97,6 +97,8 @@ def _reconcile_order(remote, folder, current_meta):
     policy = get_playlist_policy(remote, folder)
 
     current_names = set(current_meta)
+    excluded = set(get_playlist_exclusions(remote, folder))
+    current_names -= excluded
     changed = []
     for name, meta in current_meta.items():
         old = previous_meta.get(name)
@@ -157,6 +159,12 @@ def _reconcile_order(remote, folder, current_meta):
         "files": current_meta,
         "last_drive_sync": utc_now(),
         "insertion_policy": policy,
+        "excluded": sorted(excluded),
+        "published_excluded": sorted(excluded),
+        "draft_excluded": [
+            name for name in entry.get("draft_excluded", excluded)
+            if name in current_meta
+        ],
     }
     order = published_order
     save_playlists(data)
