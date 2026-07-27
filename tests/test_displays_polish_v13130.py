@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_displays_workspace_has_compact_actions_and_selection():
     template = (ROOT / "hub/templates/displays.html").read_text(encoding="utf-8")
 
-    assert "v13.13.0" in template
+    assert "{{ hub_version }}" in template
     assert "fleet-card-selection-control" in template
     assert "card-update-button" in template
     assert "Take screenshot" in template

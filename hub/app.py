@@ -235,7 +235,13 @@ def create_app():
 
     @app.context_processor
     def church_display_auth_context():
-        return {"current_user": getattr(g, "current_user", None), "notification_summary": notification_summary()}
+        from services.hub_version import current_hub_version
+
+        return {
+            "current_user": getattr(g, "current_user", None),
+            "notification_summary": notification_summary(),
+            "hub_version": current_hub_version(),
+        }
 
     return app
 
