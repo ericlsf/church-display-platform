@@ -33,6 +33,18 @@ class ContentWorkflowTests(unittest.TestCase):
         self.assertEqual(entry["published_order"], ["b.jpg", "a.jpg"])
         self.assertEqual(entry["status"], "published")
 
+    def test_published_order_wins_over_legacy_display_order(self):
+        media.save_playlist_draft("gdrive", "Weekly", ["b.jpg", "a.jpg"])
+        media.publish_playlist("gdrive", "Weekly")
+        data = media.load_playlists()
+        data["playlists"]["gdrive:Weekly"]["order"] = ["a.jpg", "b.jpg"]
+        media.save_playlists(data)
+
+        self.assertEqual(
+            media.get_playlist_order("gdrive", "Weekly"),
+            ["b.jpg", "a.jpg"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

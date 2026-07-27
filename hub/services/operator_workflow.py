@@ -3,8 +3,7 @@ from services.content_cache import sync_playlist_from_drive
 from services.jobs import create_job
 from services.media import (
     get_playlist_exclusions,
-    save_playlist_exclusions,
-    save_playlist_order,
+    get_playlist_order,
 )
 from services.media_index import analyze_cached_folder, cached_drive_folders
 
@@ -134,8 +133,9 @@ def apply_operator_changes(display_id, folder, order, excluded, settings):
     if not folder:
         raise ValueError("Choose a Google Drive folder")
 
-    save_playlist_exclusions(remote, folder, excluded, draft=False)
-    order = save_playlist_order(remote, folder, order)
+    # Playlist order and visibility belong to the Drive folder, not to this
+    # display. The display editor only assigns the shared folder playlist.
+    order = get_playlist_order(remote, folder)
     manifest, error = sync_playlist_from_drive(remote, folder)
     if error:
         raise RuntimeError(f"Google Drive sync failed: {error}")

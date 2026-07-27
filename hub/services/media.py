@@ -96,7 +96,9 @@ def save_playlists(data):
 def get_playlist_order(remote, folder):
     data = load_playlists()
     entry = data.get("playlists", {}).get(playlist_key(remote, folder), {})
-    order = entry.get("order", [])
+    # The published folder playlist is authoritative for every display that
+    # uses this folder. ``order`` is retained only as a legacy fallback.
+    order = entry.get("published_order") or entry.get("order") or []
     return [str(x) for x in order if str(x).strip()]
 
 

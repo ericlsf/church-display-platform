@@ -15,7 +15,7 @@
   </header>
 
   <nav class="operator-steps" aria-label="Editor sections">
-    <a href="#content">1. Content</a>
+    <a href="#content">1. Playlist</a>
     <a href="#messages">2. Messages</a>
     <a href="#timing">3. Timing</a>
     <a href="#apply">4. Apply</a>
@@ -24,7 +24,7 @@
   <form method="POST" action="{{ url_for('display_details.operator_apply', display_id=display.id) }}" id="operator-form">
     <section class="operator-panel" id="content">
       <div class="panel-heading">
-        <div><span class="step-number">1</span><h2>Content</h2><p>Images currently assigned to this display.</p></div>
+        <div><span class="step-number">1</span><h2>Shared playlist</h2><p>Choose the folder playlist this display should follow.</p></div>
         <span class="sync-state">{{ analysis.media_items|length if analysis else 0 }} items</span>
       </div>
 
@@ -44,14 +44,16 @@
       {% if analysis and analysis.error %}
         <p class="warning">{{ analysis.error }}</p>
       {% elif analysis and (analysis.media_items or analysis.hidden_media_items) %}
-        <p class="helper">Drag thumbnails to change playback order. Hide removes an image from playback without deleting it from Google Drive.</p>
-        <textarea name="playlist_order" data-order-field hidden>{% for item in analysis.media_items %}{{ item.path }}{% if not loop.last %}
-{% endif %}{% endfor %}</textarea>
-        <textarea name="playlist_excluded" data-excluded-field hidden>{% for item in analysis.hidden_media_items %}{{ item.path }}{% if not loop.last %}
-{% endif %}{% endfor %}</textarea>
-        <div class="operator-playlist" data-playlist>
+        <div class="shared-playlist-notice">
+          <div>
+            <strong>Using the shared “{{ folder }}” playlist</strong>
+            <p class="helper">Its order and hidden images apply to every display using this folder.</p>
+          </div>
+          <a class="button-link" href="{{ url_for('content.content_page', folder=folder, supported_only='1') }}">Edit {{ folder }} playlist</a>
+        </div>
+        <div class="operator-playlist is-read-only">
           {% for item in analysis.media_items %}
-          <article class="operator-media-card" draggable="true" data-path="{{ item.path }}">
+          <article class="operator-media-card">
             <span class="order-number">{{ loop.index }}</span>
             <div class="operator-thumb">
               {% if item.type == "image" %}
@@ -60,33 +62,14 @@
               {% else %}<span>{{ item.icon }}</span>{% endif %}
             </div>
             <strong>{{ item.name }}</strong>
-            <div class="order-controls">
-              <button type="button" data-move="-1" aria-label="Move {{ item.name }} earlier">&uarr;</button>
-              <button type="button" data-move="1" aria-label="Move {{ item.name }} later">&darr;</button>
-              <button type="button" data-hide-media aria-label="Hide {{ item.name }} from playback">Hide</button>
-            </div>
           </article>
           {% endfor %}
         </div>
-        <section class="operator-hidden-media" data-hidden-media {% if not analysis.hidden_media_items %}hidden{% endif %}>
-          <div>
-            <h3>Hidden from playback</h3>
-            <p class="helper">These files remain in Google Drive and can be restored at any time.</p>
-          </div>
-          <div class="operator-hidden-list" data-hidden-list>
-            {% for item in analysis.hidden_media_items %}
-            <article data-hidden-path="{{ item.path }}">
-              <span>{{ item.name }}</span>
-              <button type="button" data-restore-media>Restore</button>
-            </article>
-            {% endfor %}
-          </div>
-        </section>
+        {% if analysis.hidden_media_items %}
+          <p class="helper">{{ analysis.hidden_media_items|length }} image(s) are hidden in this shared playlist.</p>
+        {% endif %}
       {% else %}
         <div class="operator-empty">Choose a folder to see its images.</div>
-        <textarea name="playlist_order" data-order-field hidden></textarea>
-        <textarea name="playlist_excluded" data-excluded-field hidden>{% if analysis %}{% for item in analysis.hidden_media_items %}{{ item.path }}{% if not loop.last %}
-{% endif %}{% endfor %}{% endif %}</textarea>
       {% endif %}
     </section>
 
@@ -139,7 +122,7 @@
     </section>
 
     <section class="operator-apply" id="apply">
-      <div><span class="step-number">4</span><h2>Ready to update {{ display.name }}?</h2><p>Saves the order, refreshes the folder, syncs the media, and applies the messages and timing.</p></div>
+      <div><span class="step-number">4</span><h2>Ready to update {{ display.name }}?</h2><p>Assigns the shared folder playlist, syncs its media, and applies the messages and timing.</p></div>
       <button class="primary operator-apply-button" type="submit">Apply Changes to {{ display.name }}</button>
     </section>
   </form>

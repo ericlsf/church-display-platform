@@ -1,6 +1,6 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from services.config import load_hub_settings
+from services.config import load_config, load_hub_settings
 from services.drive import list_drive_folders
 from services.events import log_event
 from services.jobs import create_job
@@ -41,6 +41,38 @@ def parse_order():
     return [x.strip() for x in request.form.get("playlist_order", "").splitlines() if x.strip()]
 
 
+def displays_using_folder(folder):
+    folder = (folder or "").strip().strip("/")
+    return [
+        display
+        for display in load_config().get("displays", [])
+        if (
+            display.get("assigned_folder")
+            or display.get("sync_folder")
+            or ""
+        ).strip().strip("/") == folder
+    ]
+
+
+def queue_shared_playlist(remote, folder, order):
+    targets = displays_using_folder(folder)
+    if not targets:
+        return 0
+    manifest, error = sync_playlist_from_drive(remote, folder)
+    if error:
+        raise RuntimeError(f"Google Drive sync failed: {error}")
+    final_order = manifest.get("order") or order
+    for display in targets:
+        create_job(display.get("id"), "set_sync_folder", {
+            "remote": remote,
+            "folder": folder,
+            "run_now": True,
+            "source": "shared_folder_playlist",
+            "playlist_order": final_order,
+        })
+    return len(targets)
+
+
 @content_bp.route("")
 def content_page():
     settings = load_hub_settings()
@@ -72,6 +104,7 @@ def content_page():
         supported_only=supported_only,
         analysis=analysis,
         workflow=workflow,
+        playlist_display_count=len(displays_using_folder(folder)) if folder else 0,
     )
 
 
@@ -90,11 +123,15 @@ def save_published_order():
             "Saved from Images & Playlists",
         )
         published = publish_playlist(remote, folder)
+        target_count = queue_shared_playlist(remote, folder, published)
         log_event(
             f"Saved playback order for {remote}:{folder} with {len(published)} item(s)",
             category="content",
         )
-        flash(f"Playback order saved for {len(published)} image(s).", "success")
+        flash(
+            f"Shared playlist saved and queued for {target_count} display(s).",
+            "success",
+        )
     return redirect(url_for("content.content_page", folder=folder, supported_only="1"))
 
 
@@ -126,8 +163,9 @@ def publish_order():
         if parse_order():
             save_playlist_draft(remote, folder, parse_order(), request.form.get("draft_note", ""))
         order = publish_playlist(remote, folder)
+        target_count = queue_shared_playlist(remote, folder, order)
         log_event(f"Published playlist {remote}:{folder} with {len(order)} item(s)", category="content")
-        flash("Playlist published.", "success")
+        flash(f"Playlist published and queued for {target_count} display(s).", "success")
     return redirect(url_for("content.content_page", folder=folder, supported_only="1"))
 
 
