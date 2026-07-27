@@ -1,0 +1,20 @@
+.simple-save-panel {
+  position: static;
+  padding: 1rem 1.25rem;
+  box-shadow: none;
+}
+
+.simple-save-panel .simple-step-heading > span {
+  flex-basis: 2rem;
+  width: 2rem;
+  height: 2rem;
+}
+
+.simple-save-panel .simple-step-heading h2 {
+  font-size: 1.25rem;
+}
+
+.simple-save-panel .primary {
+  font-size: 1rem;
+  padding: .75rem 1.15rem;
+}
