@@ -131,6 +131,7 @@ def test_old_displays_receive_clear_operator_defaults():
     return_value=({"order": ["second.jpg", "first.jpg"]}, ""),
 )
 @patch("services.operator_workflow.save_playlist_order")
+@patch("services.operator_workflow.save_playlist_exclusions")
 @patch("services.operator_workflow.save_config")
 @patch(
     "services.operator_workflow.load_hub_settings",
@@ -151,6 +152,7 @@ def test_apply_is_one_operation_that_saves_syncs_and_queues_settings(
     load_config,
     load_settings,
     save_config,
+    save_exclusions,
     save_order,
     sync_folder,
     create_job,
@@ -162,6 +164,7 @@ def test_apply_is_one_operation_that_saves_syncs_and_queues_settings(
         "welcome-center",
         "Missions",
         ["second.jpg", "first.jpg"],
+        ["hidden.jpg"],
         settings,
     )
 
@@ -169,6 +172,9 @@ def test_apply_is_one_operation_that_saves_syncs_and_queues_settings(
     saved = save_config.call_args.args[0]["displays"][0]
     assert saved["assigned_folder"] == "Missions"
     assert saved["presentation"] == settings
+    save_exclusions.assert_called_once_with(
+        "gdrive", "Missions", ["hidden.jpg"], draft=False
+    )
     assert [call.args[1] for call in create_job.call_args_list] == [
         "set_sync_folder",
         "apply_display_settings",

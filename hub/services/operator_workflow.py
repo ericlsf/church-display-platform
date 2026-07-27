@@ -1,7 +1,11 @@
 from services.config import load_config, load_hub_settings, save_config
 from services.content_cache import sync_playlist_from_drive
 from services.jobs import create_job
-from services.media import save_playlist_order
+from services.media import (
+    get_playlist_exclusions,
+    save_playlist_exclusions,
+    save_playlist_order,
+)
 from services.media_index import analyze_cached_folder, cached_drive_folders
 
 
@@ -101,6 +105,15 @@ def editor_data(display_id, selected_folder=""):
         if folder
         else None
     )
+    if analysis:
+        excluded = set(get_playlist_exclusions(remote, folder))
+        media_items = analysis.get("media_items", [])
+        analysis["media_items"] = [
+            item for item in media_items if item.get("path") not in excluded
+        ]
+        analysis["hidden_media_items"] = [
+            item for item in media_items if item.get("path") in excluded
+        ]
     return {
         "display": display,
         "remote": remote,
@@ -113,7 +126,7 @@ def editor_data(display_id, selected_folder=""):
     }
 
 
-def apply_operator_changes(display_id, folder, order, settings):
+def apply_operator_changes(display_id, folder, order, excluded, settings):
     config = load_config()
     display = _display(config, display_id)
     remote = load_hub_settings().get("drive_remote", "gdrive")
@@ -121,6 +134,7 @@ def apply_operator_changes(display_id, folder, order, settings):
     if not folder:
         raise ValueError("Choose a Google Drive folder")
 
+    save_playlist_exclusions(remote, folder, excluded, draft=False)
     order = save_playlist_order(remote, folder, order)
     manifest, error = sync_playlist_from_drive(remote, folder)
     if error:
