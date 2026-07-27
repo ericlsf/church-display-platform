@@ -5,6 +5,7 @@
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
   const collapseKey = "church-display-shell-collapsed";
   const routes = [
+    ["/maintenance","settings",["Settings","Remote Maintenance"]],
     ["/command-center","home",["Home"]],
     ["/alerts/rules","alerts",["Alerts","Configure Alerts"]],
     ["/alerts","alerts",["Alerts"]],

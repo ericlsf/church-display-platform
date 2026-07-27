@@ -34,6 +34,9 @@
           <a href="/setup" data-shell-route="/setup" title="General"><span class="app-nav-icon">⚒</span><span class="app-nav-label">General</span></a>
           <a href="/users" data-shell-route="/users" title="Access &amp; Security"><span class="app-nav-icon">♙</span><span class="app-nav-label">Access &amp; Security</span></a>
           <a href="/system" data-shell-route="/system" title="System"><span class="app-nav-icon">◉</span><span class="app-nav-label">System</span></a>
+          {% if current_user and current_user.role == "admin" %}
+          <a href="/maintenance" data-shell-route="/maintenance" title="Remote Maintenance"><span class="app-nav-icon">&gt;_</span><span class="app-nav-label">Remote Maintenance</span></a>
+          {% endif %}
         </div>
       </section>
     </nav>
@@ -47,7 +50,7 @@
       <a href="/notifications" class="app-notification-button" title="Notifications" aria-label="Notifications">●<span data-shell-notification-count hidden></span></a>
       <div class="app-user-menu">
         <button type="button" data-shell-user-toggle aria-expanded="false"><span class="app-user-avatar">A</span><span class="app-user-name">Admin</span><span>⌄</span></button>
-        <div data-shell-user-menu hidden><a href="/users">Access &amp; Security</a><a href="/alerts/rules/">Configure Alerts</a><a href="/system">System</a><hr><a href="/logout">Sign Out</a></div>
+        <div data-shell-user-menu hidden><a href="/users">Access &amp; Security</a><a href="/alerts/rules/">Configure Alerts</a><a href="/system">System</a>{% if current_user and current_user.role == "admin" %}<a href="/maintenance">Remote Maintenance</a>{% endif %}<hr><a href="/logout">Sign Out</a></div>
       </div>
     </div>
   </header>

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="${CHURCH_DISPLAY_ROOT:-/home/lsfservice/church-display-platform}"
+SERVICE="church-display-hub.service"
+RUN_USER="${SUDO_USER:-lsfservice}"
+
+echo "Updating Church Display Hub in ${ROOT}"
+cd "$ROOT"
+runuser -u "$RUN_USER" -- git fetch origin --tags
+runuser -u "$RUN_USER" -- git switch main
+runuser -u "$RUN_USER" -- git pull --ff-only origin main
+runuser -u "$RUN_USER" -- "$ROOT/hub/venv/bin/python" -m pip install -r "$ROOT/hub/requirements.txt"
+runuser -u "$RUN_USER" -- "$ROOT/hub/venv/bin/python" -m compileall -q "$ROOT/hub" "$ROOT/display/agent"
+restart_unit="church-display-hub-restart-$(date +%s)"
+systemd-run \
+  --quiet \
+  --unit="$restart_unit" \
+  --on-active=3s \
+  /usr/bin/systemctl restart "$SERVICE"
+echo "Hub update installed. The service restart is scheduled in 3 seconds."

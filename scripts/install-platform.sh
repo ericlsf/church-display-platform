@@ -27,6 +27,8 @@ sudo sed -i "s#^ExecStart=.*#ExecStart=${ROOT}/hub/venv/bin/python ${ROOT}/hub/a
 sudo systemctl daemon-reload
 sudo systemctl enable --now church-display-hub.service
 
+sudo bash scripts/install-remote-maintenance.sh "$USER_NAME"
+
 if [[ -f /etc/systemd/system/church-display-agent.service ]]; then
   sudo systemctl enable --now church-display-agent.service
 fi

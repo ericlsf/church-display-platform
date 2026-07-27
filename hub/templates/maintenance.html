@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Remote Maintenance - Church Display Hub{% endblock %}
+{% block head %}<link rel="stylesheet" href="/static/remote-maintenance.css">{% endblock %}
+{% block content %}
+<section class="page-hero maintenance-hero">
+  <div>
+    <span class="eyebrow">Administrator tools</span>
+    <h1>Remote Maintenance</h1>
+    <p>Run troubleshooting commands on the Hub or a display and watch the output without being on site.</p>
+  </div>
+  <span class="terminal-lock-state {{ 'unlocked' if unlocked else 'locked' }}">{{ 'Unlocked for this session' if unlocked else 'Locked' }}</span>
+</section>
+
+{% if not unlocked %}
+<section class="section terminal-unlock">
+  <div>
+    <h2>Verify your password</h2>
+    <p class="muted">Terminal access is restricted to administrators and automatically locks after 10 minutes.</p>
+  </div>
+  <form method="POST" action="/maintenance/unlock">
+    <label for="terminal-password">Administrator password</label>
+    <div class="inline-form">
+      <input id="terminal-password" name="password" type="password" autocomplete="current-password" required>
+      <button class="primary" type="submit">Unlock terminal</button>
+    </div>
+  </form>
+</section>
+{% else %}
+<section class="maintenance-warning">
+  <strong>Commands run with the service account’s permissions.</strong>
+  <span>Only use commands you trust. Output and command text are recorded in the audit history.</span>
+  <form method="POST" action="/maintenance/lock"><button type="submit">Lock now</button></form>
+</section>
+
+<div class="maintenance-tabs" role="tablist">
+  <button class="is-active" type="button" data-terminal-tab="hub">Hub terminal</button>
+  <button type="button" data-terminal-tab="display">Display terminal</button>
+</div>
+
+<section class="section terminal-workspace" data-terminal-panel="hub">
+  <div class="terminal-heading">
+    <div><h2>Hub terminal</h2><p class="muted">Commands run from the platform repository unless you provide another folder.</p></div>
+    <button class="primary" type="button" data-hub-update>Pull latest code &amp; restart Hub</button>
+  </div>
+  <form data-hub-terminal-form>
+    <label for="hub-cwd">Working directory</label>
+    <input id="hub-cwd" name="cwd" placeholder="/home/lsfservice/church-display-platform">
+    <label for="hub-command">Command</label>
+    <div class="command-entry">
+      <span aria-hidden="true">$</span>
+      <textarea id="hub-command" name="command" rows="3" spellcheck="false" placeholder="git status" required></textarea>
+      <button class="primary" type="submit">Run</button>
+    </div>
+  </form>
+  <div class="terminal-status"><span data-terminal-target>Ready</span><span data-terminal-status></span></div>
+  <pre class="terminal-output" data-terminal-output aria-live="polite">Select a recent session or run a command.</pre>
+  {% if sessions %}
+  <div class="terminal-history">
+    <h3>Recent Hub sessions</h3>
+    {% for item in sessions %}
+    <button type="button" data-session-id="{{ item.id }}"><strong>{{ item.status|title }}</strong><span>{{ item.command }}</span><small>{{ item.created_at }}</small></button>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+
+<section class="section terminal-workspace" data-terminal-panel="display" hidden>
+  <div class="terminal-heading"><div><h2>Display terminal</h2><p class="muted">The command is queued securely and runs when the display agent checks in.</p></div></div>
+  <form data-display-terminal-form>
+    <label for="display-target">Display</label>
+    <select id="display-target" name="display_id" required>
+      <option value="">Choose a display</option>
+      {% for display in displays %}<option value="{{ display.id }}">{{ display.name or display.id }}</option>{% endfor %}
+    </select>
+    <label for="display-command">Command</label>
+    <div class="command-entry">
+      <span aria-hidden="true">$</span>
+      <textarea id="display-command" name="command" rows="3" spellcheck="false" placeholder="systemctl status church-display.service --no-pager" required></textarea>
+      <button class="primary" type="submit">Run</button>
+    </div>
+  </form>
+  <div class="terminal-status"><span data-display-target>Ready</span><span data-display-status></span></div>
+  <pre class="terminal-output" data-display-output aria-live="polite">Run a command to see its output here.</pre>
+  {% if remote_jobs %}
+  <div class="terminal-history">
+    <h3>Recent display sessions</h3>
+    {% for job in remote_jobs %}
+    <button type="button" data-job-id="{{ job.id }}"><strong>{{ job.status|title }}</strong><span>{{ job.display_id }} — {{ job.payload.command }}</span><small>{{ job.created_at }}</small></button>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+{% endif %}
+<script src="/static/remote-maintenance.js"></script>
+{% endblock %}
