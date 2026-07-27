@@ -43,9 +43,11 @@
 
       {% if analysis and analysis.error %}
         <p class="warning">{{ analysis.error }}</p>
-      {% elif analysis and analysis.media_items %}
-        <p class="helper">Drag thumbnails to change playback order. Your custom order is remembered when new images are added.</p>
+      {% elif analysis and (analysis.media_items or analysis.hidden_media_items) %}
+        <p class="helper">Drag thumbnails to change playback order. Hide removes an image from playback without deleting it from Google Drive.</p>
         <textarea name="playlist_order" data-order-field hidden>{% for item in analysis.media_items %}{{ item.path }}{% if not loop.last %}
+{% endif %}{% endfor %}</textarea>
+        <textarea name="playlist_excluded" data-excluded-field hidden>{% for item in analysis.hidden_media_items %}{{ item.path }}{% if not loop.last %}
 {% endif %}{% endfor %}</textarea>
         <div class="operator-playlist" data-playlist>
           {% for item in analysis.media_items %}
@@ -61,13 +63,30 @@
             <div class="order-controls">
               <button type="button" data-move="-1" aria-label="Move {{ item.name }} earlier">&uarr;</button>
               <button type="button" data-move="1" aria-label="Move {{ item.name }} later">&darr;</button>
+              <button type="button" data-hide-media aria-label="Hide {{ item.name }} from playback">Hide</button>
             </div>
           </article>
           {% endfor %}
         </div>
+        <section class="operator-hidden-media" data-hidden-media {% if not analysis.hidden_media_items %}hidden{% endif %}>
+          <div>
+            <h3>Hidden from playback</h3>
+            <p class="helper">These files remain in Google Drive and can be restored at any time.</p>
+          </div>
+          <div class="operator-hidden-list" data-hidden-list>
+            {% for item in analysis.hidden_media_items %}
+            <article data-hidden-path="{{ item.path }}">
+              <span>{{ item.name }}</span>
+              <button type="button" data-restore-media>Restore</button>
+            </article>
+            {% endfor %}
+          </div>
+        </section>
       {% else %}
         <div class="operator-empty">Choose a folder to see its images.</div>
         <textarea name="playlist_order" data-order-field hidden></textarea>
+        <textarea name="playlist_excluded" data-excluded-field hidden>{% if analysis %}{% for item in analysis.hidden_media_items %}{{ item.path }}{% if not loop.last %}
+{% endif %}{% endfor %}{% endif %}</textarea>
       {% endif %}
     </section>
 

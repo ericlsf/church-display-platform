@@ -61,6 +61,11 @@ def operator_apply(display_id):
         for value in request.form.get("playlist_order", "").splitlines()
         if value.strip()
     ]
+    excluded = [
+        value.strip()
+        for value in request.form.get("playlist_excluded", "").splitlines()
+        if value.strip()
+    ]
     days = request.form.getlist("service_day")
     times = request.form.getlist("service_time")
     services = [
@@ -98,7 +103,7 @@ def operator_apply(display_id):
     }
     try:
         media_count = apply_operator_changes(
-            display_id, folder, order, settings
+            display_id, folder, order, excluded, settings
         )
         flash(
             f"Changes applied: {media_count} media items synced and display "

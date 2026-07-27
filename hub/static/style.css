@@ -3583,3 +3583,87 @@ body.v8-sidebar-collapsed .v8-main-content{
   .fleet-quick-actions{grid-template-columns:1fr auto!important}.fleet-primary-action{grid-column:auto}
   .fleet-more-actions>summary{min-width:64px}.fleet-card-topline{align-items:center}
 }
+/* v13.14.0 playlist visibility and fleet summary polish */
+.operator-page .order-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .4rem;
+}
+.operator-page .order-controls button {
+  min-width: 0;
+}
+.operator-page .order-controls [data-hide-media] {
+  grid-column: 1 / -1;
+  color: #ffd38a;
+}
+.operator-hidden-media {
+  display: grid;
+  gap: .75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--fleet-border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .025);
+}
+.operator-hidden-media[hidden] {
+  display: none;
+}
+.operator-hidden-media h3,
+.operator-hidden-media p {
+  margin: 0;
+}
+.operator-hidden-list {
+  display: grid;
+  gap: .5rem;
+}
+.operator-hidden-list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .7rem .85rem;
+  border: 1px solid var(--fleet-border);
+  border-radius: 10px;
+}
+.fleet-summary {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(145px, 1fr));
+  gap: 10px;
+  max-width: 960px;
+  padding: 16px 20px;
+}
+.fleet-summary > .fleet-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  padding: 11px 14px;
+}
+.fleet-summary-copy {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start;
+  gap: 2px;
+  line-height: 1.1;
+}
+.fleet-summary-copy strong,
+.fleet-summary .fleet-summary-copy > span {
+  display: block !important;
+  margin: 0;
+}
+.fleet-summary-copy strong {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+.fleet-summary .fleet-summary-copy > span {
+  color: var(--fleet-muted);
+  font-size: .75rem;
+  white-space: nowrap;
+}
+@media (max-width: 700px) {
+  .fleet-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: none;
+    padding: 12px 0;
+  }
+}

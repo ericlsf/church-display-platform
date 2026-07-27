@@ -3,6 +3,9 @@
   if (!editor) return;
   const playlist = editor.querySelector("[data-playlist]");
   const orderField = editor.querySelector("[data-order-field]");
+  const excludedField = editor.querySelector("[data-excluded-field]");
+  const hiddenMedia = editor.querySelector("[data-hidden-media]");
+  const hiddenList = editor.querySelector("[data-hidden-list]");
   const folderSelect = editor.querySelector("[data-folder-select]");
   const refreshFolder = editor.querySelector("[data-refresh-folder]");
 
@@ -16,6 +19,13 @@
     });
   };
 
+  const syncExcluded = () => {
+    if (!excludedField) return;
+    const rows = [...editor.querySelectorAll("[data-hidden-path]")];
+    excludedField.value = rows.map(row => row.dataset.hiddenPath).join("\n");
+    if (hiddenMedia) hiddenMedia.hidden = rows.length === 0;
+  };
+
   folderSelect?.addEventListener("change", () => {
     if (refreshFolder) refreshFolder.value = folderSelect.value;
     const url = new URL(window.location.href);
@@ -24,6 +34,22 @@
   });
 
   playlist?.addEventListener("click", event => {
+    const hide = event.target.closest("[data-hide-media]");
+    if (hide) {
+      const card = hide.closest("[data-path]");
+      const path = card?.dataset.path;
+      if (!card || !path || !hiddenList) return;
+      const row = document.createElement("article");
+      row.dataset.hiddenPath = path;
+      row.innerHTML = `<span></span><button type="button" data-restore-media>Restore</button>`;
+      row.querySelector("span").textContent =
+        card.querySelector("strong")?.textContent || path;
+      hiddenList.appendChild(row);
+      card.remove();
+      syncOrder();
+      syncExcluded();
+      return;
+    }
     const button = event.target.closest("[data-move]");
     if (!button) return;
     const card = button.closest("[data-path]");
@@ -34,6 +60,25 @@
       playlist.insertBefore(card.nextElementSibling, card);
     }
     syncOrder();
+  });
+
+  hiddenList?.addEventListener("click", event => {
+    const restore = event.target.closest("[data-restore-media]");
+    if (!restore || !playlist) return;
+    const row = restore.closest("[data-hidden-path]");
+    if (!row) return;
+    const path = row.dataset.hiddenPath;
+    const name = row.querySelector("span")?.textContent || path;
+    const card = document.createElement("article");
+    card.className = "operator-media-card";
+    card.draggable = true;
+    card.dataset.path = path;
+    card.innerHTML = `<span class="order-number"></span><div class="operator-thumb"><span class="operator-thumb-fallback">Restored</span></div><strong></strong><div class="order-controls"><button type="button" data-move="-1" aria-label="Move earlier">&uarr;</button><button type="button" data-move="1" aria-label="Move later">&darr;</button><button type="button" data-hide-media aria-label="Hide from playback">Hide</button></div>`;
+    card.querySelector("strong").textContent = name;
+    playlist.appendChild(card);
+    row.remove();
+    syncOrder();
+    syncExcluded();
   });
 
   let dragging = null;
@@ -82,4 +127,5 @@
     if (remove) remove.closest(".service-row")?.remove();
   });
   syncOrder();
+  syncExcluded();
 })();
