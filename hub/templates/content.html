@@ -2,7 +2,7 @@
 {% block title %}Images &amp; Playlists - Church Display Hub{% endblock %}
 {% block head %}
 <link rel="stylesheet" href="/static/content-simple-v1390.css?v=2">
-<link rel="stylesheet" href="/static/content-shared-playlist-v13151.css">
+<link rel="stylesheet" href="/static/content-shared-playlist-v13151.css?v=3">
 {% endblock %}
 {% block content %}
 <div class="simple-content-page" data-simple-content>
@@ -49,7 +49,7 @@
       <form method="POST" action="/content/save" id="simple-order-form">
         <input type="hidden" name="remote" value="{{ drive_remote }}">
         <input type="hidden" name="folder" value="{{ selected_folder }}">
-        <textarea name="playlist_order" data-simple-order hidden>{% for item in analysis["media_items"] %}{{ item.path }}{% if not loop.last %}
+        <textarea name="playlist_order" data-simple-order hidden>{% for path in analysis.get("playlist_master_order", analysis.get("playlist_order", [])) %}{{ path }}{% if not loop.last %}
 {% endif %}{% endfor %}</textarea>
         <textarea name="playlist_excluded" data-simple-excluded hidden>{% for item in analysis.get("hidden_media_items", []) %}{{ item.path }}{% if not loop.last %}
 {% endif %}{% endfor %}</textarea>
@@ -64,7 +64,7 @@
           {% if analysis["media_items"] %}
             <div class="simple-image-grid" data-simple-playlist>
               {% for item in analysis["media_items"] %}
-                <article class="simple-image-card" draggable="true" data-path="{{ item.path }}">
+                <article class="simple-image-card" draggable="true" data-path="{{ item.path }}" data-position="{{ item.playlist_position }}">
                   <span class="simple-order-number">{{ loop.index }}</span>
                   <div class="simple-image-preview">
                     {% if item.type == "image" %}
@@ -91,7 +91,23 @@
             <p>These files remain safely in Google Drive.</p>
             <div data-hidden-list>
               {% for item in analysis.get("hidden_media_items", []) %}
-                <button type="button" data-restore="{{ item.path }}">{{ item.name }} <span>Restore</span></button>
+                <article class="simple-hidden-card"
+                         data-restore-card
+                         data-path="{{ item.path }}"
+                         data-name="{{ item.name }}"
+                         data-type="{{ item.type }}"
+                         data-position="{{ item.playlist_position }}"
+                         data-preview="{{ url_for('media.media_preview', remote=drive_remote, folder=selected_folder, path=item.path) }}">
+                  <div class="simple-hidden-preview">
+                    {% if item.type == "image" %}
+                      <img loading="lazy" src="{{ url_for('media.media_preview', remote=drive_remote, folder=selected_folder, path=item.path) }}" alt="Preview of {{ item.name }}">
+                    {% else %}
+                      <span>{{ item.type|title }}</span>
+                    {% endif %}
+                  </div>
+                  <strong title="{{ item.name }}">{{ item.name }}</strong>
+                  <button type="button" data-restore="{{ item.path }}">Restore</button>
+                </article>
               {% endfor %}
             </div>
             <button type="button" data-restore-all>Restore all</button>
@@ -126,5 +142,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/content-simple-v1390.js?v=2"></script>
+<script src="/static/content-simple-v1390.js?v=3"></script>
 {% endblock %}

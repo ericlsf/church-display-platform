@@ -7,10 +7,83 @@
   const hiddenList = page?.querySelector("[data-hidden-list]");
   if (!playlist || !orderField || !excludedField) return;
 
+  let masterOrder = orderField.value.split(/\r?\n/).map(value => value.trim()).filter(Boolean);
   const hidden = new Map();
-  [...hiddenList?.querySelectorAll("[data-restore]") || []].forEach(button => {
-    hidden.set(button.dataset.restore, button.firstChild?.textContent.trim() || button.dataset.restore);
+
+  const metadataFromCard = card => ({
+    name: card.dataset.name || card.querySelector("strong")?.textContent?.trim() || card.dataset.path,
+    type: card.dataset.type || "image",
+    preview: card.dataset.preview || card.querySelector("img")?.src || "",
+    position: Number(card.dataset.position || masterOrder.indexOf(card.dataset.path)),
   });
+
+  [...hiddenList?.querySelectorAll("[data-restore-card]") || []].forEach(card => {
+    hidden.set(card.dataset.path, metadataFromCard(card));
+  });
+
+  const createPlaylistCard = (path, item) => {
+    const card = document.createElement("article");
+    card.className = "simple-image-card";
+    card.draggable = true;
+    card.dataset.path = path;
+    card.dataset.position = String(item.position);
+
+    const number = document.createElement("span");
+    number.className = "simple-order-number";
+
+    const preview = document.createElement("div");
+    preview.className = "simple-image-preview";
+    if (item.type === "image" && item.preview) {
+      const image = document.createElement("img");
+      image.loading = "lazy";
+      image.src = item.preview;
+      image.alt = `Preview of ${item.name}`;
+      preview.append(image);
+    } else {
+      const fallback = document.createElement("span");
+      fallback.textContent = item.type === "image" ? "Preview unavailable" : item.type;
+      preview.append(fallback);
+    }
+
+    const name = document.createElement("strong");
+    name.title = item.name;
+    name.textContent = item.name;
+
+    const controls = document.createElement("div");
+    controls.className = "simple-order-buttons";
+    [
+      ["-1", "\u2191", `Move ${item.name} earlier`],
+      ["1", "\u2193", `Move ${item.name} later`],
+    ].forEach(([direction, label, ariaLabel]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.move = direction;
+      button.ariaLabel = ariaLabel;
+      button.textContent = label;
+      controls.append(button);
+    });
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.dataset.hide = "";
+    remove.ariaLabel = `Remove ${item.name} from playlist`;
+    remove.textContent = "Remove";
+    controls.append(remove);
+
+    card.append(number, preview, name, controls);
+    return card;
+  };
+
+  const insertRestoredCard = (path, item) => {
+    const card = createPlaylistCard(path, item);
+    const position = masterOrder.indexOf(path);
+    const laterPath = masterOrder.slice(position + 1).find(candidate =>
+      playlist.querySelector(`[data-path="${CSS.escape(candidate)}"]`)
+    );
+    const laterCard = laterPath
+      ? playlist.querySelector(`[data-path="${CSS.escape(laterPath)}"]`)
+      : null;
+    playlist.insertBefore(card, laterCard);
+  };
 
   const renderHidden = () => {
     excludedField.value = [...hidden.keys()].join("\n");
@@ -18,25 +91,67 @@
     hiddenTray.hidden = hidden.size === 0;
     const count = hiddenTray.querySelector("[data-hidden-count]");
     if (count) count.textContent = String(hidden.size);
-    hiddenList.innerHTML = [...hidden].map(([path, name]) =>
-      `<button type="button" data-restore="${path.replaceAll("&", "&amp;").replaceAll('"', "&quot;")}">${name.replaceAll("&", "&amp;").replaceAll("<", "&lt;")} <span>Restore</span></button>`
-    ).join("");
+    hiddenList.replaceChildren();
+
+    [...hidden.entries()]
+      .sort(([, left], [, right]) => left.position - right.position)
+      .forEach(([path, item]) => {
+        const card = document.createElement("article");
+        card.className = "simple-hidden-card";
+        card.dataset.restoreCard = "";
+        card.dataset.path = path;
+
+        const preview = document.createElement("div");
+        preview.className = "simple-hidden-preview";
+        if (item.type === "image" && item.preview) {
+          const image = document.createElement("img");
+          image.loading = "lazy";
+          image.src = item.preview;
+          image.alt = `Preview of ${item.name}`;
+          preview.append(image);
+        } else {
+          const fallback = document.createElement("span");
+          fallback.textContent = item.type === "image" ? "Preview unavailable" : item.type;
+          preview.append(fallback);
+        }
+
+        const name = document.createElement("strong");
+        name.title = item.name;
+        name.textContent = item.name;
+        const restore = document.createElement("button");
+        restore.type = "button";
+        restore.dataset.restore = path;
+        restore.textContent = "Restore";
+        card.append(preview, name, restore);
+        hiddenList.append(card);
+      });
   };
 
   const syncOrder = () => {
     const cards = [...playlist.querySelectorAll("[data-path]")];
+    const visiblePaths = cards.map(card => card.dataset.path);
+    let visibleIndex = 0;
+    masterOrder = masterOrder.map(path =>
+      hidden.has(path) ? path : (visiblePaths[visibleIndex++] || path)
+    );
+    masterOrder.push(...visiblePaths.slice(visibleIndex).filter(path => !masterOrder.includes(path)));
+    [...hidden.keys()].forEach(path => {
+      if (!masterOrder.includes(path)) masterOrder.push(path);
+    });
     cards.forEach((card, index) => {
       const number = card.querySelector(".simple-order-number");
       if (number) number.textContent = String(index + 1);
     });
-    orderField.value = cards.map(card => card.dataset.path).join("\n");
+    orderField.value = masterOrder.join("\n");
   };
 
   playlist.addEventListener("click", event => {
     const hideButton = event.target.closest("[data-hide]");
     if (hideButton) {
       const card = hideButton.closest("[data-path]");
-      hidden.set(card.dataset.path, card.querySelector("strong")?.textContent || card.dataset.path);
+      const item = metadataFromCard(card);
+      item.position = masterOrder.indexOf(card.dataset.path);
+      hidden.set(card.dataset.path, item);
       card.remove();
       syncOrder();
       renderHidden();
@@ -59,14 +174,21 @@
     const restore = event.target.closest("[data-restore]");
     if (restore) {
       const path = restore.dataset.restore;
+      const item = hidden.get(path);
+      if (!item) return;
+      insertRestoredCard(path, item);
       hidden.delete(path);
+      syncOrder();
       renderHidden();
-      page.querySelector("#simple-order-form")?.requestSubmit();
+      return;
     }
     if (event.target.closest("[data-restore-all]")) {
+      [...hidden.entries()]
+        .sort(([, left], [, right]) => left.position - right.position)
+        .forEach(([path, item]) => insertRestoredCard(path, item));
       hidden.clear();
+      syncOrder();
       renderHidden();
-      page.querySelector("#simple-order-form")?.requestSubmit();
     }
   });
 
@@ -112,14 +234,12 @@
   playlist.addEventListener("drop", event => {
     if (!dragged) return;
     event.preventDefault();
-
     const target = dropTarget;
     if (target && target !== dragged) {
-      if (target.classList.contains("drop-after")) {
-        playlist.insertBefore(dragged, target.nextElementSibling);
-      } else {
-        playlist.insertBefore(dragged, target);
-      }
+      playlist.insertBefore(
+        dragged,
+        target.classList.contains("drop-after") ? target.nextElementSibling : target
+      );
     }
     clearDropTarget();
     syncOrder();

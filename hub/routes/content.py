@@ -88,10 +88,22 @@ def content_page():
         excluded = set(workflow.get("draft_excluded", []))
         published_order = workflow.get("published_order") or analysis.get("playlist_order", [])
         by_path = {item.get("path"): item for item in analysis.get("media_items", [])}
-        ordered = [by_path[path] for path in published_order if path in by_path and path not in excluded]
-        ordered.extend(item for item in analysis.get("media_items", []) if item.get("path") not in published_order and item.get("path") not in excluded)
-        analysis["hidden_media_items"] = [item for item in analysis.get("media_items", []) if item.get("path") in excluded]
-        analysis["media_items"] = ordered
+        master_order = [path for path in published_order if path in by_path]
+        master_order.extend(
+            item.get("path")
+            for item in analysis.get("media_items", [])
+            if item.get("path") not in master_order
+        )
+        ordered_items = [by_path[path] for path in master_order]
+        for position, item in enumerate(ordered_items):
+            item["playlist_position"] = position
+        analysis["playlist_master_order"] = master_order
+        analysis["hidden_media_items"] = [
+            item for item in ordered_items if item.get("path") in excluded
+        ]
+        analysis["media_items"] = [
+            item for item in ordered_items if item.get("path") not in excluded
+        ]
 
     return render_template(
         "content.html",
