@@ -3,6 +3,7 @@ from agent.jobs import (
     heartbeat,
     management,
     preview,
+    remote_command,
     rollback,
     settings,
     sync,
@@ -80,6 +81,9 @@ def dispatch(job):
                 job,
                 report,
             )
+
+        elif job_type == "remote_command":
+            remote_command.handle_remote_command(job, report)
 
         elif job_type == "list_files":
             management.handle_list_files(

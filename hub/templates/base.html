@@ -51,6 +51,7 @@
                 <a data-command-item data-keywords="settings general enrollment platform" href="/setup">Open General Settings</a>
                 <a data-command-item data-keywords="remote access cloudflare tunnel offsite" href="/remote-access">Configure Remote Access</a>
                 <a data-command-item data-keywords="system diagnostics support backup" href="/system">Open System</a>
+                {% if current_user and current_user.role == "admin" %}<a data-command-item data-keywords="terminal command shell maintenance remote update restart" href="/maintenance">Open Remote Maintenance</a>{% endif %}
                 <a data-command-item data-keywords="users permissions accounts security" href="/users">Open Access &amp; Security</a>
             </div>
             <p class="command-empty" data-command-empty hidden>No matching command. Press Enter to search globally.</p>

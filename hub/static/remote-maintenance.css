@@ -1,0 +1,23 @@
+.maintenance-hero{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.terminal-lock-state{border:1px solid var(--border,#30343b);border-radius:999px;padding:.55rem .85rem;font-weight:700}
+.terminal-lock-state.unlocked{color:#55d68a;border-color:#247044;background:#0d2719}
+.terminal-unlock{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,560px);gap:2rem;align-items:end}
+.inline-form{display:flex;gap:.75rem}.inline-form input{flex:1}
+.maintenance-warning{display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;margin:1.25rem 0;border:1px solid #8b5d13;border-radius:12px;background:#251b0b;color:#f5cf75}
+.maintenance-warning span{flex:1;color:#d8c8a4}.maintenance-warning form{margin:0}
+.maintenance-tabs{display:flex;gap:.5rem;margin:1.25rem 0}
+.maintenance-tabs button{padding:.8rem 1rem}.maintenance-tabs .is-active{background:#2f7ff7;color:#fff;border-color:#2f7ff7}
+.terminal-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem}
+.terminal-workspace label{display:block;margin:.8rem 0 .35rem;font-weight:700}
+.terminal-workspace input,.terminal-workspace select{width:100%}
+.command-entry{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:stretch;border:1px solid #3a414d;border-radius:10px;background:#090c11;overflow:hidden}
+.command-entry>span{padding:1rem .2rem 1rem 1rem;color:#53d487;font:700 1rem ui-monospace,monospace}
+.command-entry textarea{border:0!important;resize:vertical;background:transparent!important;color:#e8edf4!important;font:1rem/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;padding:1rem;min-height:88px}
+.command-entry button{border-radius:0;margin:0;min-width:110px}
+.terminal-status{display:flex;justify-content:space-between;gap:1rem;margin-top:1rem;padding:.65rem .85rem;border:1px solid #30343b;border-bottom:0;border-radius:10px 10px 0 0;background:#15191f;color:#aeb8c5}
+.terminal-output{box-sizing:border-box;min-height:310px;max-height:560px;overflow:auto;margin:0;padding:1rem;border:1px solid #30343b;border-radius:0 0 10px 10px;background:#050709;color:#d9fbe6;white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace}
+.terminal-history{margin-top:1.25rem;display:grid;gap:.5rem}
+.terminal-history h3{margin-bottom:.25rem}
+.terminal-history button{display:grid;grid-template-columns:90px minmax(0,1fr) auto;text-align:left;gap:.75rem;align-items:center;padding:.7rem .85rem}
+.terminal-history button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:ui-monospace,monospace}
+@media(max-width:800px){.terminal-unlock{grid-template-columns:1fr}.maintenance-warning,.maintenance-hero,.terminal-heading{align-items:flex-start;flex-direction:column}.command-entry{grid-template-columns:auto minmax(0,1fr)}.command-entry button{grid-column:1/-1}.terminal-history button{grid-template-columns:1fr}.terminal-history button span{white-space:normal}}

@@ -15,6 +15,7 @@ hub/config/heartbeats.json
 hub/config/jobs.json
 hub/config/media_index.json
 hub/config/notifications.json
+hub/config/terminal_sessions/
 hub/static/previews/
 
 
