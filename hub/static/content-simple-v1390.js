@@ -5,20 +5,43 @@
   const excludedField = page?.querySelector("[data-simple-excluded]");
   const hiddenTray = page?.querySelector("[data-hidden-tray]");
   const hiddenList = page?.querySelector("[data-hidden-list]");
+  const expirationField = page?.querySelector("[data-simple-expirations]");
+  const changeSummary = page?.querySelector("[data-change-summary]");
+  const searchInput = page?.querySelector("[data-playlist-search]");
+  const hideSelected = page?.querySelector("[data-hide-selected]");
   if (!playlist || !orderField || !excludedField) return;
 
   let masterOrder = orderField.value.split(/\r?\n/).map(value => value.trim()).filter(Boolean);
   const hidden = new Map();
+  const expirations = new Map();
+  let changeCount = 0;
+  let lastRemoved = [];
+
+  const markChanged = (message = "Unpublished playlist changes") => {
+    changeCount += 1;
+    if (changeSummary) {
+      changeSummary.innerHTML = `<strong>${changeCount}</strong> change${changeCount === 1 ? "" : "s"} ready to publish. ${message}.`;
+      changeSummary.classList.add("has-changes");
+    }
+  };
+
+  const syncExpirations = () => {
+    if (expirationField) {
+      expirationField.value = JSON.stringify(Object.fromEntries(expirations));
+    }
+  };
 
   const metadataFromCard = card => ({
     name: card.dataset.name || card.querySelector("strong")?.textContent?.trim() || card.dataset.path,
     type: card.dataset.type || "image",
     preview: card.dataset.preview || card.querySelector("img")?.src || "",
     position: Number(card.dataset.position || masterOrder.indexOf(card.dataset.path)),
+    expires: card.dataset.expires || card.querySelector("[data-expiry]")?.value || "",
   });
 
   [...hiddenList?.querySelectorAll("[data-restore-card]") || []].forEach(card => {
     hidden.set(card.dataset.path, metadataFromCard(card));
+    if (card.dataset.expires) expirations.set(card.dataset.path, card.dataset.expires);
   });
 
   const createPlaylistCard = (path, item) => {
@@ -27,6 +50,14 @@
     card.draggable = true;
     card.dataset.path = path;
     card.dataset.position = String(item.position);
+    card.dataset.name = item.name;
+    card.dataset.type = item.type;
+    card.dataset.preview = item.preview;
+    card.dataset.expires = item.expires || "";
+
+    const select = document.createElement("label");
+    select.className = "simple-card-select";
+    select.innerHTML = `<input type="checkbox" data-media-select><span>Select ${item.name}</span>`;
 
     const number = document.createElement("span");
     number.className = "simple-order-number";
@@ -69,7 +100,11 @@
     remove.textContent = "Remove";
     controls.append(remove);
 
-    card.append(number, preview, name, controls);
+    const expiry = document.createElement("label");
+    expiry.className = "simple-expiry";
+    expiry.innerHTML = `Hide after <input type="date" data-expiry value="${item.expires || ""}">`;
+
+    card.append(number, select, preview, name, controls, expiry);
     return card;
   };
 
@@ -143,7 +178,14 @@
       if (number) number.textContent = String(index + 1);
     });
     orderField.value = masterOrder.join("\n");
+    const selectedCount = playlist.querySelectorAll("[data-media-select]:checked").length;
+    if (hideSelected) hideSelected.disabled = selectedCount === 0;
   };
+
+  playlist.querySelectorAll("[data-expiry]").forEach(input => {
+    if (input.value) expirations.set(input.closest("[data-path]").dataset.path, input.value);
+  });
+  syncExpirations();
 
   playlist.addEventListener("click", event => {
     const hideButton = event.target.closest("[data-hide]");
@@ -155,6 +197,8 @@
       card.remove();
       syncOrder();
       renderHidden();
+      lastRemoved = [[card.dataset.path, item]];
+      markChanged(`${item.name} removed`);
       return;
     }
     const button = event.target.closest("[data-move]");
@@ -168,6 +212,21 @@
       playlist.insertBefore(card.nextElementSibling, card);
     }
     syncOrder();
+    markChanged(`${card.dataset.name || "Image"} moved`);
+  });
+
+  playlist.addEventListener("change", event => {
+    if (event.target.matches("[data-media-select]")) {
+      syncOrder();
+      return;
+    }
+    if (event.target.matches("[data-expiry]")) {
+      const path = event.target.closest("[data-path]").dataset.path;
+      if (event.target.value) expirations.set(path, event.target.value);
+      else expirations.delete(path);
+      syncExpirations();
+      markChanged("automatic hide date updated");
+    }
   });
 
   hiddenTray?.addEventListener("click", event => {
@@ -180,6 +239,7 @@
       hidden.delete(path);
       syncOrder();
       renderHidden();
+      markChanged(`${item.name} restored to its original position`);
       return;
     }
     if (event.target.closest("[data-restore-all]")) {
@@ -189,6 +249,7 @@
       hidden.clear();
       syncOrder();
       renderHidden();
+      markChanged("all hidden images restored");
     }
   });
 
@@ -213,6 +274,80 @@
     dragged = null;
     clearDropTarget();
     syncOrder();
+    markChanged("playback order updated");
+  });
+
+  searchInput?.addEventListener("input", () => {
+    const query = searchInput.value.trim().toLowerCase();
+    playlist.querySelectorAll("[data-path]").forEach(card => {
+      card.hidden = Boolean(query) && !(card.dataset.name || "").toLowerCase().includes(query);
+    });
+  });
+
+  page.querySelector("[data-view-toggle]")?.addEventListener("click", event => {
+    const compact = playlist.classList.toggle("is-list-view");
+    event.currentTarget.ariaPressed = String(compact);
+    event.currentTarget.textContent = compact ? "Card view" : "Compact list";
+  });
+
+  page.querySelector("[data-select-all]")?.addEventListener("click", () => {
+    playlist.querySelectorAll("[data-path]:not([hidden]) [data-media-select]").forEach(input => {
+      input.checked = true;
+    });
+    syncOrder();
+  });
+
+  hideSelected?.addEventListener("click", () => {
+    lastRemoved = [];
+    playlist.querySelectorAll("[data-media-select]:checked").forEach(input => {
+      const card = input.closest("[data-path]");
+      const item = metadataFromCard(card);
+      item.position = masterOrder.indexOf(card.dataset.path);
+      lastRemoved.push([card.dataset.path, item]);
+      hidden.set(card.dataset.path, item);
+      card.remove();
+    });
+    syncOrder();
+    renderHidden();
+    markChanged(`${lastRemoved.length} selected image${lastRemoved.length === 1 ? "" : "s"} removed`);
+    if (changeSummary && lastRemoved.length) {
+      const undo = document.createElement("button");
+      undo.type = "button";
+      undo.dataset.undoRemove = "";
+      undo.textContent = "Undo";
+      changeSummary.append(" ", undo);
+    }
+  });
+
+  changeSummary?.addEventListener("click", event => {
+    if (!event.target.closest("[data-undo-remove]")) return;
+    lastRemoved
+      .sort(([, left], [, right]) => left.position - right.position)
+      .forEach(([path, item]) => {
+        insertRestoredCard(path, item);
+        hidden.delete(path);
+      });
+    lastRemoved = [];
+    syncOrder();
+    renderHidden();
+    markChanged("last removal undone");
+  });
+
+  const form = page.querySelector("#simple-order-form");
+  form?.addEventListener("submit", event => {
+    const visible = playlist.querySelectorAll("[data-path]").length;
+    const affected = page.querySelector(".simple-save-panel p")?.textContent?.trim() || "";
+    if (!window.confirm(`Publish ${visible} visible image${visible === 1 ? "" : "s"}?\n\n${affected}`)) {
+      event.preventDefault();
+      return;
+    }
+    changeCount = 0;
+  });
+
+  window.addEventListener("beforeunload", event => {
+    if (!changeCount) return;
+    event.preventDefault();
+    event.returnValue = "";
   });
   playlist.addEventListener("dragover", event => {
     if (!dragged) return;

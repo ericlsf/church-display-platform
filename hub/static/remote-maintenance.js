@@ -53,6 +53,8 @@
   const hubForm = document.querySelector("[data-hub-terminal-form]");
   hubForm?.addEventListener("submit", async event => {
     event.preventDefault();
+    const command = hubForm.querySelector("[name='command']")?.value || "";
+    if (!confirm(`Run this command on the HUB?\n\n${command}`)) return;
     terminalOutput.textContent = "Starting command…";
     try {
       const data = await post("/maintenance/hub/run", hubForm);
@@ -78,6 +80,9 @@
   const displayForm = document.querySelector("[data-display-terminal-form]");
   displayForm?.addEventListener("submit", async event => {
     event.preventDefault();
+    const target = displayForm.querySelector("[name='display_id']")?.selectedOptions?.[0]?.textContent || "display";
+    const command = displayForm.querySelector("[name='command']")?.value || "";
+    if (!confirm(`Run this command on ${target}?\n\n${command}`)) return;
     document.querySelector("[data-display-output]").textContent = "Queueing command…";
     try {
       const data = await post("/maintenance/display/run", displayForm);

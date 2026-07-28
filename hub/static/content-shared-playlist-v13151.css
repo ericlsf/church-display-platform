@@ -28,6 +28,32 @@
   padding: .55rem;
 }
 
+.simple-playlist-tools {
+  display: grid;
+  grid-template-columns: minmax(15rem, 1fr) auto auto auto;
+  gap: .6rem;
+  align-items: end;
+  margin-top: 1rem;
+}
+
+.simple-playlist-tools label {
+  margin: 0;
+}
+
+.simple-change-summary {
+  margin: .7rem 0 0;
+  color: #9aa4b2;
+}
+
+.simple-change-summary.has-changes {
+  color: #ffd37a;
+}
+
+.simple-change-summary button {
+  min-height: auto;
+  padding: .25rem .55rem;
+}
+
 .simple-image-card > strong {
   font-size: .9rem;
   margin: .45rem 0;
@@ -37,6 +63,27 @@
   top: .75rem;
   left: .75rem;
   padding: .18rem .45rem;
+}
+
+.simple-card-select {
+  position: absolute;
+  z-index: 3;
+  top: .7rem;
+  right: .7rem;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border-radius: .55rem;
+  background: #111d;
+}
+
+.simple-card-select span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
 }
 
 .simple-order-buttons {
@@ -51,6 +98,45 @@
 .simple-order-buttons button {
   min-height: 2.35rem;
   padding: .4rem .5rem;
+}
+
+.simple-expiry {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: .4rem;
+  margin-top: .4rem;
+  color: #9aa4b2;
+  font-size: .75rem;
+}
+
+.simple-expiry input {
+  min-height: 2rem;
+  padding: .25rem .35rem;
+  font-size: .75rem;
+}
+
+.simple-image-grid.is-list-view {
+  grid-template-columns: 1fr;
+}
+
+.simple-image-grid.is-list-view .simple-image-card {
+  display: grid;
+  grid-template-columns: 7rem minmax(10rem, 1fr) auto auto;
+  gap: .7rem;
+  align-items: center;
+}
+
+.simple-image-grid.is-list-view .simple-image-preview {
+  grid-row: 1 / span 2;
+}
+
+.simple-image-grid.is-list-view .simple-image-card > strong {
+  margin: 0;
+}
+
+.simple-image-grid.is-list-view .simple-order-buttons {
+  grid-template-columns: repeat(3, auto);
 }
 
 .simple-hidden-tray [data-hidden-list] {
@@ -99,7 +185,15 @@
 }
 
 @media (max-width: 800px) {
+  .simple-playlist-tools {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .simple-image-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .simple-image-grid.is-list-view .simple-image-card {
+    grid-template-columns: 5rem minmax(0, 1fr);
   }
 }

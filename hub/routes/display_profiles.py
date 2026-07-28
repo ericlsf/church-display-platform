@@ -20,6 +20,7 @@ from services.display_profiles import (
     delete_profile,
     export_profile,
     import_profile,
+    install_starter_profiles,
     load_profiles,
     restore_revision,
     save_profile,
@@ -101,6 +102,16 @@ def page():
         displays=load_config().get("displays", []),
         groups=load_groups().get("groups", []),
     )
+
+
+@display_profiles_bp.route("/starters", methods=["POST"])
+def starters():
+    created = install_starter_profiles(actor=_actor())
+    flash(
+        f"Added {len(created)} starter preset(s)." if created else "Starter presets are already installed.",
+        "success",
+    )
+    return redirect(url_for("display_profiles.page"))
 
 
 @display_profiles_bp.route("/save", methods=["POST"])

@@ -32,6 +32,15 @@
   <form method="POST" action="/maintenance/lock"><button type="submit">Lock now</button></form>
 </section>
 
+<section class="section maintenance-safety">
+  <strong>Before you run anything</strong>
+  <ol>
+    <li>Confirm the selected target below—Hub and display commands affect different machines.</li>
+    <li>Prefer the built-in update button for routine releases.</li>
+    <li>Every command and its output is retained in the security audit trail.</li>
+  </ol>
+</section>
+
 <div class="maintenance-tabs" role="tablist">
   <button class="is-active" type="button" data-terminal-tab="hub">Hub terminal</button>
   <button type="button" data-terminal-tab="display">Display terminal</button>
@@ -91,5 +100,5 @@
   {% endif %}
 </section>
 {% endif %}
-<script src="/static/remote-maintenance.js"></script>
+<script src="/static/remote-maintenance.js?v=2"></script>
 {% endblock %}

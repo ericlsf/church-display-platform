@@ -1,3 +1,5 @@
+import json
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from services.config import load_config, load_hub_settings
@@ -8,9 +10,12 @@ from services.media import (
     analyze_drive_folder,
     discard_playlist_draft,
     get_playlist_entry,
+    get_playlist_expirations,
+    expired_playlist_paths,
     publish_playlist,
     save_playlist_draft,
     save_playlist_exclusions,
+    save_playlist_expirations,
     save_playlist_policy,
 )
 from services.content_cache import sync_playlist_from_drive
@@ -85,7 +90,9 @@ def content_page():
     workflow = get_playlist_entry(remote, folder) if folder else {}
 
     if analysis and workflow:
+        expirations = get_playlist_expirations(remote, folder)
         excluded = set(workflow.get("draft_excluded", []))
+        excluded.update(expired_playlist_paths(remote, folder))
         published_order = workflow.get("published_order") or analysis.get("playlist_order", [])
         by_path = {item.get("path"): item for item in analysis.get("media_items", [])}
         master_order = [path for path in published_order if path in by_path]
@@ -97,6 +104,7 @@ def content_page():
         ordered_items = [by_path[path] for path in master_order]
         for position, item in enumerate(ordered_items):
             item["playlist_position"] = position
+            item["expires_on"] = expirations.get(item.get("path"), "")
         analysis["playlist_master_order"] = master_order
         analysis["hidden_media_items"] = [
             item for item in ordered_items if item.get("path") in excluded
@@ -127,6 +135,11 @@ def save_published_order():
     if folder:
         order = parse_order()
         excluded = [x.strip() for x in request.form.get("playlist_excluded", "").splitlines() if x.strip()]
+        try:
+            expirations = json.loads(request.form.get("playlist_expirations", "{}"))
+        except (TypeError, ValueError):
+            expirations = {}
+        save_playlist_expirations(remote, folder, expirations)
         save_playlist_exclusions(remote, folder, excluded, draft=True)
         save_playlist_draft(
             remote,

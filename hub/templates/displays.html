@@ -161,14 +161,18 @@
         <div><h2>{{ row.name }}</h2><p class="muted fleet-host">{{ row.host }}</p></div>
       </div>
 
+      <details class="fleet-health-details">
+      <summary>Health details</summary>
       <div class="fleet-metrics">
         <div class="fleet-metric"><span>CPU</span><strong data-cpu-temp>{{ row.system.cpu_temp if row.system and row.system.cpu_temp else '—' }}</strong></div>
         <div class="fleet-metric"><span>RAM</span><strong data-memory-usage>{{ row.system.memory if row.system and row.system.memory else '—' }}</strong></div>
         <div class="fleet-metric"><span>Disk</span><strong data-disk-usage>{{ row.system.disk if row.system and row.system.disk else '—' }}</strong></div>
         <div class="fleet-metric"><span>{{ 'Role' if row.device_role == 'controller' else 'Media' }}</span><strong data-media-count>{{ 'Hub' if row.device_role == 'controller' else row.media_count }}</strong></div>
       </div>
+      </details>
 
       <dl class="fleet-details">
+        <div><dt>{{ 'Role' if row.device_role == 'controller' else 'Playlist' }}</dt><dd>{{ 'Hub controller' if row.device_role == 'controller' else (row.sync_folder or 'Not assigned') }}</dd></div>
         <div><dt>Version</dt><dd>{{ row.current_tag if row.current_tag not in ['Unknown', 'untagged', ''] else row.version }}</dd></div>
         <div><dt>Heartbeat</dt><dd>{{ row.heartbeat }}</dd></div>
       </dl>
@@ -176,15 +180,15 @@
       <div class="fleet-quick-actions">
         {% if row.device_role != 'controller' %}
         <a class="primary button-link fleet-primary-action" href="/display/{{ row.id }}/operator">Manage</a>
-        <form method="POST" action="/fleet/{{ row.id }}/sync-now">
-          <input type="hidden" name="next" value="/displays">
-          <button class="safe" type="submit">Sync</button>
-        </form>
         {% endif %}
         <details class="fleet-more-actions">
           <summary aria-label="More actions for {{ row.name }}">More</summary>
           <div role="menu">
             {% if row.device_role != 'controller' %}
+            <form method="POST" action="/fleet/{{ row.id }}/sync-now">
+              <input type="hidden" name="next" value="/displays">
+              <button type="submit" role="menuitem">Sync content now</button>
+            </form>
             <form method="POST" action="/fleet/{{ row.id }}/screenshot">
               <input type="hidden" name="next" value="/displays">
               <button type="submit" role="menuitem">Take screenshot</button>

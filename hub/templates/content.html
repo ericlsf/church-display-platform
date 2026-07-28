@@ -53,6 +53,7 @@
 {% endif %}{% endfor %}</textarea>
         <textarea name="playlist_excluded" data-simple-excluded hidden>{% for item in analysis.get("hidden_media_items", []) %}{{ item.path }}{% if not loop.last %}
 {% endif %}{% endfor %}</textarea>
+        <input type="hidden" name="playlist_expirations" data-simple-expirations value="{}">
 
         <section class="simple-content-panel">
           <div class="simple-step-heading">
@@ -60,12 +61,20 @@
             <div><h2>Arrange the shared “{{ selected_folder }}” playlist</h2><p>Drag images or use the arrow buttons. The first image plays first on every assigned display.</p></div>
             <strong class="simple-count">{{ analysis["media_items"]|length }} images</strong>
           </div>
+          <div class="simple-playlist-tools">
+            <label>Find an image <input type="search" data-playlist-search placeholder="Search by filename"></label>
+            <button type="button" data-view-toggle aria-pressed="false">Compact list</button>
+            <button type="button" data-select-all>Select visible</button>
+            <button type="button" data-hide-selected disabled>Remove selected</button>
+          </div>
+          <p class="simple-change-summary" data-change-summary>No unpublished changes.</p>
 
           {% if analysis["media_items"] %}
             <div class="simple-image-grid" data-simple-playlist>
               {% for item in analysis["media_items"] %}
-                <article class="simple-image-card" draggable="true" data-path="{{ item.path }}" data-position="{{ item.playlist_position }}">
+                <article class="simple-image-card" draggable="true" data-path="{{ item.path }}" data-name="{{ item.name }}" data-type="{{ item.type }}" data-position="{{ item.playlist_position }}" data-preview="{{ url_for('media.media_preview', remote=drive_remote, folder=selected_folder, path=item.path) }}" data-expires="{{ item.expires_on }}">
                   <span class="simple-order-number">{{ loop.index }}</span>
+                  <label class="simple-card-select"><input type="checkbox" data-media-select><span>Select {{ item.name }}</span></label>
                   <div class="simple-image-preview">
                     {% if item.type == "image" %}
                       <img loading="lazy" src="{{ url_for('media.media_preview', remote=drive_remote, folder=selected_folder, path=item.path) }}" alt="Preview of {{ item.name }}" onerror="this.hidden=true;this.nextElementSibling.hidden=false">
@@ -80,6 +89,7 @@
                     <button type="button" data-move="1" aria-label="Move {{ item.name }} later">&darr;</button>
                     <button type="button" data-hide aria-label="Remove {{ item.name }} from playlist">Remove</button>
                   </div>
+                  <label class="simple-expiry">Hide after <input type="date" data-expiry value="{{ item.expires_on }}" title="Automatically remove this image from the playlist after this date"></label>
                 </article>
               {% endfor %}
             </div>
@@ -97,6 +107,7 @@
                          data-name="{{ item.name }}"
                          data-type="{{ item.type }}"
                          data-position="{{ item.playlist_position }}"
+                         data-expires="{{ item.expires_on }}"
                          data-preview="{{ url_for('media.media_preview', remote=drive_remote, folder=selected_folder, path=item.path) }}">
                   <div class="simple-hidden-preview">
                     {% if item.type == "image" %}
@@ -119,7 +130,7 @@
             <span>3</span>
             <div><h2>Publish shared playlist</h2><p>This updates all {{ playlist_display_count }} display(s) currently using “{{ selected_folder }}”.</p></div>
           </div>
-          <button class="primary" type="submit" {% if not analysis["media_items"] %}disabled{% endif %}>Publish Playlist</button>
+          <button class="primary" type="submit" data-publish-playlist {% if not analysis["media_items"] %}disabled{% endif %}>Review &amp; Publish</button>
         </section>
       </form>
 
@@ -142,5 +153,5 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="/static/content-simple-v1390.js?v=3"></script>
+<script src="/static/content-simple-v1390.js?v=5"></script>
 {% endblock %}
