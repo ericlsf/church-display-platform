@@ -172,8 +172,6 @@ def displays():
     for row in rows:
         row["group_ids"] = memberships.get(row.get("id"), [])
         assigned_names = [group_names.get(group_id, group_id) for group_id in row["group_ids"]]
-        if row.get("group") and row["group"] not in assigned_names:
-            assigned_names.insert(0, row["group"])
         row["group"] = ", ".join(assigned_names)
         current = row.get("sync_folder", "")
         row["folder_options"] = list(folders)
@@ -248,8 +246,6 @@ def add_display():
     host = normalize_host(request.form.get("host", ""))
     username = request.form.get("username", "").strip()
     password = request.form.get("password", "").strip()
-    group = request.form.get("group", "").strip()
-
     if not name or not host:
         return redirect(url_for("displays.displays"))
 
@@ -268,7 +264,7 @@ def add_display():
         "host": host,
         "username": username,
         "password": password,
-        "group": group,
+        "group": "",
         "presentation": {
             "overlay": {"enabled": True, "text": "Welcome"},
             "clock": {"enabled": True},
@@ -289,8 +285,6 @@ def update_display():
     host = normalize_host(request.form.get("host", ""))
     username = request.form.get("username", "").strip()
     password = request.form.get("password", "").strip()
-    group = request.form.get("group", "").strip()
-
     for display in cfg.get("displays", []):
         if display.get("id") == display_id:
             if name:
@@ -299,7 +293,6 @@ def update_display():
                 display["host"] = host
             display["username"] = username
             display["password"] = password
-            display["group"] = group
             log_event(f"Updated display {display.get('name', display_id)}")
             break
 

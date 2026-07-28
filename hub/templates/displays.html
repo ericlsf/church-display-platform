@@ -51,7 +51,6 @@
     <div><label>Admin URL or IP</label><input name="host" placeholder="http://192.168.1.101:8080" required></div>
     <div><label>Username, optional</label><input name="username" placeholder="admin"></div>
     <div><label>Password, optional</label><input name="password" type="password"></div>
-    <div><label>Group, optional</label><input name="group" placeholder="Main campus"></div>
     <div class="fleet-form-submit"><button class="primary" type="submit">Add display</button></div>
   </form>
 </section>
@@ -218,7 +217,6 @@
           <div><label>Host</label><input name="host" value="{{ row.host }}"></div>
           <div><label>Username</label><input name="username" value="{{ row.username }}"></div>
           <div><label>Password</label><input name="password" type="password" value="{{ row.password }}"></div>
-          <div><label>Group</label><input name="group" value="{{ row.group }}"></div>
           <div>
             <label>Google Drive folder <span class="source-badge">Google Drive</span></label>
             <select name="sync_folder" required>
