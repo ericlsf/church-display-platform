@@ -1,14 +1,13 @@
 import json
 import urllib.parse
-import urllib.request
 
-from agent.config import DISPLAY_ID, HUB_URL
+from agent.config import DISPLAY_ID
+from agent.hub_connection import open_hub, update_hub_urls
 
 
 def get_next_job():
-    url = f"{HUB_URL}/api/v1/jobs/next?display_id={urllib.parse.quote(DISPLAY_ID)}"
-
-    with urllib.request.urlopen(url, timeout=10) as response:
+    path = f"/api/v1/jobs/next?display_id={urllib.parse.quote(DISPLAY_ID)}"
+    with open_hub(path, timeout=10) as response:
         data = json.loads(response.read().decode("utf-8"))
 
     return data.get("job")
@@ -23,42 +22,42 @@ def post_job_status(job_id, status, progress, message):
 
     body = json.dumps(payload).encode("utf-8")
 
-    request = urllib.request.Request(
-        f"{HUB_URL}/api/v1/jobs/{job_id}/status",
+    with open_hub(
+        f"/api/v1/jobs/{job_id}/status",
         data=body,
         headers={"Content-Type": "application/json"},
         method="POST",
-    )
-
-    with urllib.request.urlopen(request, timeout=10) as response:
+        timeout=10,
+    ) as response:
         response.read()
 
 
 def post_heartbeat(payload):
     body = json.dumps(payload).encode("utf-8")
 
-    request = urllib.request.Request(
-        f"{HUB_URL}/api/v1/heartbeat",
+    with open_hub(
+        "/api/v1/heartbeat",
         data=body,
         headers={"Content-Type": "application/json"},
         method="POST",
-    )
-
-    with urllib.request.urlopen(request, timeout=10) as response:
+        timeout=10,
+    ) as response:
         raw = response.read().decode("utf-8")
     try:
-        return json.loads(raw)
+        result = json.loads(raw)
+        update_hub_urls(result.get("hub_urls"))
+        return result
     except Exception:
         return {}
 
 
 def post_management_artifact(kind, payload):
     body = json.dumps(payload).encode("utf-8")
-    request = urllib.request.Request(
-        f"{HUB_URL}/api/v1/management/artifact/{urllib.parse.quote(DISPLAY_ID)}/{urllib.parse.quote(kind)}",
+    with open_hub(
+        f"/api/v1/management/artifact/{urllib.parse.quote(DISPLAY_ID)}/{urllib.parse.quote(kind)}",
         data=body,
         headers={"Content-Type": "application/json"},
         method="POST",
-    )
-    with urllib.request.urlopen(request, timeout=30) as response:
+        timeout=30,
+    ) as response:
         response.read()

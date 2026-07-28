@@ -1,9 +1,10 @@
 import hashlib
 import json
 import shutil
-from urllib import parse, request
+from urllib import parse
 
-from agent.config import CONFIG_PATH, HUB_URL, MEDIA_DIR, STATUS_DIR
+from agent.config import CONFIG_PATH, MEDIA_DIR, STATUS_DIR
+from agent.hub_connection import open_hub
 from agent.utils import read_json, write_json
 
 STATUS_FILE = STATUS_DIR / "sync.json"
@@ -19,7 +20,7 @@ def sha256_file(path):
 
 def get_manifest(remote, folder):
     query = parse.urlencode({"remote": remote, "folder": folder})
-    with request.urlopen(f"{HUB_URL}/api/v1/content/manifest?{query}", timeout=120) as response:
+    with open_hub(f"/api/v1/content/manifest?{query}", timeout=120) as response:
         payload = json.loads(response.read().decode("utf-8"))
     if not payload.get("ok"):
         raise RuntimeError(payload.get("error") or "Hub manifest request failed")
@@ -28,10 +29,10 @@ def get_manifest(remote, folder):
 
 def download_file(playlist_id, relative_path, destination):
     encoded = "/".join(parse.quote(part, safe="") for part in relative_path.split("/"))
-    url = f"{HUB_URL}/api/v1/content/files/{parse.quote(playlist_id, safe='')}/{encoded}"
+    path = f"/api/v1/content/files/{parse.quote(playlist_id, safe='')}/{encoded}"
     destination.parent.mkdir(parents=True, exist_ok=True)
     tmp = destination.with_suffix(destination.suffix + ".part")
-    with request.urlopen(url, timeout=300) as response, tmp.open("wb") as handle:
+    with open_hub(path, timeout=300) as response, tmp.open("wb") as handle:
         shutil.copyfileobj(response, handle, length=1024 * 1024)
     tmp.replace(destination)
 

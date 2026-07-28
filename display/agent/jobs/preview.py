@@ -1,9 +1,9 @@
 import shutil
 import subprocess
-import urllib.request
 from pathlib import Path
 
-from agent.config import DISPLAY_ID, HUB_URL
+from agent.config import DISPLAY_ID
+from agent.hub_connection import open_hub
 
 
 TMP_FILE = Path("/tmp/church-display-preview.jpg")
@@ -69,17 +69,16 @@ def upload_preview():
 
     body += f"--{boundary}--\r\n".encode()
 
-    req = urllib.request.Request(
-        f"{HUB_URL}/api/v1/preview",
+    with open_hub(
+        "/api/v1/preview",
         data=body,
         headers={
             "Content-Type": f"multipart/form-data; boundary={boundary}",
             "Content-Length": str(len(body)),
         },
         method="POST",
-    )
-
-    with urllib.request.urlopen(req, timeout=20) as response:
+        timeout=20,
+    ) as response:
         response.read()
 
     return True, "Preview uploaded"

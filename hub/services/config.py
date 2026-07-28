@@ -14,7 +14,11 @@ CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 DEFAULT_CONFIG = {"displays": []}
-DEFAULT_HUB_SETTINGS = {"drive_remote": "gdrive"}
+DEFAULT_HUB_SETTINGS = {
+    "drive_remote": "gdrive",
+    "hub_url": "",
+    "public_hub_url": "",
+}
 DEFAULT_PENDING = {"pending": []}
 
 
@@ -62,6 +66,8 @@ def save_config(cfg):
 def load_hub_settings():
     settings = load_json(HUB_SETTINGS_FILE, DEFAULT_HUB_SETTINGS)
     settings.setdefault("drive_remote", "gdrive")
+    settings.setdefault("hub_url", "")
+    settings.setdefault("public_hub_url", "")
     return settings
 
 

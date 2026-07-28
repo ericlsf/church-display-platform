@@ -53,7 +53,8 @@ def save_rollouts(data):
 
 def _package_url(sha256):
     hub_url = (
-        load_hub_settings().get("hub_url")
+        load_hub_settings().get("public_hub_url")
+        or load_hub_settings().get("hub_url")
         or "http://church-display-hub.local:8090"
     ).rstrip("/")
     return (

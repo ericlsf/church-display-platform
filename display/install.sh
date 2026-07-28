@@ -7,6 +7,7 @@ SERVICE_DIR="/etc/systemd/system"
 SUDOERS_FILE="/etc/sudoers.d/church-display-agent"
 
 HUB_URL="${CHURCH_DISPLAY_HUB_URL:-}"
+HUB_FALLBACK_URL="${CHURCH_DISPLAY_HUB_FALLBACK_URL:-}"
 DISPLAY_NAME="${CHURCH_DISPLAY_NAME:-}"
 RAW_DISPLAY_ID="${CHURCH_DISPLAY_ID:-$(hostname)}"
 AUTO_START="${CHURCH_DISPLAY_AUTO_START:-yes}"
@@ -23,6 +24,7 @@ DISPLAY_ID="$(normalize_id "$RAW_DISPLAY_ID")"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --hub-url) HUB_URL="${2:-}"; shift 2 ;;
+    --fallback-hub-url) HUB_FALLBACK_URL="${2:-}"; shift 2 ;;
     --display-name) DISPLAY_NAME="${2:-}"; shift 2 ;;
     --display-id)
       RAW_DISPLAY_ID="${2:-}"
@@ -48,6 +50,7 @@ if [[ "$(id -u)" -eq 0 ]]; then
 fi
 
 HUB_URL="${HUB_URL%/}"
+HUB_FALLBACK_URL="${HUB_FALLBACK_URL%/}"
 DISPLAY_NAME="${DISPLAY_NAME:-$(hostname)}"
 DISPLAY_ID="${DISPLAY_ID:-$(normalize_id "$(hostname)")}"
 
@@ -109,6 +112,7 @@ echo "Writing display identity..."
 sudo install -d -m 0755 "$ENV_DIR"
 sudo tee "$ENV_DIR/heartbeat.env" >/dev/null <<EOF
 HUB_URL=$HUB_URL
+HUB_FALLBACK_URL=$HUB_FALLBACK_URL
 DISPLAY_ID=$DISPLAY_ID
 DISPLAY_NAME=$DISPLAY_NAME
 DISPLAY_PORT=8080

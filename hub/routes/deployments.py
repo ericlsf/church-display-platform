@@ -27,7 +27,8 @@ def deploy_jobs(limit=100):
 def package_base_url():
     settings = load_hub_settings()
     return (
-        settings.get("hub_url")
+        settings.get("public_hub_url")
+        or settings.get("hub_url")
         or "http://church-display-hub.local:8090"
     ).rstrip("/")
 

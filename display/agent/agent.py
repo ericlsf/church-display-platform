@@ -2,7 +2,7 @@ import time
 from datetime import datetime, timedelta
 
 from agent.api import get_next_job, post_heartbeat
-from agent.config import DISPLAY_ID, HUB_URL
+from agent.config import DISPLAY_ID, HUB_URLS
 from agent.dispatcher import dispatch
 from agent.jobs.heartbeat import build_heartbeat
 from agent.jobs.preview import upload_preview
@@ -49,7 +49,7 @@ def send_preview():
 
 def run_forever():
     log(f"Display Agent started for {DISPLAY_ID}")
-    log(f"Hub: {HUB_URL}")
+    log(f"Hub endpoints: {', '.join(HUB_URLS)}")
 
     next_heartbeat = datetime.now()
     next_preview = datetime.now() + timedelta(seconds=10)
