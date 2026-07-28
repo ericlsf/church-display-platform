@@ -39,6 +39,15 @@ DEFAULT_SETTINGS = {
     },
 }
 
+STARTER_PROFILES = [
+    ("Sunday Morning", "Clock, welcome overlay, and a 20-minute countdown.", {}),
+    ("Wednesday Evening", "A simple evening-service countdown.", {"countdown": {"start_minutes": 15}}),
+    ("Special Event", "Event mode with countdown and no clock.", {"clock": {"enabled": False}, "countdown": {"start_minutes": 30}}),
+    ("Lobby", "Welcome message and clock without a countdown.", {"countdown": {"enabled": False}}),
+    ("No Countdown", "Slideshow, welcome message, and clock only.", {"countdown": {"enabled": False}}),
+    ("Emergency Message", "Prominent overlay without clock or countdown.", {"overlay": {"text": "Please follow staff instructions"}, "clock": {"enabled": False}, "countdown": {"enabled": False}}),
+]
+
 
 def _now():
     return datetime.now(timezone.utc).isoformat()
@@ -182,6 +191,35 @@ def save_profiles(data):
         encoding="utf-8",
     )
     temp.replace(PROFILES_FILE)
+
+
+def install_starter_profiles(actor="system"):
+    data = load_profiles()
+    existing = {profile.get("name", "").casefold() for profile in data["profiles"]}
+    created = []
+    for name, description, overrides in STARTER_PROFILES:
+        if name.casefold() in existing:
+            continue
+        settings = deepcopy(DEFAULT_SETTINGS)
+        for section, values in overrides.items():
+            settings.setdefault(section, {}).update(values)
+        now = _now()
+        profile = {
+            "id": _unique_id(data, name),
+            "name": name,
+            "description": description,
+            "settings": normalize_settings(settings),
+            "history": [],
+            "created_at": now,
+            "updated_at": now,
+            "updated_by": actor,
+        }
+        data["profiles"].append(profile)
+        existing.add(name.casefold())
+        created.append(profile)
+    if created:
+        save_profiles(data)
+    return created
 
 
 def _slugify(value):

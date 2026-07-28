@@ -1,5 +1,6 @@
 import json
 import subprocess
+from datetime import date
 from pathlib import Path
 
 from services.config import CONFIG_DIR
@@ -109,7 +110,16 @@ def get_playlist_exclusions(remote, folder, draft=False):
     values = entry.get(key)
     if values is None:
         values = entry.get("excluded", [])
-    return [str(x) for x in values if str(x).strip()]
+    clean = [str(x) for x in values if str(x).strip()]
+    if not draft:
+        # Enforce expiration wherever the published playlist is resolved,
+        # even if nobody opens the Content page that day.
+        clean.extend(
+            path
+            for path in expired_playlist_paths(remote, folder)
+            if path not in clean
+        )
+    return clean
 
 
 def save_playlist_exclusions(remote, folder, excluded, draft=True):
@@ -130,6 +140,58 @@ def save_playlist_exclusions(remote, folder, excluded, draft=True):
     })
     save_playlists(data)
     return clean
+
+
+def get_playlist_expirations(remote, folder):
+    entry = load_playlists().get("playlists", {}).get(
+        playlist_key(remote, folder),
+        {},
+    )
+    values = entry.get("expirations", {})
+    return {
+        str(path): str(expires)
+        for path, expires in values.items()
+        if str(path).strip() and str(expires).strip()
+    }
+
+
+def save_playlist_expirations(remote, folder, expirations):
+    clean = {}
+    for path, expires in (expirations or {}).items():
+        path = str(path).strip().strip("/")
+        expires = str(expires).strip()
+        if not path or not expires:
+            continue
+        try:
+            date.fromisoformat(expires)
+        except ValueError:
+            continue
+        clean[path] = expires
+
+    data = load_playlists()
+    entry = data.setdefault("playlists", {}).setdefault(
+        playlist_key(remote, folder),
+        {},
+    )
+    entry.update({
+        "remote": remote or "gdrive",
+        "folder": (folder or "").strip().strip("/"),
+        "expirations": clean,
+    })
+    save_playlists(data)
+    return clean
+
+
+def expired_playlist_paths(remote, folder, today=None):
+    today = today or date.today()
+    expired = []
+    for path, expires in get_playlist_expirations(remote, folder).items():
+        try:
+            if date.fromisoformat(expires) < today:
+                expired.append(path)
+        except ValueError:
+            continue
+    return expired
 
 
 def save_playlist_order(remote, folder, order):

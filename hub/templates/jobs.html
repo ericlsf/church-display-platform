@@ -96,7 +96,7 @@
         {% if jobs %}
             {% for job in jobs %}
                 <div class="card">
-                    <h3>{{ job.type }}</h3>
+                    <h3>{{ job.type|replace('_', ' ')|title }}</h3>
                     <p><strong>Display:</strong> {{ job.display_id }}</p>
                     <p><strong>Status:</strong> {{ job.status }}{% if job.acknowledged %} <span class="muted">(resolved)</span>{% endif %}</p>
                     <p><strong>Progress:</strong> {{ job.progress }}%</p>
@@ -154,7 +154,7 @@ function renderJob(job) {
 
     return `
         <div class="card">
-            <h3>${escapeHtml(job.type)}</h3>
+            <h3>${escapeHtml(String(job.type || "job").replaceAll("_", " ").replace(/\b\w/g, letter => letter.toUpperCase()))}</h3>
             <p><strong>Display:</strong> ${escapeHtml(job.display_id)}</p>
             <p><strong>Status:</strong> <span class="${cls}">${escapeHtml(job.status)}</span>${job.acknowledged ? ` <span class="muted">(resolved)</span>` : ""}</p>
             <p><strong>Progress:</strong> ${escapeHtml(job.progress)}%</p>

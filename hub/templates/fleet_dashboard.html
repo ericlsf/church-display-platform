@@ -20,6 +20,23 @@
     </div>
   </div>
 
+  <section class="section today-workflow">
+    <div class="section-heading-row">
+      <div><p class="eyebrow">EVERYDAY WORKFLOW</p><h2>Today</h2><p class="muted">The shortest path from new Drive images to updated screens.</p></div>
+      <a class="button primary" href="/content">Open Content</a>
+    </div>
+    <div class="today-workflow-grid">
+      <a href="/content"><strong>1. Prepare images</strong><span>Add files in Google Drive, then arrange the shared folder playlist.</span></a>
+      <a href="/displays"><strong>2. Choose displays</strong><span>Confirm each display uses the right folder and review its live preview.</span></a>
+      <a href="/deployments"><strong>3. Publish and verify</strong><span>Publish the playlist, watch progress, and retry failed work.</span></a>
+    </div>
+    <details class="today-help"><summary>New here? Open the 3-step setup checklist</summary><ol>
+      <li>Add or enroll a display from <a href="/displays">Displays</a>.</li>
+      <li>Create reusable settings in <a href="/display-profiles">Display Presets</a>.</li>
+      <li>Choose a Drive folder, arrange it once, and publish from <a href="/content">Content</a>.</li>
+    </ol></details>
+  </section>
+
   <div class="fleet-metric-grid">
     <a class="fleet-metric-card" href="/displays">
       <span>Online</span>
@@ -125,7 +142,7 @@
               <div>
                 <strong>{{ job.display_id }}</strong>
                 <small>
-                  {{ job.type }} ·
+                  {{ job.type|replace('_', ' ')|title }} &middot;
                   {{ job.payload.target or job.status }}
                 </small>
               </div>
@@ -160,7 +177,7 @@
               <div>
                 <strong>{{ job.display_id }}</strong>
                 <small>
-                  {{ job.message or job.type }}
+                  {{ job.message or (job.type|replace('_', ' ')|title) }}
                 </small>
               </div>
               <span class="status-pill warning">

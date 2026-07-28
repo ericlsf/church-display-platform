@@ -3548,6 +3548,17 @@ body.v8-sidebar-collapsed .v8-main-content{
 .fleet-card.is-selected{border-color:#4b93ff;box-shadow:0 0 0 2px rgba(75,147,255,.18)}
 .fleet-card-heading{padding-top:14px}.fleet-card-heading h2{font-size:1.1rem}
 .fleet-metrics{margin-top:15px}.fleet-details{margin:14px 0 0;padding-bottom:14px}
+.fleet-health-details{margin:14px 0 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.fleet-health-details>summary{padding:10px 2px;cursor:pointer;color:#9fc4ff;font-size:.82rem;font-weight:750}
+.fleet-health-details>summary:hover{color:#c5dcff}.fleet-health-details .fleet-metrics{margin:0 0 12px}
+.fleet-details{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.today-workflow{margin-bottom:18px}.today-workflow-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.today-workflow-grid>a{display:grid;gap:5px;padding:14px;border:1px solid var(--border);border-radius:12px;background:#121212;color:inherit;text-decoration:none}
+.today-workflow-grid>a:hover{border-color:#477ec7;background:#172033}.today-workflow-grid span{color:var(--muted);font-size:.86rem}
+.today-help{margin-top:12px}.today-help summary{cursor:pointer;color:#9fc4ff;font-weight:700}.today-help ol{margin-bottom:0}
+.maintenance-safety{border-color:#6e5725;background:#1c1810}.maintenance-safety ol{margin-bottom:0}
+@media(max-width:760px){.today-workflow-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.fleet-details{grid-template-columns:1fr 1fr}}
 
 .card-update-button{cursor:pointer;text-decoration:none}
 .card-update-button:hover,.card-update-button:focus-visible{border-color:#eab83f;background:rgba(245,189,79,.2);color:#ffe5a5}
