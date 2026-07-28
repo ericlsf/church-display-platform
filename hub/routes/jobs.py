@@ -11,7 +11,7 @@ from services.jobs import (
     parse_iso,
     request_cancel, retry_job, update_job,
 )
-from services.releases import list_git_tags
+from services.display_release_catalog import list_display_release_tags
 
 
 jobs_bp = Blueprint("jobs", __name__, url_prefix="/jobs")
@@ -25,7 +25,7 @@ def jobs_page():
 
     drive_remote = hub_settings.get("drive_remote", "gdrive")
     drive_folders, drive_error = list_drive_folders(drive_remote)
-    release_tags = list_git_tags()
+    release_tags = list_display_release_tags()
 
     all_jobs = list_jobs(1000)
     selected_display = request.args.get("display_id", "").strip()

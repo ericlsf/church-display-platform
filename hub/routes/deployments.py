@@ -5,7 +5,11 @@ from services.display_artifacts import create_artifact
 from services.events import log_event
 from services.fleet_state import build_fleet_state
 from services.jobs import create_job, list_jobs
-from services.releases import latest_git_tag, list_git_tags
+from services.display_release_catalog import (
+    latest_display_tag,
+    list_display_release_tags,
+    release_readiness,
+)
 from services.deployment_guard import existing_deployment, unique_display_ids
 
 
@@ -66,7 +70,7 @@ def queue_deploy_job(display_id, target, dry_run):
 @deployments_bp.route("")
 def deployments_page():
     cfg = load_config()
-    tags = list_git_tags()
+    tags = list_display_release_tags()
     state = build_fleet_state()
 
     return render_template(
@@ -74,7 +78,8 @@ def deployments_page():
         active="deployments",
         displays=cfg.get("displays", []),
         release_tags=tags,
-        latest_tag=state.get("latest_tag") or latest_git_tag(),
+        latest_tag=state.get("latest_tag") or latest_display_tag(),
+        release_readiness=release_readiness(),
         outdated_rows=state.get("outdated_rows", []),
         outdated_count=state.get("outdated_count", 0),
         deploy_jobs=deploy_jobs(100),
@@ -109,7 +114,7 @@ def queue_deployment():
 def queue_latest_deployment():
     display_id = request.form.get("display_id", "").strip()
     dry_run = request.form.get("dry_run", "true").strip()
-    target = request.form.get("target", "").strip() or latest_git_tag()
+    target = request.form.get("target", "").strip() or latest_display_tag()
 
     if not display_id or not target:
         return redirect(request.referrer or url_for("dashboard.dashboard"))
@@ -126,7 +131,7 @@ def queue_latest_deployment():
 @deployments_bp.route("/queue-outdated", methods=["POST"])
 def queue_outdated_deployment():
     dry_run = request.form.get("dry_run", "true").strip()
-    target = request.form.get("target", "").strip() or latest_git_tag()
+    target = request.form.get("target", "").strip() or latest_display_tag()
 
     if not target:
         return redirect(request.referrer or url_for("deployments.deployments_page"))

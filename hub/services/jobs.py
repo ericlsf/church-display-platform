@@ -53,6 +53,7 @@ def normalize_job(job):
     job.setdefault("attempt", 0)
     job.setdefault("max_attempts", 2)
     job.setdefault("timeout_seconds", 900)
+    job.setdefault("queue_timeout_seconds", 86400)
     job.setdefault("cancel_requested", False)
     job.setdefault("cancellable", True)
     job.setdefault("history", [])
@@ -63,6 +64,26 @@ def normalize_job(job):
     job["acknowledged"] = resolved
     job["resolved"] = resolved
     return job
+
+
+def job_waiting_seconds(job, now=None):
+    if str(job.get("status", "")).lower() != "queued":
+        return 0
+    created = parse_iso(job.get("created_at", ""))
+    if not created:
+        return 0
+    return max(0, int(((now or datetime.now()) - created).total_seconds()))
+
+
+def job_waiting_state(job, now=None):
+    seconds = job_waiting_seconds(job, now)
+    if not seconds:
+        return ""
+    if seconds >= int(job.get("queue_timeout_seconds", 86400)):
+        return "expired"
+    if seconds >= 300:
+        return "waiting"
+    return "queued"
 
 
 def job_is_resolved(job):
@@ -114,7 +135,14 @@ def _prune_history(data):
     return changed
 
 
-def create_job(display_id, job_type, payload=None, max_attempts=2, timeout_seconds=900):
+def create_job(
+    display_id,
+    job_type,
+    payload=None,
+    max_attempts=2,
+    timeout_seconds=900,
+    queue_timeout_seconds=86400,
+):
     data = load_jobs()
     job = {
         "id": str(uuid.uuid4()),
@@ -131,6 +159,7 @@ def create_job(display_id, job_type, payload=None, max_attempts=2, timeout_secon
         "attempt": 0,
         "max_attempts": max(1, int(max_attempts)),
         "timeout_seconds": max(30, int(timeout_seconds)),
+        "queue_timeout_seconds": max(300, int(queue_timeout_seconds)),
         "cancel_requested": False,
         "cancellable": job_type not in {"reboot", "service_action"},
         "history": [],
@@ -148,6 +177,26 @@ def _expire_and_retry(data):
     now = datetime.now()
     for job in data["jobs"]:
         normalize_job(job)
+        if job.get("status") == "queued":
+            waiting = job_waiting_seconds(job, now)
+            if waiting >= int(job.get("queue_timeout_seconds", 86400)):
+                job.update({
+                    "status": "timed_out",
+                    "progress": 100,
+                    "message": (
+                        "Device did not collect this job before the queue timeout. "
+                        "Confirm the device is online, then retry."
+                    ),
+                    "updated_at": now_iso(),
+                    "completed_at": now_iso(),
+                })
+                job["history"].append({
+                    "at": now_iso(),
+                    "status": "timed_out",
+                    "message": "Queued job expired before the device collected it",
+                })
+                changed = True
+            continue
         if job.get("status") != "running":
             continue
         started = parse_iso(job.get("started_at", ""))
@@ -179,7 +228,14 @@ def list_jobs(limit=100):
     data = load_jobs()
     _expire_and_retry(data)
     _prune_history(data)
-    return list(reversed(data["jobs"][-limit:]))
+    result = []
+    now = datetime.now()
+    for job in reversed(data["jobs"][-limit:]):
+        row = dict(job)
+        row["waiting_seconds"] = job_waiting_seconds(row, now)
+        row["waiting_state"] = job_waiting_state(row, now)
+        result.append(row)
+    return result
 
 
 def get_next_job(display_id):
