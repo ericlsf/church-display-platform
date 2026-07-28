@@ -3,6 +3,7 @@ from pathlib import Path
 from flask import Blueprint, Response, request, send_file
 
 from services.display_package import build_display_package, current_version
+from services.config import load_hub_settings
 
 
 display_installer_bp = Blueprint(
@@ -17,9 +18,15 @@ BOOTSTRAP_FILE = STATIC_DIR / "install-display-bootstrap.sh"
 
 @display_installer_bp.route("")
 def download_installer():
-    hub_url = request.host_url.rstrip("/")
+    settings = load_hub_settings()
+    request_url = request.host_url.rstrip("/")
+    hub_url = (settings.get("hub_url") or request_url).rstrip("/")
+    public_hub_url = (
+        settings.get("public_hub_url") or request_url
+    ).rstrip("/")
     script = BOOTSTRAP_FILE.read_text(encoding="utf-8")
     script = script.replace("__HUB_URL__", hub_url)
+    script = script.replace("__PUBLIC_HUB_URL__", public_hub_url)
 
     return Response(
         script,

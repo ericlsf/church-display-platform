@@ -37,12 +37,28 @@
       value="{{ settings.get('timezone', 'America/Chicago') }}"
     >
 
-    <label>Hub URL</label>
+    <label>Local Hub URL</label>
     <input
+      type="url"
       name="hub_url"
       value="{{ settings.get('hub_url', '') }}"
       placeholder="http://church-display-hub.local:8090"
     >
+    <small class="muted">
+      Displays use this address first while they are on the same network.
+    </small>
+
+    <label>Public Hub URL</label>
+    <input
+      type="url"
+      name="public_hub_url"
+      value="{{ settings.get('public_hub_url', '') }}"
+      placeholder="https://hub.example.org"
+    >
+    <small class="muted">
+      Displays automatically use this secure address if the local address
+      is unavailable or changes.
+    </small>
 
     <button class="primary" type="submit">Save Hub Configuration</button>
   </form>

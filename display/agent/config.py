@@ -1,4 +1,5 @@
 import os
+import socket
 from pathlib import Path
 
 
@@ -13,7 +14,15 @@ STATUS_DIR.mkdir(parents=True, exist_ok=True)
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 HUB_URL = os.environ.get("HUB_URL", "http://127.0.0.1:8090").rstrip("/")
-DISPLAY_ID = os.environ.get("DISPLAY_ID") or os.uname().nodename
+HUB_FALLBACK_URL = os.environ.get("HUB_FALLBACK_URL", "").rstrip("/")
+HUB_URLS = tuple(
+    dict.fromkeys(
+        url
+        for url in (HUB_URL, HUB_FALLBACK_URL)
+        if url
+    )
+)
+DISPLAY_ID = os.environ.get("DISPLAY_ID") or socket.gethostname()
 DISPLAY_PORT = os.environ.get("DISPLAY_PORT", "8080")
 DISPLAY_VERSION = os.environ.get("DISPLAY_VERSION", "1.2.3")
 

@@ -2,6 +2,7 @@ import socket
 
 from agent.api import post_heartbeat
 from agent.config import APP_DIR, DISPLAY_ID, DISPLAY_PORT
+from agent.hub_connection import active_hub_url, hub_urls
 from agent.utils import cpu_temp, disk_usage, memory_usage, now_iso, read_json, run_command, uptime
 from agent.version import get_version_info, installed_version
 
@@ -69,6 +70,11 @@ def build_heartbeat():
         "git": get_version_info(),
         "config_version": 1,
         "sent_at": now_iso(),
+        "hub_connection": {
+            "active_url": active_hub_url(),
+            "configured_urls": list(hub_urls()),
+            "fallback_enabled": len(hub_urls()) > 1,
+        },
         "player": read_json(APP_DIR / "status" / "player.json", {}),
         "media": read_json(APP_DIR / "status" / "media.json", {}),
         "sync": read_json(APP_DIR / "status" / "sync.json", {}),

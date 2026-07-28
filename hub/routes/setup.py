@@ -184,7 +184,10 @@ def setup_page():
                 request.form.get("timezone", "").strip()
                 or "America/Chicago"
             ),
-            "hub_url": request.form.get("hub_url", "").strip(),
+            "hub_url": normalize_host(request.form.get("hub_url", "")),
+            "public_hub_url": normalize_host(
+                request.form.get("public_hub_url", "")
+            ),
         }
 
         try:

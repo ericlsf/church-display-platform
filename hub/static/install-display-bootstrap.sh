@@ -2,7 +2,9 @@
 set -euo pipefail
 
 DEFAULT_HUB_URL="__HUB_URL__"
+DEFAULT_PUBLIC_HUB_URL="__PUBLIC_HUB_URL__"
 HUB_URL="${CHURCH_DISPLAY_HUB_URL:-$DEFAULT_HUB_URL}"
+HUB_FALLBACK_URL="${CHURCH_DISPLAY_HUB_FALLBACK_URL:-$DEFAULT_PUBLIC_HUB_URL}"
 DISPLAY_NAME="${CHURCH_DISPLAY_NAME:-}"
 DISPLAY_ID="${CHURCH_DISPLAY_ID:-}"
 AUTO_START="${CHURCH_DISPLAY_AUTO_START:-yes}"
@@ -107,6 +109,7 @@ fi
 
 echo
 echo "Hub:          $HUB_URL"
+echo "Fallback Hub: $HUB_FALLBACK_URL"
 echo "Hostname:     $HOSTNAME_VALUE"
 echo "Stable ID:    $DISPLAY_ID"
 echo "Friendly name:$DISPLAY_NAME"
@@ -143,6 +146,7 @@ sudo chown -R "$USER:$USER" "$INSTALL_ROOT"
 
 ARGS=(
   --hub-url "$HUB_URL"
+  --fallback-hub-url "$HUB_FALLBACK_URL"
   --display-name "$DISPLAY_NAME"
   --display-id "$DISPLAY_ID"
   --non-interactive

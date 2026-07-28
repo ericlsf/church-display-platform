@@ -5,6 +5,7 @@ from services.display_address import refresh_approved_display_address
 from services.heartbeat_store import load_heartbeats, save_heartbeats
 from services.history import record_health_sample
 from services.resilience import agent_policy
+from services.config import load_hub_settings
 
 heartbeat_bp = Blueprint("heartbeat", __name__, url_prefix="/api/v1")
 
@@ -33,4 +34,17 @@ def heartbeat():
         pass
     if first_seen:
         log_event(f"Heartbeat received from {display_id}")
-    return jsonify({"ok": True, "agent_policy": agent_policy()})
+    settings = load_hub_settings()
+    hub_urls = [
+        url.rstrip("/")
+        for url in (
+            settings.get("hub_url"),
+            settings.get("public_hub_url"),
+        )
+        if str(url or "").strip()
+    ]
+    return jsonify({
+        "ok": True,
+        "agent_policy": agent_policy(),
+        "hub_urls": list(dict.fromkeys(hub_urls)),
+    })

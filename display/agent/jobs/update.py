@@ -7,9 +7,10 @@ import tarfile
 import tempfile
 import time
 from pathlib import Path
-from urllib import request
+from urllib import parse, request
 
 from agent.config import APP_DIR
+from agent.hub_connection import open_hub
 from agent.utils import run_command
 from agent.version import get_version_info
 from agent.install_version import record_installed_release
@@ -37,8 +38,22 @@ def handle_update_check(job, report):
 
 def _download(url, destination, report):
     report("running", 20, "Downloading display software package")
-    req = request.Request(url, headers={"User-Agent": "ChurchDisplayAgent/1"})
-    with request.urlopen(req, timeout=120) as response:
+    parsed = parse.urlsplit(url)
+    release_path = parsed.path
+    if parsed.query:
+        release_path += f"?{parsed.query}"
+    if release_path.startswith("/api/v1/display-releases/"):
+        response_context = open_hub(
+            release_path,
+            headers={"User-Agent": "ChurchDisplayAgent/1"},
+            timeout=120,
+        )
+    else:
+        req = request.Request(
+            url, headers={"User-Agent": "ChurchDisplayAgent/1"}
+        )
+        response_context = request.urlopen(req, timeout=120)
+    with response_context as response:
         total = int(response.headers.get("Content-Length", "0") or 0)
         written = 0
         with destination.open("wb") as handle:
