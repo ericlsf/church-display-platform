@@ -61,6 +61,48 @@
     </small>
 
     <button class="primary" type="submit">Save Hub Configuration</button>
+
+    <div
+      class="hub-connectivity-tests"
+      data-connectivity-endpoint="/setup/test-connectivity"
+    >
+      <div>
+        <h3>Connection Test</h3>
+        <p class="muted">
+          Tests the saved addresses from this Hub. Save any URL changes first.
+        </p>
+      </div>
+
+      <div class="hub-connectivity-row">
+        <div>
+          <strong>Local URL</strong>
+          <small>{{ settings.get("hub_url") or "Not configured" }}</small>
+        </div>
+        <span
+          class="hub-connectivity-status is-untested"
+          data-connectivity-status="local"
+          aria-live="polite"
+        >Not tested</span>
+        <button type="button" data-test-connectivity="local">Test local</button>
+      </div>
+
+      <div class="hub-connectivity-row">
+        <div>
+          <strong>Public URL</strong>
+          <small>{{ settings.get("public_hub_url") or "Not configured" }}</small>
+        </div>
+        <span
+          class="hub-connectivity-status is-untested"
+          data-connectivity-status="public"
+          aria-live="polite"
+        >Not tested</span>
+        <button type="button" data-test-connectivity="public">Test public</button>
+      </div>
+
+      <button type="button" data-test-connectivity="all">
+        Test both URLs
+      </button>
+    </div>
   </form>
 </div>
 
@@ -188,4 +230,8 @@
     <button class="safe" type="submit">Finish Setup and Open Dashboard</button>
   </form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/hub-connectivity-v13200.js"></script>
 {% endblock %}
