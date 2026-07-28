@@ -48,7 +48,7 @@ class UsabilityWorkflowTests(unittest.TestCase):
 
     def test_version_matches_usability_release(self):
         version = Path("hub/VERSION").read_text(encoding="utf-8").strip()
-        self.assertEqual(version, "v13.19.0")
+        self.assertEqual(version, "v13.20.0")
 
 
 if __name__ == "__main__":

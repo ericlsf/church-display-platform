@@ -3679,3 +3679,77 @@ body.v8-sidebar-collapsed .v8-main-content{
     padding: 12px 0;
   }
 }
+.hub-connectivity-tests {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid var(--border, #30343b);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.hub-connectivity-tests h3,
+.hub-connectivity-tests p {
+  margin: 0;
+}
+
+.hub-connectivity-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem;
+  border: 1px solid var(--border, #30343b);
+  border-radius: 0.65rem;
+}
+
+.hub-connectivity-row small {
+  display: block;
+  margin-top: 0.2rem;
+  overflow-wrap: anywhere;
+}
+
+.hub-connectivity-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 8rem;
+  font-weight: 700;
+}
+
+.hub-connectivity-status::before {
+  content: "";
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: #7d8794;
+}
+
+.hub-connectivity-status.is-testing::before {
+  background: #4c8bf5;
+}
+
+.hub-connectivity-status.is-reachable {
+  color: #4bd080;
+}
+
+.hub-connectivity-status.is-reachable::before {
+  background: #4bd080;
+  box-shadow: 0 0 0 0.25rem rgba(75, 208, 128, 0.12);
+}
+
+.hub-connectivity-status.is-unreachable {
+  color: #ff8b8b;
+}
+
+.hub-connectivity-status.is-unreachable::before {
+  background: #ef4444;
+  box-shadow: 0 0 0 0.25rem rgba(239, 68, 68, 0.12);
+}
+
+@media (max-width: 720px) {
+  .hub-connectivity-row {
+    grid-template-columns: 1fr;
+  }
+}

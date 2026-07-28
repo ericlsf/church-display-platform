@@ -1,4 +1,12 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 
 from services.config import (
     load_config,
@@ -13,6 +21,8 @@ from services.content_cache import sync_playlist_from_drive
 from services.drive import list_drive_folders
 from services.events import log_event
 from services.jobs import create_job, list_jobs
+from services.hub_connectivity import test_hub_url
+from services.hub_version import current_hub_version
 from services.platform_admin import (
     mark_setup_complete,
     save_hub_settings,
@@ -21,6 +31,39 @@ from services.platform_admin import (
 
 
 setup_bp = Blueprint("setup", __name__, url_prefix="/setup")
+
+
+@setup_bp.route("/connectivity-health")
+def connectivity_health():
+    return jsonify({
+        "ok": True,
+        "service": "church-display-hub",
+        "version": current_hub_version(),
+    })
+
+
+@setup_bp.route("/test-connectivity", methods=["POST"])
+def test_connectivity():
+    target = (request.get_json(silent=True) or {}).get("target", "all")
+    if target not in {"local", "public", "all"}:
+        return jsonify({"ok": False, "error": "Unknown test target."}), 400
+
+    settings = load_hub_settings()
+    targets = {
+        "local": settings.get("hub_url", ""),
+        "public": settings.get("public_hub_url", ""),
+    }
+    selected = targets if target == "all" else {target: targets[target]}
+    results = {
+        name: test_hub_url(url)
+        for name, url in selected.items()
+    }
+    return jsonify({
+        "ok": bool(results) and all(
+            result.get("ok") for result in results.values()
+        ),
+        "results": results,
+    })
 
 
 def _latest_provisioning_job(display_id):

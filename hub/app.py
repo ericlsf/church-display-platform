@@ -137,6 +137,7 @@ def create_app():
     public_paths = {
         "/login",
         "/setup",
+        "/setup/connectivity-health",
         "/discovery/register",
         "/api/v1/heartbeat",
         "/api/v1/preview",
