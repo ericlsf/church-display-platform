@@ -147,7 +147,7 @@
                 </small>
               </div>
               <span class="status-pill">
-                {{ job.progress|default(0) }}%
+                {% if job.waiting_state == "waiting" %}Waiting for device{% else %}{{ job.progress|default(0) }}%{% endif %}
               </span>
             </div>
           {% endfor %}
