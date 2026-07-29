@@ -66,7 +66,7 @@ def _include(path_string):
     if relative.suffix in {".pyc", ".pyo"}:
         return False
 
-    allowed_roots = {"app", "agent", "scripts"}
+    allowed_roots = {"app", "agent", "scripts", "recovery", "systemd"}
     if relative.parts and relative.parts[0] in allowed_roots:
         return True
 
@@ -99,6 +99,9 @@ def build_release_package(target):
 
     required = {
         "display/agent/agent.py",
+        "display/agent/config.py",
+        "display/agent/hub_connection.py",
+        "display/recovery/recover.py",
         "display/app/main.py",
         "display/requirements.txt",
     }

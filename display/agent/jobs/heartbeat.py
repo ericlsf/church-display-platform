@@ -5,6 +5,7 @@ from agent.config import APP_DIR, DISPLAY_ID, DISPLAY_PORT
 from agent.hub_connection import active_hub_url, hub_urls
 from agent.utils import cpu_temp, disk_usage, memory_usage, now_iso, read_json, run_command, uptime
 from agent.version import get_version_info, installed_version
+from agent.update_state import load as load_update_state
 
 
 def local_ip():
@@ -68,7 +69,7 @@ def build_heartbeat():
         "host": f"http://{ip}:{DISPLAY_PORT}",
         "version": installed_version(),
         "git": get_version_info(),
-        "config_version": 1,
+        "config_version": 2,
         "sent_at": now_iso(),
         "hub_connection": {
             "active_url": active_hub_url(),
@@ -79,6 +80,7 @@ def build_heartbeat():
         "media": read_json(APP_DIR / "status" / "media.json", {}),
         "sync": read_json(APP_DIR / "status" / "sync.json", {}),
         "display_app": service_state("church-display.service"),
+        "display_update": load_update_state(),
         "resilience": read_json(APP_DIR / "status" / "resilience.json", {}),
         "system": {
             "cpu_temp": cpu_temp(),

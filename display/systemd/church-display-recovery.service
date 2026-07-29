@@ -1,0 +1,9 @@
+[Unit]
+Description=Church Display update recovery check
+After=network.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/church-display/display
+ExecStart=/opt/church-display/display/venv/bin/python /opt/church-display/display/recovery/recover.py

@@ -14,6 +14,7 @@ from agent.hub_connection import open_hub
 from agent.utils import run_command
 from agent.version import get_version_info
 from agent.install_version import record_installed_release
+from agent import update_state
 
 
 INSTALL_ROOT = APP_DIR.parent
@@ -21,7 +22,7 @@ RELEASES_DIR = INSTALL_ROOT / "releases"
 BACKUPS_DIR = INSTALL_ROOT / "backups"
 CURRENT_BACKUP = BACKUPS_DIR / "last-good-display"
 RUNTIME_NAMES = {"venv", "media", "status", "logs", "config", "backups"}
-SOURCE_NAMES = {"app", "agent", "scripts", "requirements.txt", "install.sh", "VERSION", "RELEASE"}
+SOURCE_NAMES = {"app", "agent", "scripts", "recovery", "systemd", "requirements.txt", "install.sh", "VERSION", "RELEASE"}
 
 
 def handle_update_check(job, report):
@@ -153,6 +154,16 @@ def _validate_stage(stage, report):
     )
     if code != 0:
         raise RuntimeError((stderr or stdout or "Python validation failed")[-1000:])
+
+    report("running", 51, "Validating staged agent imports")
+    environment = os.environ.copy()
+    environment["PYTHONPATH"] = str(release_root)
+    result = subprocess.run(
+        [str(APP_DIR / "venv" / "bin" / "python"), "-c", "import agent.config, agent.hub_connection, agent.dispatcher; from agent.jobs import update"],
+        cwd=release_root, env=environment, capture_output=True, text=True, timeout=60,
+    )
+    if result.returncode != 0:
+        raise RuntimeError((result.stderr or result.stdout or "Agent import validation failed")[-1000:])
 
     return release_root
 
@@ -329,6 +340,8 @@ def handle_deploy_update(job, report):
                 )
                 return
 
+            previous_version = (APP_DIR / "VERSION").read_text(encoding="utf-8").strip() if (APP_DIR / "VERSION").exists() else "unknown"
+            update_state.begin(job, target, previous_version)
             _backup_current(report)
             _install_release(release_root, report)
             _install_dependencies(report)
@@ -358,15 +371,25 @@ def handle_deploy_update(job, report):
                 )
 
             _restart_and_verify(report)
-
+            update_state.awaiting_checkin()
             report(
-                "success",
-                100,
-                f"Display software updated to {target}; "
-                "display service verified. Agent will restart.",
+                "running",
+                95,
+                f"Installed {target}; waiting for restarted agent check-in verification",
             )
 
-            # Restart after the success report reaches the Hub.
+            # A detached watchdog restores the backup if this agent never checks in.
+            subprocess.Popen(
+                [
+                    str(APP_DIR / "venv" / "bin" / "python"),
+                    str(APP_DIR / "recovery" / "recover.py"),
+                    "--watch",
+                ],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,
+            )
+            # The restarted agent reports final success only after a heartbeat.
             subprocess.Popen(
                 [
                     "sudo",
@@ -380,6 +403,7 @@ def handle_deploy_update(job, report):
             )
 
         except Exception as exc:
+            update_state.failed(exc)
             if CURRENT_BACKUP.exists() and not dry_run:
                 _restore_backup(report, str(exc))
             else:
