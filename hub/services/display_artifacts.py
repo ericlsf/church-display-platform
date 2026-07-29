@@ -1,3 +1,4 @@
+import hashlib
 import json
 from pathlib import Path
 
@@ -48,7 +49,6 @@ def create_artifact(target):
         temp.replace(path)
 
     # Verify the persisted bytes before publishing the artifact.
-    import hashlib
     actual = hashlib.sha256(path.read_bytes()).hexdigest()
     if actual != sha256:
         path.unlink(missing_ok=True)
@@ -77,6 +77,10 @@ def get_artifact(sha256):
 
     path = artifact_path(sha256)
     if not path.is_file():
+        return None
+
+    actual = hashlib.sha256(path.read_bytes()).hexdigest()
+    if actual != sha256:
         return None
 
     index = _load_index()

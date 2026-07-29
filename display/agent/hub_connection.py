@@ -60,7 +60,15 @@ def update_hub_urls(urls):
     )
 
 
-def open_hub(path, *, data=None, headers=None, method=None, timeout=10):
+def open_hub(
+    path,
+    *,
+    data=None,
+    headers=None,
+    method=None,
+    timeout=10,
+    validate_response=None,
+):
     global _active_hub_url
     last_error = None
 
@@ -73,6 +81,17 @@ def open_hub(path, *, data=None, headers=None, method=None, timeout=10):
         )
         try:
             response = urllib.request.urlopen(request, timeout=timeout)
+            if validate_response and not validate_response(response):
+                content_type = response.headers.get(
+                    "Content-Type",
+                    "unknown content type",
+                )
+                response.close()
+                last_error = RuntimeError(
+                    f"Hub endpoint returned an invalid response "
+                    f"({content_type})"
+                )
+                continue
             _active_hub_url = base_url
             return response
         except (OSError, urllib.error.URLError) as exc:

@@ -36,24 +36,61 @@ def handle_update_check(job, report):
     )
 
 
-def _download(url, destination, report):
+def _download(url, destination, report, expected_sha256=""):
     report("running", 20, "Downloading display software package")
     parsed = parse.urlsplit(url)
     release_path = parsed.path
     if parsed.query:
         release_path += f"?{parsed.query}"
+
+    expected_sha256 = (expected_sha256 or "").strip().lower()
+
+    def valid_release_response(response):
+        content_type = (
+            response.headers.get("Content-Type", "")
+            .split(";", 1)[0]
+            .strip()
+            .lower()
+        )
+        if content_type not in {
+            "application/gzip",
+            "application/x-gzip",
+            "application/octet-stream",
+        }:
+            return False
+        reported_checksum = (
+            response.headers.get("X-Checksum-SHA256", "")
+            .strip()
+            .lower()
+        )
+        return not (
+            expected_sha256
+            and reported_checksum
+            and reported_checksum != expected_sha256
+        )
+
+    headers = {
+        "User-Agent": "ChurchDisplayAgent/1",
+        "Accept": "application/octet-stream, application/gzip",
+        "Accept-Encoding": "identity",
+        "Cache-Control": "no-cache",
+    }
     if release_path.startswith("/api/v1/display-releases/"):
         response_context = open_hub(
             release_path,
-            headers={"User-Agent": "ChurchDisplayAgent/1"},
+            headers=headers,
             timeout=120,
+            validate_response=valid_release_response,
         )
     else:
-        req = request.Request(
-            url, headers={"User-Agent": "ChurchDisplayAgent/1"}
-        )
+        req = request.Request(url, headers=headers)
         response_context = request.urlopen(req, timeout=120)
     with response_context as response:
+        if not valid_release_response(response):
+            raise RuntimeError(
+                "Display update URL did not return a software package "
+                f"(received {response.headers.get('Content-Type', 'unknown')})"
+            )
         total = int(response.headers.get("Content-Length", "0") or 0)
         written = 0
         with destination.open("wb") as handle:
@@ -66,7 +103,13 @@ def _download(url, destination, report):
                 if total:
                     progress = 20 + min(20, int(written / total * 20))
                     report("running", progress, f"Downloaded {written}/{total} bytes")
-
+    if destination.stat().st_size < 2:
+        raise RuntimeError("Display software package download was empty")
+    with destination.open("rb") as handle:
+        if handle.read(2) != b"\x1f\x8b":
+            raise RuntimeError(
+                "Display update URL returned data that is not a gzip package"
+            )
 
 def _sha256(path):
     digest = hashlib.sha256()
@@ -253,7 +296,12 @@ def handle_deploy_update(job, report):
         stage.mkdir()
 
         try:
-            _download(package_url, archive, report)
+            _download(
+                package_url,
+                archive,
+                report,
+                expected_sha256=expected_sha256,
+            )
 
             actual_sha256 = _sha256(archive)
             if expected_sha256 and actual_sha256 != expected_sha256:
