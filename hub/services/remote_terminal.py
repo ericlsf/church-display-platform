@@ -147,7 +147,7 @@ def _run_session(session_id, command, cwd, timeout):
 
 
 def start_hub_command(command, username, cwd=None, timeout=MAX_COMMAND_SECONDS):
-    command = str(command or "").strip()
+    command = str(command or "").replace("\r\n", "\n").replace("\r", "\n").strip()
     if not command:
         raise ValueError("A command is required.")
     if "\x00" in command or len(command) > 8000:

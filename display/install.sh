@@ -172,8 +172,14 @@ EOF
 sudo chmod 0440 "$SUDOERS_FILE"
 sudo visudo -cf "$SUDOERS_FILE" >/dev/null
 
+sudo install -m 0644 "$APP_DIR/systemd/church-display-recovery.service" \
+  "$SERVICE_DIR/church-display-recovery.service"
+sudo install -m 0644 "$APP_DIR/systemd/church-display-recovery.timer" \
+  "$SERVICE_DIR/church-display-recovery.timer"
+
 sudo systemctl daemon-reload
 sudo systemctl enable church-display-agent.service
+sudo systemctl enable --now church-display-recovery.timer
 
 if [[ "$AUTO_START" == "yes" ]]; then
   sudo systemctl enable church-display.service

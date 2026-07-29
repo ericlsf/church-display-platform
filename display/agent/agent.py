@@ -7,6 +7,8 @@ from agent.dispatcher import dispatch
 from agent.jobs.heartbeat import build_heartbeat
 from agent.jobs.preview import upload_preview
 from agent.resilience import evaluate_and_recover
+from agent.update_state import finalize_after_heartbeat
+from agent.version import installed_version
 
 
 HEARTBEAT_INTERVAL_SECONDS = 30
@@ -32,6 +34,8 @@ def run_job_once():
 def send_heartbeat():
     heartbeat = build_heartbeat()
     response = post_heartbeat(heartbeat)
+    if finalize_after_heartbeat(installed_version()):
+        log(f"Verified display update to {installed_version()}")
     state = evaluate_and_recover(heartbeat, response)
     action = state.get("last_action")
     if action and action not in {"recovery_disabled", "maintenance_suppressed"}:

@@ -24,6 +24,11 @@ HUB_URLS = tuple(
 )
 DISPLAY_ID = os.environ.get("DISPLAY_ID") or socket.gethostname()
 DISPLAY_PORT = os.environ.get("DISPLAY_PORT", "8080")
-DISPLAY_VERSION = os.environ.get("DISPLAY_VERSION", "1.2.3")
+def _installed_version():
+    version_file = APP_DIR / "VERSION"
+    return version_file.read_text(encoding="utf-8").strip().lstrip("v") if version_file.exists() else "unknown"
+
+
+DISPLAY_VERSION = os.environ.get("DISPLAY_VERSION") or _installed_version()
 
 
