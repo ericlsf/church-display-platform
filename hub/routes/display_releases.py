@@ -21,7 +21,7 @@ def artifact(sha256):
 
     response = send_file(
         metadata["path"],
-        mimetype="application/gzip",
+        mimetype="application/octet-stream",
         as_attachment=True,
         download_name=metadata["path"].name,
         conditional=False,
